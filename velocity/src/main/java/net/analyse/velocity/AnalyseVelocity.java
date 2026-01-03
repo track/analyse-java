@@ -1,0 +1,154 @@
+package net.analyse.velocity;
+
+import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.scheduler.ScheduledTask;
+import lombok.Getter;
+import net.analyse.velocity.config.AnalyseVelocityConfig;
+import net.analyse.velocity.listener.PlayerListener;
+import net.analyse.velocity.session.SessionManager;
+import net.analyse.velocity.task.HeartbeatTask;
+import org.slf4j.Logger;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Analyse plugin for Velocity proxy
+ */
+@Plugin(
+    id = "analyse",
+    name = "Analyse",
+    version = "1.0.0-SNAPSHOT",
+    description = "Analytics tracking plugin for Minecraft servers",
+    authors = {"VertCode"}
+)
+@Getter
+public class AnalyseVelocity {
+
+  private final ProxyServer server;
+  private final Logger logger;
+  private final Path dataDirectory;
+
+  private AnalyseVelocityConfig pluginConfig;
+  private SessionManager sessionManager;
+  private PlayerListener playerListener;
+  private ScheduledTask heartbeatTask;
+
+  @Inject
+  public AnalyseVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    this.server = server;
+    this.logger = logger;
+    this.dataDirectory = dataDirectory;
+  }
+
+  @Subscribe
+  public void onProxyInitialize(ProxyInitializeEvent event) {
+    logger.info("Initializing Analyse...");
+
+    // Load configuration
+    if (!loadConfig()) {
+      return;
+    }
+
+    // Initialize session manager
+    sessionManager = new SessionManager();
+
+    // Register player listener
+    playerListener = new PlayerListener(this);
+    server.getEventManager().register(this, playerListener);
+
+    // Start heartbeat task (after playerListener is initialized)
+    startHeartbeatTask();
+
+    logger.info(String.format("Analyse initialized with %d server(s) configured",
+        pluginConfig.getServers().size()));
+  }
+
+  @Subscribe
+  public void onProxyReload(ProxyReloadEvent event) {
+    logger.info("Reloading Analyse configuration...");
+
+    // Cancel existing heartbeat task
+    if (heartbeatTask != null) {
+      heartbeatTask.cancel();
+    }
+
+    // Shutdown existing clients
+    if (playerListener != null) {
+      playerListener.shutdown();
+    }
+
+    // Reload configuration
+    if (!loadConfig()) {
+      logger.error("Failed to reload configuration!");
+      return;
+    }
+
+    // Reinitialize player listener clients
+    if (playerListener != null) {
+      playerListener.reinitialize();
+    }
+
+    // Restart heartbeat task
+    startHeartbeatTask();
+
+    logger.info(String.format("Analyse reloaded with %d server(s) configured",
+        pluginConfig.getServers().size()));
+  }
+
+  @Subscribe
+  public void onProxyShutdown(ProxyShutdownEvent event) {
+    logger.info("Shutting down Analyse...");
+
+    // Cancel heartbeat task
+    if (heartbeatTask != null) {
+      heartbeatTask.cancel();
+    }
+
+    // Shutdown player listener (closes API clients)
+    if (playerListener != null) {
+      playerListener.shutdown();
+    }
+
+    logger.info("Analyse shutdown complete");
+  }
+
+  /**
+   * Load configuration from file
+   *
+   * @return true if successful, false otherwise
+   */
+  private boolean loadConfig() {
+    try {
+      pluginConfig = AnalyseVelocityConfig.load(dataDirectory);
+    } catch (IOException e) {
+      logger.error("Failed to load configuration", e);
+      return false;
+    }
+
+    // Check if any servers are configured
+    if (pluginConfig.getServers().isEmpty()) {
+      logger.warn("No servers configured! Please edit the config.json file.");
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Start the heartbeat task (runs every 30 seconds)
+   */
+  private void startHeartbeatTask() {
+    heartbeatTask = server.getScheduler()
+        .buildTask(this, new HeartbeatTask(this, playerListener))
+        .repeat(30, TimeUnit.SECONDS)
+        .schedule();
+  }
+}

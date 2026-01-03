@@ -1,0 +1,6 @@
+name: Analyse
+version: ${version}
+main: net.analyse.bungeecord.AnalyseBungee
+description: Analyse tracking plugin
+author: VertCode
+

@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.5' apply false
+}
+
+allprojects {
+    group = project.property('group')
+    version = project.property('version')
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+        maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    }
+
+    dependencies {
+        compileOnly "org.projectlombok:lombok:${project.property('lombokVersion')}"
+        annotationProcessor "org.projectlombok:lombok:${project.property('lombokVersion')}"
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+}
+

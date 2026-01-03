@@ -1,0 +1,50 @@
+---
+alwaysApply: true
+---
+
+# Commit Message Rules
+
+## Format
+
+```
+type(scope): description
+```
+
+### Types
+- **feat**: New feature or functionality
+- **fix**: Bug fix
+- **refactor**: Code refactoring (no feature change)
+- **docs**: Documentation changes
+- **style**: Formatting, missing semicolons, etc. (no code change)
+- **test**: Adding or updating tests
+- **chore**: Maintenance tasks, dependencies, configs
+
+### Scope
+- The module, component, or area being changed
+- Use PascalCase for component names: `feat(Button):`
+- Use lowercase for general areas: `fix(cache):`, `docs(README):`
+
+### Description
+- Start with lowercase
+- Use imperative mood ("add" not "added" or "adds")
+- No period at the end
+- Be descriptive but concise
+
+## Examples
+
+**Good:**
+```
+feat(Button): add loading state with spinner animation
+fix(auth): handle expired tokens gracefully
+refactor(cache): simplify purge logic by always removing entries after applying purgeFunction
+docs(README): update dependency descriptions and improve examples
+style(globals): organize CSS custom properties into logical groups
+```
+
+**Bad:**
+```
+Fixed bug                           # No type, no scope, vague
+feat: Added new button              # Past tense, capitalized
+update stuff                        # No type, no scope, vague
+feat(Button): Add loading state.    # Capitalized, has period
+```

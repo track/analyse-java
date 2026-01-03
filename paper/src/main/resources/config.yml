@@ -1,0 +1,9 @@
+# Analyse Plugin Configuration
+
+# Your server's API key from the Analyse dashboard
+api-key: "anl_your_api_key_here"
+
+# Bedrock player username prefix (used by Floodgate/Geyser)
+# Common values: "." or "_" or "*"
+# Leave empty to disable bedrock detection
+bedrock-prefix: "."
