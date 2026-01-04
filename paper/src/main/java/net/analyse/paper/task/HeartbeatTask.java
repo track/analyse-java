@@ -34,7 +34,8 @@ public class HeartbeatTask implements Runnable {
         .map(Player::getUniqueId)
         .toList();
 
-    HeartbeatRequest request = new HeartbeatRequest(onlinePlayers);
+    String instanceId = plugin.getPluginConfig().getInstanceId();
+    HeartbeatRequest request = new HeartbeatRequest(instanceId, onlinePlayers);
 
     client.heartbeat(request, new AnalyseCallback<>() {
       @Override

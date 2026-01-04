@@ -12,6 +12,7 @@ public class AnalysePaperConfig {
 
   private final String apiKey;
   private final String bedrockPrefix;
+  private final String instanceId;
 
   /**
    * Create a new configuration from the plugin's config file
@@ -24,6 +25,7 @@ public class AnalysePaperConfig {
 
     this.apiKey = config.getString("api-key", "");
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
+    this.instanceId = config.getString("instance-id", "default");
   }
 
   /**

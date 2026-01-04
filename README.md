@@ -36,6 +36,9 @@ api-key: "anl_your_api_key_here"
 # Common values: "." or "_" or "*"
 # Leave empty to disable bedrock detection
 bedrock-prefix: "."
+
+# Instance ID for multi-instance setups (e.g. "survival-1", "survival-2")
+instance-id: "default"
 ```
 
 ### Velocity / BungeeCord
@@ -45,6 +48,7 @@ Location: `plugins/analyse/config.json`
 ```json
 {
   "bedrockPrefix": ".",
+  "instanceId": "default",
   "servers": {
     "lobby": {
       "apiKey": "anl_your_lobby_api_key"
@@ -57,6 +61,8 @@ Location: `plugins/analyse/config.json`
 ```
 
 Each backend server can have its own API key for separate analytics tracking.
+
+The `instanceId` is useful for multi-instance setups (e.g., `proxy-1`, `proxy-2`) to identify which instance is sending heartbeats.
 
 ## Features
 

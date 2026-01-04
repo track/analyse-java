@@ -21,6 +21,7 @@ public class AnalyseVelocityConfig {
   private static final String CONFIG_FILE = "config.json";
 
   private String bedrockPrefix = ".";
+  private String instanceId = "default";
   private Map<String, ServerConfig> servers = new HashMap<>();
 
   /**
@@ -78,6 +79,7 @@ public class AnalyseVelocityConfig {
   private static AnalyseVelocityConfig createDefault() {
     AnalyseVelocityConfig config = new AnalyseVelocityConfig();
     config.bedrockPrefix = ".";
+    config.instanceId = "default";
     config.servers.put("lobby", new ServerConfig("anl_your_lobby_key_here"));
     config.servers.put("survival", new ServerConfig("anl_your_survival_key_here"));
     return config;

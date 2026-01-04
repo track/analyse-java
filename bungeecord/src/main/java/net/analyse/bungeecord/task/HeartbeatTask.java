@@ -59,7 +59,8 @@ public class HeartbeatTask implements Runnable {
         .map(ProxiedPlayer::getUniqueId)
         .toList();
 
-    HeartbeatRequest request = new HeartbeatRequest(onlinePlayers);
+    String instanceId = plugin.getPluginConfig().getInstanceId();
+    HeartbeatRequest request = new HeartbeatRequest(instanceId, onlinePlayers);
 
     client.heartbeat(request, new AnalyseCallback<>() {
       @Override

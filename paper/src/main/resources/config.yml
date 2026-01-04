@@ -7,3 +7,7 @@ api-key: "anl_your_api_key_here"
 # Common values: "." or "_" or "*"
 # Leave empty to disable bedrock detection
 bedrock-prefix: "."
+
+# Instance ID for multi-instance setups (e.g. "survival-1", "survival-2")
+# Used to identify this specific server instance in heartbeats
+instance-id: "default"

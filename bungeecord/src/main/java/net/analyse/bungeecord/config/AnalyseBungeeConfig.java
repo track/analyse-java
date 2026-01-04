@@ -21,6 +21,7 @@ public class AnalyseBungeeConfig {
   private static final String CONFIG_FILE = "config.json";
 
   private String bedrockPrefix = ".";
+  private String instanceId = "default";
   private Map<String, ServerConfig> servers = new HashMap<>();
 
   /**
@@ -78,6 +79,7 @@ public class AnalyseBungeeConfig {
   private static AnalyseBungeeConfig createDefault() {
     AnalyseBungeeConfig config = new AnalyseBungeeConfig();
     config.bedrockPrefix = ".";
+    config.instanceId = "default";
     config.servers.put("lobby", new ServerConfig("anl_your_lobby_key_here"));
     config.servers.put("survival", new ServerConfig("anl_your_survival_key_here"));
     return config;
