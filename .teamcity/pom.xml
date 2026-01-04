@@ -59,7 +59,7 @@
             <plugin>
                 <groupId>org.jetbrains.teamcity</groupId>
                 <artifactId>teamcity-configs-maven-plugin</artifactId>
-                <version>2024.12</version>
+                <version>2025.11</version>
                 <configuration>
                     <format>kotlin</format>
                     <dstDir>target/generated-configs</dstDir>
