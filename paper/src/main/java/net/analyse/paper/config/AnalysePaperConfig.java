@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @Getter
 public class AnalysePaperConfig {
 
+  private final boolean debug;
   private final String apiKey;
   private final String bedrockPrefix;
   private final String instanceId;
@@ -23,6 +24,7 @@ public class AnalysePaperConfig {
     plugin.saveDefaultConfig();
     FileConfiguration config = plugin.getConfig();
 
+    this.debug = config.getBoolean("debug", false);
     this.apiKey = config.getString("api-key", "");
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");

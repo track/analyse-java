@@ -80,8 +80,8 @@ public class PlayerListener implements Listener {
 
     // Create session for this player
     sessionManager.createSession(uuid, hostname, ip);
-    logger.fine(String.format("Created session for %s (hostname: %s, ip: %s)",
-        player.getName(), hostname, ip));
+    plugin.debug("Created session for %s (hostname: %s, ip: %s)",
+        player.getName(), hostname, ip);
   }
 
   @EventHandler
@@ -136,7 +136,7 @@ public class PlayerListener implements Listener {
   private void sendJoinEvent(UUID uuid, String username, PlayerSession session, String serverName) {
     Optional<AnalyseClient> clientOpt = getClientForServer(serverName);
     if (clientOpt.isEmpty()) {
-      logger.fine(String.format("Server %s not configured, skipping join event for %s", serverName, username));
+      plugin.debug("Server %s not configured, skipping join event for %s", serverName, username);
       return;
     }
 
@@ -151,8 +151,8 @@ public class PlayerListener implements Listener {
       @Override
       public void onSuccess(JoinResponse response) {
         session.setCurrentSession(serverName, response.getSessionId());
-        logger.fine(String.format("Join event sent for %s on %s (sessionId: %s, bedrock: %s)",
-            username, serverName, response.getSessionId(), isBedrock));
+        plugin.debug("Join event sent for %s on %s (sessionId: %s, bedrock: %s)",
+            username, serverName, response.getSessionId(), isBedrock);
       }
 
       @Override
@@ -182,8 +182,8 @@ public class PlayerListener implements Listener {
     client.leave(request, new AnalyseCallback<>() {
       @Override
       public void onSuccess(LeaveResponse response) {
-        logger.fine(String.format("Leave event sent for %s on %s (duration: %ds)",
-            username, serverName, response.getDuration()));
+        plugin.debug("Leave event sent for %s on %s (duration: %ds)",
+            username, serverName, response.getDuration());
       }
 
       @Override

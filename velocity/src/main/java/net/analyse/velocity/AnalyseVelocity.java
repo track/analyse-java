@@ -151,4 +151,27 @@ public class AnalyseVelocity {
         .repeat(30, TimeUnit.SECONDS)
         .schedule();
   }
+
+  /**
+   * Log a debug message (only if debug mode is enabled)
+   *
+   * @param message The message to log
+   */
+  public void debug(String message) {
+    if (pluginConfig != null && pluginConfig.isDebug()) {
+      logger.info("[DEBUG] " + message);
+    }
+  }
+
+  /**
+   * Log a formatted debug message (only if debug mode is enabled)
+   *
+   * @param format The format string
+   * @param args The arguments
+   */
+  public void debug(String format, Object... args) {
+    if (pluginConfig != null && pluginConfig.isDebug()) {
+      logger.info("[DEBUG] " + String.format(format, args));
+    }
+  }
 }

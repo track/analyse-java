@@ -63,8 +63,8 @@ public class PlayerListener implements Listener {
 
     // Create session for this player
     sessionManager.createSession(uuid, hostname, ip);
-    logger.fine(String.format("Created session for %s (hostname: %s, ip: %s)",
-        player.getName(), hostname, ip));
+    plugin.debug("Created session for %s (hostname: %s, ip: %s)",
+        player.getName(), hostname, ip);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -91,8 +91,8 @@ public class PlayerListener implements Listener {
       @Override
       public void onSuccess(JoinResponse response) {
         session.setSessionId(response.getSessionId());
-        logger.fine(String.format("Join event sent for %s (sessionId: %s, bedrock: %s)",
-            username, response.getSessionId(), isBedrock));
+        plugin.debug("Join event sent for %s (sessionId: %s, bedrock: %s)",
+            username, response.getSessionId(), isBedrock);
       }
 
       @Override
@@ -125,8 +125,7 @@ public class PlayerListener implements Listener {
     client.leave(request, new AnalyseCallback<>() {
       @Override
       public void onSuccess(LeaveResponse response) {
-        logger.fine(String.format("Leave event sent for %s (duration: %ds)",
-            username, response.getDuration()));
+        plugin.debug("Leave event sent for %s (duration: %ds)", username, response.getDuration());
       }
 
       @Override

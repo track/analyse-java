@@ -65,8 +65,7 @@ public class HeartbeatTask implements Runnable {
     client.heartbeat(request, new AnalyseCallback<>() {
       @Override
       public void onSuccess(HeartbeatResponse response) {
-        logger.fine(String.format("Heartbeat sent for %s (%d players)",
-            serverName, response.getOnlineCount()));
+        plugin.debug("Heartbeat sent for %s (%d players)", serverName, response.getOnlineCount());
       }
 
       @Override

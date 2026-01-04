@@ -73,4 +73,27 @@ public class AnalysePlugin extends JavaPlugin {
 
     getLogger().info("Analyse shutdown complete");
   }
+
+  /**
+   * Log a debug message (only if debug mode is enabled)
+   *
+   * @param message The message to log
+   */
+  public void debug(String message) {
+    if (pluginConfig != null && pluginConfig.isDebug()) {
+      getLogger().info("[DEBUG] " + message);
+    }
+  }
+
+  /**
+   * Log a formatted debug message (only if debug mode is enabled)
+   *
+   * @param format The format string
+   * @param args The arguments
+   */
+  public void debug(String format, Object... args) {
+    if (pluginConfig != null && pluginConfig.isDebug()) {
+      getLogger().info("[DEBUG] " + String.format(format, args));
+    }
+  }
 }

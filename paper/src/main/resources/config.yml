@@ -1,5 +1,8 @@
 # Analyse Plugin Configuration
 
+# Enable debug logging for troubleshooting
+debug: false
+
 # Your server's API key from the Analyse dashboard
 api-key: "anl_your_api_key_here"
 
