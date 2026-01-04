@@ -12,9 +12,12 @@ project {
 
 object AnalyseVcs : GitVcsRoot({
     name = "Analyse Server Plugins"
-    url = "https://github.com/VCD/Analyse.git"
+    url = "git@github.com:VCD/Analyse.git"  // Use SSH URL
     branch = "refs/heads/main"
     branchSpec = "+:refs/heads/*"
+    authMethod = uploadedKey {
+        uploadedKey = "id_ed25519"  // Name of the key you uploaded in TeamCity
+    }
 })
 
 object Build : BuildType({
@@ -45,4 +48,3 @@ object Build : BuildType({
         }
     }
 })
-
