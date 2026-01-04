@@ -2,6 +2,8 @@
 
 Analytics tracking plugins for Minecraft servers. Supports Paper, Velocity, and BungeeCord.
 
+[![Build Status](https://ci.analyse.net/app/rest/builds/buildType:Analyse_Build/statusIcon)](https://ci.analyse.net)
+
 ## Modules
 
 | Module | Description |
