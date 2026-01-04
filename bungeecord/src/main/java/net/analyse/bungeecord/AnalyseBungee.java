@@ -25,6 +25,7 @@ public class AnalyseBungee extends Plugin {
 
   @Override
   public void onEnable() {
+    // Test
     getLogger().info("Initializing Analyse...");
 
     // Load configuration
