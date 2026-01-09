@@ -6,13 +6,14 @@ import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
+import net.analyse.sdk.request.PlayerInfo;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.analyse.velocity.AnalyseVelocity;
 import net.analyse.velocity.listener.PlayerListener;
+import net.analyse.velocity.session.PlayerSession;
 import org.slf4j.Logger;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Sends periodic heartbeats to the API for each configured server
@@ -55,9 +56,9 @@ public class HeartbeatTask implements Runnable {
     RegisteredServer server = serverOpt.get();
     AnalyseClient client = clientOpt.get();
 
-    // Collect UUIDs of players on this server
-    List<UUID> onlinePlayers = server.getPlayersConnected().stream()
-        .map(Player::getUniqueId)
+    // Collect player info with hostnames for players on this server
+    List<PlayerInfo> onlinePlayers = server.getPlayersConnected().stream()
+        .map(this::createPlayerInfo)
         .toList();
 
     String instanceId = plugin.getPluginConfig().getInstanceId();
@@ -76,5 +77,17 @@ public class HeartbeatTask implements Runnable {
       }
     });
   }
-}
 
+  /**
+   * Create player info from a player, including their hostname from session
+   *
+   * @param player The player
+   * @return PlayerInfo with UUID and hostname
+   */
+  private PlayerInfo createPlayerInfo(Player player) {
+    // Try to get hostname from session
+    Optional<PlayerSession> sessionOpt = plugin.getSessionManager().getSession(player.getUniqueId());
+    String hostname = sessionOpt.map(PlayerSession::getHostname).orElse(null);
+    return new PlayerInfo(player.getUniqueId(), hostname);
+  }
+}

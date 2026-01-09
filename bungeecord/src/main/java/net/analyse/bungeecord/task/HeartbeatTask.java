@@ -2,16 +2,17 @@ package net.analyse.bungeecord.task;
 
 import net.analyse.bungeecord.AnalyseBungee;
 import net.analyse.bungeecord.listener.PlayerListener;
+import net.analyse.bungeecord.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
+import net.analyse.sdk.request.PlayerInfo;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -54,9 +55,9 @@ public class HeartbeatTask implements Runnable {
 
     AnalyseClient client = clientOpt.get();
 
-    // Collect UUIDs of players on this server
-    List<UUID> onlinePlayers = serverInfo.getPlayers().stream()
-        .map(ProxiedPlayer::getUniqueId)
+    // Collect player info with hostnames for players on this server
+    List<PlayerInfo> onlinePlayers = serverInfo.getPlayers().stream()
+        .map(this::createPlayerInfo)
         .toList();
 
     String instanceId = plugin.getPluginConfig().getInstanceId();
@@ -75,5 +76,17 @@ public class HeartbeatTask implements Runnable {
       }
     });
   }
-}
 
+  /**
+   * Create player info from a player, including their hostname from session
+   *
+   * @param player The player
+   * @return PlayerInfo with UUID and hostname
+   */
+  private PlayerInfo createPlayerInfo(ProxiedPlayer player) {
+    // Try to get hostname from session
+    Optional<PlayerSession> sessionOpt = plugin.getSessionManager().getSession(player.getUniqueId());
+    String hostname = sessionOpt.map(PlayerSession::getHostname).orElse(null);
+    return new PlayerInfo(player.getUniqueId(), hostname);
+  }
+}

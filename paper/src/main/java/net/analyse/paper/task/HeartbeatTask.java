@@ -1,15 +1,17 @@
 package net.analyse.paper.task;
 
 import net.analyse.paper.AnalysePlugin;
+import net.analyse.paper.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
+import net.analyse.sdk.request.PlayerInfo;
 import net.analyse.sdk.response.HeartbeatResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -29,9 +31,9 @@ public class HeartbeatTask implements Runnable {
 
   @Override
   public void run() {
-    // Collect UUIDs of all online players
-    List<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream()
-        .map(Player::getUniqueId)
+    // Collect player info with hostnames for all online players
+    List<PlayerInfo> onlinePlayers = Bukkit.getOnlinePlayers().stream()
+        .map(this::createPlayerInfo)
         .toList();
 
     String instanceId = plugin.getPluginConfig().getInstanceId();
@@ -49,5 +51,17 @@ public class HeartbeatTask implements Runnable {
       }
     });
   }
-}
 
+  /**
+   * Create player info from a player, including their hostname from session
+   *
+   * @param player The player
+   * @return PlayerInfo with UUID and hostname
+   */
+  private PlayerInfo createPlayerInfo(Player player) {
+    // Try to get hostname from session
+    Optional<PlayerSession> sessionOpt = plugin.getSessionManager().getSession(player.getUniqueId());
+    String hostname = sessionOpt.map(PlayerSession::getHostname).orElse(null);
+    return new PlayerInfo(player.getUniqueId(), hostname);
+  }
+}
