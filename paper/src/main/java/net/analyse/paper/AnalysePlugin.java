@@ -20,10 +20,11 @@ public class AnalysePlugin extends JavaPlugin {
   private SessionManager sessionManager;
   private AnalyseClient client;
   private BukkitTask heartbeatTask;
+  private boolean configValid = false;
 
   @Override
-  public void onEnable() {
-    getLogger().info("Initializing Analyse...");
+  public void onLoad() {
+    getLogger().info("Loading Analyse...");
 
     // Load configuration
     pluginConfig = new AnalysePaperConfig(this);
@@ -31,9 +32,23 @@ public class AnalysePlugin extends JavaPlugin {
     // Validate configuration
     if (!pluginConfig.isValid()) {
       getLogger().warning("Invalid configuration! Please set your API key in config.yml");
+      return;
+    }
+
+    configValid = true;
+    getLogger().info("Configuration loaded successfully!");
+  }
+
+  @Override
+  public void onEnable() {
+    // Check if config was valid
+    if (!configValid) {
+      getLogger().severe("Cannot enable Analyse - invalid configuration!");
       getServer().getPluginManager().disablePlugin(this);
       return;
     }
+
+    getLogger().info("Enabling Analyse...");
 
     // Initialize SDK client
     AnalyseConfig sdkConfig = new AnalyseConfig(pluginConfig.getApiKey());
@@ -54,12 +69,12 @@ public class AnalysePlugin extends JavaPlugin {
         600L
     );
 
-    getLogger().info("Analyse initialized successfully!");
+    getLogger().info("Analyse enabled successfully!");
   }
 
   @Override
   public void onDisable() {
-    getLogger().info("Shutting down Analyse...");
+    getLogger().info("Disabling Analyse...");
 
     // Cancel heartbeat task
     if (heartbeatTask != null) {
@@ -71,7 +86,7 @@ public class AnalysePlugin extends JavaPlugin {
       client.shutdown();
     }
 
-    getLogger().info("Analyse shutdown complete");
+    getLogger().info("Analyse disabled");
   }
 
   /**
