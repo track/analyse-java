@@ -5,9 +5,11 @@ import net.analyse.bungeecord.config.AnalyseBungeeConfig;
 import net.analyse.bungeecord.listener.PlayerListener;
 import net.analyse.bungeecord.session.SessionManager;
 import net.analyse.bungeecord.task.HeartbeatTask;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,8 +44,47 @@ public class AnalyseBungee extends Plugin {
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
 
+    // Initialize sessions for players already online (in case of reload)
+    initializeOnlinePlayers();
+
     getLogger().info(String.format("Analyse initialized with %d server(s) configured",
         pluginConfig.getServers().size()));
+  }
+
+  /**
+   * Initialize sessions for players already online (handles proxy reload scenario)
+   */
+  private void initializeOnlinePlayers() {
+    int count = getProxy().getOnlineCount();
+    if (count == 0) {
+      return;
+    }
+
+    getLogger().info(String.format("Initializing sessions for %d online player(s)...", count));
+
+    for (ProxiedPlayer player : getProxy().getPlayers()) {
+      String username = player.getName();
+
+      // Get hostname from virtual host
+      String hostname = "unknown";
+      InetSocketAddress virtualHost = player.getPendingConnection().getVirtualHost();
+      if (virtualHost != null) {
+        hostname = virtualHost.getHostString();
+      }
+
+      // Get player's IP address
+      String ip = player.getAddress().getAddress().getHostAddress();
+
+      // Create session
+      sessionManager.createSession(player.getUniqueId(), hostname, ip);
+      debug("Created session for existing player %s (hostname: %s, ip: %s)", username, hostname, ip);
+
+      // If player is already on a server, send join event
+      if (player.getServer() != null) {
+        String serverName = player.getServer().getInfo().getName();
+        playerListener.sendJoinEventForExistingPlayer(player, serverName);
+      }
+    }
   }
 
   @Override

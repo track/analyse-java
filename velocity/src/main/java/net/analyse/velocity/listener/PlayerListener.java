@@ -210,6 +210,26 @@ public class PlayerListener {
   }
 
   /**
+   * Send a join event for an existing player (used during plugin reload)
+   *
+   * @param player     The player
+   * @param serverName The server name
+   */
+  public void sendJoinEventForExistingPlayer(Player player, String serverName) {
+    UUID uuid = player.getUniqueId();
+    String username = player.getUsername();
+
+    Optional<PlayerSession> sessionOpt = sessionManager.getSession(uuid);
+    if (sessionOpt.isEmpty()) {
+      logger.warn(String.format("No session found for existing player %s", username));
+      return;
+    }
+
+    PlayerSession session = sessionOpt.get();
+    sendJoinEvent(uuid, username, session, serverName);
+  }
+
+  /**
    * Reinitialize API clients after a config reload
    */
   public void reinitialize() {

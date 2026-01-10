@@ -7,6 +7,7 @@ import com.velocitypowered.api.event.proxy.ProxyReloadEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import lombok.Getter;
@@ -16,6 +17,7 @@ import net.analyse.velocity.session.SessionManager;
 import net.analyse.velocity.task.HeartbeatTask;
 import org.slf4j.Logger;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -67,8 +69,45 @@ public class AnalyseVelocity {
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
 
+    // Initialize sessions for players already online (in case of reload)
+    initializeOnlinePlayers();
+
     logger.info(String.format("Analyse initialized with %d server(s) configured",
         pluginConfig.getServers().size()));
+  }
+
+  /**
+   * Initialize sessions for players already online (handles proxy reload scenario)
+   */
+  private void initializeOnlinePlayers() {
+    int count = server.getPlayerCount();
+    if (count == 0) {
+      return;
+    }
+
+    logger.info(String.format("Initializing sessions for %d online player(s)...", count));
+
+    for (Player player : server.getAllPlayers()) {
+      String username = player.getUsername();
+
+      // Get hostname from virtual host
+      String hostname = player.getVirtualHost()
+          .map(InetSocketAddress::getHostString)
+          .orElse("unknown");
+
+      // Get player's IP address
+      String ip = player.getRemoteAddress().getAddress().getHostAddress();
+
+      // Create session
+      sessionManager.createSession(player.getUniqueId(), hostname, ip);
+      debug("Created session for existing player %s (hostname: %s, ip: %s)", username, hostname, ip);
+
+      // If player is already on a server, send join event
+      player.getCurrentServer().ifPresent(serverConnection -> {
+        String serverName = serverConnection.getServerInfo().getName();
+        playerListener.sendJoinEventForExistingPlayer(player, serverName);
+      });
+    }
   }
 
   @Subscribe
