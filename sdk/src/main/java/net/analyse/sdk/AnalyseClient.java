@@ -16,10 +16,10 @@ import net.analyse.sdk.response.LeaveResponse;
  */
 public class AnalyseClient {
 
-  private static final String ENDPOINT_JOIN = "/api/plugin/join";
-  private static final String ENDPOINT_LEAVE = "/api/plugin/leave";
-  private static final String ENDPOINT_HEARTBEAT = "/api/plugin/heartbeat";
-  private static final String ENDPOINT_EVENT = "/api/plugin/event";
+  private static final String ENDPOINT_JOIN = "/v1/plugin/join";
+  private static final String ENDPOINT_LEAVE = "/v1/plugin/leave";
+  private static final String ENDPOINT_HEARTBEAT = "/v1/plugin/heartbeat";
+  private static final String ENDPOINT_EVENT = "/v1/plugin/event";
 
   private final AnalyseHttpClient httpClient;
 
