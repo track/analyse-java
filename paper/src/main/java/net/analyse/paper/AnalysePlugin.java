@@ -1,6 +1,8 @@
 package net.analyse.paper;
 
 import lombok.Getter;
+import net.analyse.api.AnalyseProvider;
+import net.analyse.api.platform.AnalysePlatform;
 import net.analyse.paper.config.AnalysePaperConfig;
 import net.analyse.paper.listener.PlayerListener;
 import net.analyse.paper.session.SessionManager;
@@ -21,7 +23,7 @@ import java.util.UUID;
  * Analyse plugin for Paper/Spigot/Bukkit servers
  */
 @Getter
-public class AnalysePlugin extends JavaPlugin {
+public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
 
   private AnalysePaperConfig pluginConfig;
   private SessionManager sessionManager;
@@ -60,6 +62,9 @@ public class AnalysePlugin extends JavaPlugin {
     // Initialize SDK client
     AnalyseConfig sdkConfig = new AnalyseConfig(pluginConfig.getApiKey());
     client = new AnalyseClient(sdkConfig);
+
+    // Register with the API provider so other plugins can use Analyse.trackEvent()
+    AnalyseProvider.register(this);
 
     // Initialize session manager
     sessionManager = new SessionManager();
@@ -142,6 +147,9 @@ public class AnalysePlugin extends JavaPlugin {
   public void onDisable() {
     getLogger().info("Disabling Analyse...");
 
+    // Unregister from the API provider
+    AnalyseProvider.unregister();
+
     // Cancel heartbeat task
     if (heartbeatTask != null) {
       heartbeatTask.cancel();
@@ -176,5 +184,20 @@ public class AnalysePlugin extends JavaPlugin {
     if (pluginConfig != null && pluginConfig.isDebug()) {
       getLogger().info("[DEBUG] " + String.format(format, args));
     }
+  }
+
+  @Override
+  public boolean isDebugEnabled() {
+    return pluginConfig != null && pluginConfig.isDebug();
+  }
+
+  @Override
+  public void logInfo(String message) {
+    getLogger().info(message);
+  }
+
+  @Override
+  public void logWarning(String message) {
+    getLogger().warning(message);
   }
 }

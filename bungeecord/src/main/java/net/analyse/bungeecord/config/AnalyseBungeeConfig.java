@@ -23,6 +23,7 @@ public class AnalyseBungeeConfig {
   private boolean debug = false;
   private String bedrockPrefix = ".";
   private String instanceId = "default";
+  private String defaultServer = null;
   private Map<String, ServerConfig> servers = new HashMap<>();
 
   /**

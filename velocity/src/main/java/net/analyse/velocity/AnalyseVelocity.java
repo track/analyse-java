@@ -11,6 +11,9 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import lombok.Getter;
+import net.analyse.api.AnalyseProvider;
+import net.analyse.api.platform.AnalysePlatform;
+import net.analyse.sdk.AnalyseClient;
 import net.analyse.velocity.config.AnalyseVelocityConfig;
 import net.analyse.velocity.listener.PlayerListener;
 import net.analyse.velocity.session.SessionManager;
@@ -32,7 +35,7 @@ import java.util.concurrent.TimeUnit;
     authors = {"VertCode"}
 )
 @Getter
-public class AnalyseVelocity {
+public class AnalyseVelocity implements AnalysePlatform {
 
   private final ProxyServer server;
   private final Logger logger;
@@ -65,6 +68,11 @@ public class AnalyseVelocity {
     // Register player listener
     playerListener = new PlayerListener(this);
     server.getEventManager().register(this, playerListener);
+
+    // Register with the API provider if a default server is configured
+    if (playerListener.getDefaultClient() != null) {
+      AnalyseProvider.register(this);
+    }
 
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
@@ -146,6 +154,9 @@ public class AnalyseVelocity {
   public void onProxyShutdown(ProxyShutdownEvent event) {
     logger.info("Shutting down Analyse...");
 
+    // Unregister from the API provider
+    AnalyseProvider.unregister();
+
     // Cancel heartbeat task
     if (heartbeatTask != null) {
       heartbeatTask.cancel();
@@ -212,5 +223,25 @@ public class AnalyseVelocity {
     if (pluginConfig != null && pluginConfig.isDebug()) {
       logger.info("[DEBUG] " + String.format(format, args));
     }
+  }
+
+  @Override
+  public AnalyseClient getClient() {
+    return playerListener != null ? playerListener.getDefaultClient() : null;
+  }
+
+  @Override
+  public boolean isDebugEnabled() {
+    return pluginConfig != null && pluginConfig.isDebug();
+  }
+
+  @Override
+  public void logInfo(String message) {
+    logger.info(message);
+  }
+
+  @Override
+  public void logWarning(String message) {
+    logger.warn(message);
   }
 }

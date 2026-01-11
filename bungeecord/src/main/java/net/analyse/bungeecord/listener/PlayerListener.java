@@ -67,6 +67,20 @@ public class PlayerListener implements Listener {
     return Optional.ofNullable(serverClients.get(serverName));
   }
 
+  /**
+   * Get the default API client (for the configured default server)
+   *
+   * @return The default client, or null if not configured
+   */
+  public AnalyseClient getDefaultClient() {
+    String defaultServer = plugin.getPluginConfig().getDefaultServer();
+    if (defaultServer == null || defaultServer.isBlank()) {
+      return null;
+    }
+
+    return serverClients.get(defaultServer);
+  }
+
   @EventHandler
   public void onPostLogin(PostLoginEvent event) {
     ProxiedPlayer player = event.getPlayer();

@@ -1,10 +1,13 @@
 package net.analyse.bungeecord;
 
 import lombok.Getter;
+import net.analyse.api.AnalyseProvider;
+import net.analyse.api.platform.AnalysePlatform;
 import net.analyse.bungeecord.config.AnalyseBungeeConfig;
 import net.analyse.bungeecord.listener.PlayerListener;
 import net.analyse.bungeecord.session.SessionManager;
 import net.analyse.bungeecord.task.HeartbeatTask;
+import net.analyse.sdk.AnalyseClient;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
@@ -16,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * Analyse plugin for BungeeCord proxy
  */
 @Getter
-public class AnalyseBungee extends Plugin {
+public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
   private static final int HEARTBEAT_INTERVAL_SECONDS = 30;
 
@@ -40,6 +43,11 @@ public class AnalyseBungee extends Plugin {
     // Register player listener
     playerListener = new PlayerListener(this);
     getProxy().getPluginManager().registerListener(this, playerListener);
+
+    // Register with the API provider if a default server is configured
+    if (playerListener.getDefaultClient() != null) {
+      AnalyseProvider.register(this);
+    }
 
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
@@ -90,6 +98,9 @@ public class AnalyseBungee extends Plugin {
   @Override
   public void onDisable() {
     getLogger().info("Shutting down Analyse...");
+
+    // Unregister from the API provider
+    AnalyseProvider.unregister();
 
     // Cancel heartbeat task
     if (heartbeatTask != null) {
@@ -160,5 +171,25 @@ public class AnalyseBungee extends Plugin {
     if (pluginConfig != null && pluginConfig.isDebug()) {
       getLogger().info("[DEBUG] " + String.format(format, args));
     }
+  }
+
+  @Override
+  public AnalyseClient getClient() {
+    return playerListener != null ? playerListener.getDefaultClient() : null;
+  }
+
+  @Override
+  public boolean isDebugEnabled() {
+    return pluginConfig != null && pluginConfig.isDebug();
+  }
+
+  @Override
+  public void logInfo(String message) {
+    getLogger().info(message);
+  }
+
+  @Override
+  public void logWarning(String message) {
+    getLogger().warning(message);
   }
 }

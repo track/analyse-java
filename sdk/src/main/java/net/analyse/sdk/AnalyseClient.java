@@ -2,9 +2,11 @@ package net.analyse.sdk;
 
 import net.analyse.sdk.config.AnalyseConfig;
 import net.analyse.sdk.http.AnalyseHttpClient;
+import net.analyse.sdk.request.EventRequest;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.JoinRequest;
 import net.analyse.sdk.request.LeaveRequest;
+import net.analyse.sdk.response.EventResponse;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.analyse.sdk.response.JoinResponse;
 import net.analyse.sdk.response.LeaveResponse;
@@ -17,6 +19,7 @@ public class AnalyseClient {
   private static final String ENDPOINT_JOIN = "/api/plugin/join";
   private static final String ENDPOINT_LEAVE = "/api/plugin/leave";
   private static final String ENDPOINT_HEARTBEAT = "/api/plugin/heartbeat";
+  private static final String ENDPOINT_EVENT = "/api/plugin/event";
 
   private final AnalyseHttpClient httpClient;
 
@@ -57,6 +60,16 @@ public class AnalyseClient {
    */
   public void heartbeat(HeartbeatRequest request, AnalyseCallback<HeartbeatResponse> callback) {
     httpClient.post(ENDPOINT_HEARTBEAT, request, HeartbeatResponse.class, callback);
+  }
+
+  /**
+   * Send a custom event to the API
+   *
+   * @param request  The event request containing event details
+   * @param callback The callback to invoke on success or failure
+   */
+  public void trackEvent(EventRequest request, AnalyseCallback<EventResponse> callback) {
+    httpClient.post(ENDPOINT_EVENT, request, EventResponse.class, callback);
   }
 
   /**
