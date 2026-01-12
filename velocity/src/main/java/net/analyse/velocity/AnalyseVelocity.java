@@ -10,10 +10,12 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import co.aikar.commands.VelocityCommandManager;
 import lombok.Getter;
 import net.analyse.api.AnalyseProvider;
 import net.analyse.api.platform.AnalysePlatform;
 import net.analyse.sdk.AnalyseClient;
+import net.analyse.velocity.command.AnalyseCommand;
 import net.analyse.velocity.config.AnalyseVelocityConfig;
 import net.analyse.velocity.listener.PlayerListener;
 import net.analyse.velocity.session.SessionManager;
@@ -73,6 +75,10 @@ public class AnalyseVelocity implements AnalysePlatform {
     if (playerListener.getDefaultClient() != null) {
       AnalyseProvider.register(this);
     }
+
+    // Register commands using ACF
+    VelocityCommandManager commandManager = new VelocityCommandManager(server, this);
+    commandManager.registerCommand(new AnalyseCommand(this));
 
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();

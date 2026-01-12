@@ -1,8 +1,10 @@
 package net.analyse.bungeecord;
 
+import co.aikar.commands.BungeeCommandManager;
 import lombok.Getter;
 import net.analyse.api.AnalyseProvider;
 import net.analyse.api.platform.AnalysePlatform;
+import net.analyse.bungeecord.command.AnalyseCommand;
 import net.analyse.bungeecord.config.AnalyseBungeeConfig;
 import net.analyse.bungeecord.listener.PlayerListener;
 import net.analyse.bungeecord.session.SessionManager;
@@ -48,6 +50,10 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
     if (playerListener.getDefaultClient() != null) {
       AnalyseProvider.register(this);
     }
+
+    // Register commands using ACF
+    BungeeCommandManager commandManager = new BungeeCommandManager(this);
+    commandManager.registerCommand(new AnalyseCommand(this));
 
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();

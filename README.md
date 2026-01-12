@@ -2,16 +2,74 @@
 
 Analytics tracking plugins for Minecraft servers. Supports Paper, Velocity, and BungeeCord.
 
-[![Build Status](https://ci.analyse.net/app/rest/builds/buildType:Analyse_Build/statusIcon)](https://ci.analyse.net)
+## Features
+
+- **Automatic Session Tracking** - Player joins, leaves, and playtime
+- **Heartbeat System** - Regular server health checks
+- **Custom Events API** - Fluent API for other plugins to track analytics
+- **Multi-Platform** - Paper, BungeeCord, and Velocity support
+- **ACF Commands** - Clean command system using [Annotation Command Framework](https://github.com/aikar/commands)
+
+## Documentation
+
+📖 **[Full Documentation](docs/README.md)**
+
+- [Installation Guide](docs/installation.md)
+- [Configuration](docs/configuration.md)
+- [Commands](docs/commands.md)
+- [Developer API](docs/api.md)
+
+## Quick Start
+
+### 1. Download
+
+Download the appropriate plugin for your server:
+
+| Platform | Download |
+|----------|----------|
+| Paper/Spigot | `analyse-paper-x.x.x.jar` |
+| BungeeCord | `analyse-bungeecord-x.x.x.jar` |
+| Velocity | `analyse-velocity-x.x.x.jar` |
+
+### 2. Configure
+
+Add your API key from [analyse.net](https://analyse.net):
+
+```yaml
+# Paper - plugins/Analyse/config.yml
+api-key: "your-api-key-here"
+```
+
+### 3. Verify
+
+Run `/analyse status` to check the connection.
+
+## For Developers
+
+Track custom events from your plugin:
+
+```java
+import net.analyse.api.Analyse;
+
+// Simple event
+Analyse.trackEvent("shop_purchase")
+    .withPlayer(player.getUniqueId(), player.getName())
+    .withData("item", "diamond_sword")
+    .withValue(500.0)
+    .send();
+```
+
+See the [Developer API Documentation](docs/api.md) for more examples.
 
 ## Modules
 
 | Module | Description |
 |--------|-------------|
-| `sdk` | Core SDK with API client and data models |
-| `paper` | Plugin for Paper/Spigot/Bukkit servers |
-| `velocity` | Plugin for Velocity proxies (multi-server) |
-| `bungeecord` | Plugin for BungeeCord proxies (multi-server) |
+| `sdk` | Core SDK with HTTP client and data models |
+| `api` | Public API for other plugins to track events |
+| `paper` | Plugin for Paper/Spigot servers |
+| `velocity` | Plugin for Velocity proxies |
+| `bungeecord` | Plugin for BungeeCord proxies |
 
 ## Building
 
@@ -19,77 +77,36 @@ Analytics tracking plugins for Minecraft servers. Supports Paper, Velocity, and 
 ./gradlew clean build
 ```
 
-Output JARs will be in:
+Output JARs:
 - `paper/build/libs/analyse-paper-*.jar`
 - `velocity/build/libs/analyse-velocity-*.jar`
 - `bungeecord/build/libs/analyse-bungeecord-*.jar`
 
-## Configuration
-
-### Paper
-
-Location: `plugins/Analyse/config.yml`
-
-```yaml
-# Your server's API key from the Analyse dashboard
-api-key: "anl_your_api_key_here"
-
-# Bedrock player username prefix (used by Floodgate/Geyser)
-# Common values: "." or "_" or "*"
-# Leave empty to disable bedrock detection
-bedrock-prefix: "."
-
-# Instance ID for multi-instance setups (e.g. "survival-1", "survival-2")
-instance-id: "default"
-```
-
-### Velocity / BungeeCord
-
-Location: `plugins/analyse/config.json`
-
-```json
-{
-  "bedrockPrefix": ".",
-  "instanceId": "default",
-  "servers": {
-    "lobby": {
-      "apiKey": "anl_your_lobby_api_key"
-    },
-    "survival": {
-      "apiKey": "anl_your_survival_api_key"
-    }
-  }
-}
-```
-
-Each backend server can have its own API key for separate analytics tracking.
-
-The `instanceId` is useful for multi-instance setups (e.g., `proxy-1`, `proxy-2`) to identify which instance is sending heartbeats.
-
-## Features
-
-- **Player Join/Leave Tracking**: Sends events when players join and leave
-- **Heartbeat**: Reports online players every 30 seconds
-- **Bedrock Detection**: Identifies Bedrock players by username prefix
-- **Multi-Server Support**: Velocity/BungeeCord track players across backend servers
-- **Hostname Tracking**: Records which domain players used to connect
-
-## API Endpoints
-
-The plugins communicate with the following endpoints:
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/plugin/join` | POST | Player joined the server |
-| `/api/plugin/leave` | POST | Player left the server |
-| `/api/plugin/heartbeat` | POST | Periodic player count update |
-
 ## Requirements
 
-- Java 21+
-- Paper 1.21.4+ / Velocity 3.4.0+ / BungeeCord 1.21+
+- **Java**: 21+
+- **Paper**: 1.21.4+
+- **Velocity**: 3.4.0+
+- **BungeeCord**: 1.21+
+
+## Commands
+
+```
+/analyse              - Show plugin status
+/analyse status       - Show plugin status  
+/analyse reload       - Reload configuration
+/analyse debug        - Toggle debug mode
+/analyse event <name> - Send a custom event
+/analyse help         - Show help
+```
+
+See [Commands Documentation](docs/commands.md) for details.
+
+## Support
+
+- Website: [analyse.net](https://analyse.net)
+- API: [api.analyse.net](https://api.analyse.net)
 
 ## License
 
 Proprietary - All rights reserved.
-

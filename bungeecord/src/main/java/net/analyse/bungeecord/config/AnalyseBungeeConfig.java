@@ -3,6 +3,7 @@ package net.analyse.bungeecord.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
+import lombok.Setter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -20,6 +21,7 @@ public class AnalyseBungeeConfig {
 
   private static final String CONFIG_FILE = "config.json";
 
+  @Setter
   private boolean debug = false;
   private String bedrockPrefix = ".";
   private String instanceId = "default";

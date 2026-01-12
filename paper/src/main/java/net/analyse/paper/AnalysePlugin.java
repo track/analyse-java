@@ -1,8 +1,10 @@
 package net.analyse.paper;
 
+import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import net.analyse.api.AnalyseProvider;
 import net.analyse.api.platform.AnalysePlatform;
+import net.analyse.paper.command.AnalyseCommand;
 import net.analyse.paper.config.AnalysePaperConfig;
 import net.analyse.paper.listener.PlayerListener;
 import net.analyse.paper.session.SessionManager;
@@ -72,6 +74,10 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     // Register player listener
     PlayerListener playerListener = new PlayerListener(this, client);
     getServer().getPluginManager().registerEvents(playerListener, this);
+
+    // Register commands using ACF
+    PaperCommandManager commandManager = new PaperCommandManager(this);
+    commandManager.registerCommand(new AnalyseCommand(this));
 
     // Start heartbeat task (every 30 seconds = 600 ticks)
     heartbeatTask = getServer().getScheduler().runTaskTimerAsynchronously(

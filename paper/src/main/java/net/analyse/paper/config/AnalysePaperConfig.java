@@ -10,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 @Getter
 public class AnalysePaperConfig {
 
-  private final boolean debug;
+  private boolean debug;
   private final String apiKey;
   private final String bedrockPrefix;
   private final String instanceId;
@@ -51,5 +51,14 @@ public class AnalysePaperConfig {
     }
 
     return username.startsWith(bedrockPrefix);
+  }
+
+  /**
+   * Set debug mode at runtime
+   *
+   * @param debug Whether debug mode should be enabled
+   */
+  public void setDebug(boolean debug) {
+    this.debug = debug;
   }
 }

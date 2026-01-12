@@ -64,5 +64,14 @@ public class SessionManager {
   public int getSessionCount() {
     return sessions.size();
   }
+
+  /**
+   * Get all active sessions
+   *
+   * @return Map of UUID to PlayerSession
+   */
+  public Map<UUID, PlayerSession> getActiveSessions() {
+    return sessions;
+  }
 }
 
