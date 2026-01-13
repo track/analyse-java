@@ -107,6 +107,21 @@ public class PlayerListener implements Listener {
     if (plugin.getAbTestManager() != null) {
       plugin.getAbTestManager().processJoin(player, firstJoin);
     }
+
+    // Notify admins about updates on join
+    if (player.hasPermission("analyse.admin") && plugin.getUpdateChecker() != null) {
+      if (plugin.getUpdateChecker().isUpdateAvailable()) {
+        // Delay slightly so it appears after other join messages
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+          plugin.getUpdateChecker().sendUpdateMessage(
+              player,
+              plugin.getUpdateChecker().getCurrentVersion(),
+              plugin.getUpdateChecker().getLatestVersion(),
+              plugin.getUpdateChecker().getDownloadUrl()
+          );
+        }, 40L);
+      }
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

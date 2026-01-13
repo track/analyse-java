@@ -10,6 +10,7 @@ import net.analyse.paper.config.AnalysePaperConfig;
 import net.analyse.paper.listener.PlayerListener;
 import net.analyse.paper.manager.SessionManager;
 import net.analyse.paper.task.HeartbeatTask;
+import net.analyse.paper.update.PaperUpdateChecker;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
@@ -35,6 +36,7 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
   private ABTestManager abTestManager;
   private AnalyseClient client;
   private BukkitTask heartbeatTask;
+  private PaperUpdateChecker updateChecker;
   private boolean configValid = false;
 
   @Override
@@ -94,6 +96,10 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     // Initialize A/B test manager
     abTestManager = new ABTestManager(this);
     abTestManager.start();
+
+    // Initialize update checker
+    updateChecker = new PaperUpdateChecker(this, getDescription().getVersion());
+    updateChecker.start();
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
@@ -167,6 +173,11 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     // Stop A/B test manager
     if (abTestManager != null) {
       abTestManager.stop();
+    }
+
+    // Stop update checker
+    if (updateChecker != null) {
+      updateChecker.stop();
     }
 
     // Cancel heartbeat task

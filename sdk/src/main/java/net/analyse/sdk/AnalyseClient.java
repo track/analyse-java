@@ -13,6 +13,7 @@ import net.analyse.sdk.response.EventResponse;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.analyse.sdk.response.JoinResponse;
 import net.analyse.sdk.response.LeaveResponse;
+import net.analyse.sdk.response.VersionResponse;
 
 /**
  * Main client for interacting with the Analyse API
@@ -25,6 +26,7 @@ public class AnalyseClient {
   private static final String ENDPOINT_EVENT = "/v1/plugin/event";
   private static final String ENDPOINT_AB_TESTS = "/v1/plugin/ab-tests";
   private static final String ENDPOINT_CONVERSION = "/v1/plugin/conversion";
+  private static final String ENDPOINT_VERSION = "/v1/plugin/version";
 
   private final AnalyseHttpClient httpClient;
 
@@ -94,6 +96,15 @@ public class AnalyseClient {
    */
   public void trackConversion(ConversionRequest request, AnalyseCallback<ConversionResponse> callback) {
     httpClient.post(ENDPOINT_CONVERSION, request, ConversionResponse.class, callback);
+  }
+
+  /**
+   * Check for plugin updates
+   *
+   * @param callback The callback to invoke on success or failure
+   */
+  public void checkVersion(AnalyseCallback<VersionResponse> callback) {
+    httpClient.get(ENDPOINT_VERSION, VersionResponse.class, callback);
   }
 
   /**

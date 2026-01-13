@@ -10,6 +10,7 @@ import net.analyse.bungeecord.config.AnalyseBungeeConfig;
 import net.analyse.bungeecord.listener.PlayerListener;
 import net.analyse.bungeecord.manager.SessionManager;
 import net.analyse.bungeecord.task.HeartbeatTask;
+import net.analyse.bungeecord.update.BungeeUpdateChecker;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.object.abtest.ABTest;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -34,6 +35,7 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
   private ABTestManager abTestManager;
   private PlayerListener playerListener;
   private ScheduledTask heartbeatTask;
+  private BungeeUpdateChecker updateChecker;
 
   @Override
   public void onEnable() {
@@ -66,6 +68,12 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
+
+    // Initialize update checker (only if we have a default client)
+    if (playerListener.getDefaultClient() != null) {
+      updateChecker = new BungeeUpdateChecker(this, getDescription().getVersion());
+      updateChecker.start();
+    }
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();

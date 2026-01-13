@@ -22,6 +22,7 @@ import net.analyse.velocity.listener.PlayerListener;
 import net.analyse.velocity.manager.ABTestManager;
 import net.analyse.velocity.manager.SessionManager;
 import net.analyse.velocity.task.HeartbeatTask;
+import net.analyse.velocity.update.VelocityUpdateChecker;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -52,6 +53,7 @@ public class AnalyseVelocity implements AnalysePlatform {
   private ABTestManager abTestManager;
   private PlayerListener playerListener;
   private ScheduledTask heartbeatTask;
+  private VelocityUpdateChecker updateChecker;
 
   @Inject
   public AnalyseVelocity(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -91,6 +93,12 @@ public class AnalyseVelocity implements AnalysePlatform {
 
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
+
+    // Initialize update checker (only if we have a default client)
+    if (playerListener.getDefaultClient() != null) {
+      updateChecker = new VelocityUpdateChecker(this, "0.1.0");
+      updateChecker.start();
+    }
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
@@ -175,6 +183,11 @@ public class AnalyseVelocity implements AnalysePlatform {
     // Stop A/B test manager
     if (abTestManager != null) {
       abTestManager.stop();
+    }
+
+    // Stop update checker
+    if (updateChecker != null) {
+      updateChecker.stop();
     }
 
     // Cancel heartbeat task
