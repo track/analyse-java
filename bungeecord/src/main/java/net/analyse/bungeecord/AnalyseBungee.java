@@ -239,4 +239,16 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
       abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
     }
   }
+
+  @Override
+  public void processEventTrigger(UUID playerUuid, String eventName) {
+    if (abTestManager == null) {
+      return;
+    }
+
+    ProxiedPlayer player = getProxy().getPlayer(playerUuid);
+    if (player != null) {
+      abTestManager.processEvent(player, eventName);
+    }
+  }
 }

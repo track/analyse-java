@@ -291,4 +291,15 @@ public class AnalyseVelocity implements AnalysePlatform {
       abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
     }
   }
+
+  @Override
+  public void processEventTrigger(UUID playerUuid, String eventName) {
+    if (abTestManager == null) {
+      return;
+    }
+
+    server.getPlayer(playerUuid).ifPresent(player -> {
+      abTestManager.processEvent(player, eventName);
+    });
+  }
 }

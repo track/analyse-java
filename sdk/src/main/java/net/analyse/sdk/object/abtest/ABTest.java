@@ -16,7 +16,8 @@ public class ABTest {
   public enum Trigger {
     FIRST_JOIN,
     EVERY_JOIN,
-    ON_COMMAND
+    ON_COMMAND,
+    ON_EVENT
   }
 
   /**
@@ -34,6 +35,7 @@ public class ABTest {
   private String name;
   private Trigger trigger;
   private String triggerCommand;
+  private String triggerEvent;
   private boolean cancelCommand;
   private Status status;
   private List<Variant> variants;
@@ -75,6 +77,20 @@ public class ABTest {
 
     return normalizedCommand.equalsIgnoreCase(normalizedTrigger) ||
         normalizedCommand.toLowerCase().startsWith(normalizedTrigger.toLowerCase() + " ");
+  }
+
+  /**
+   * Check if this test is triggered by a specific event
+   *
+   * @param eventName The event name to check
+   * @return true if this test is triggered by the event
+   */
+  public boolean matchesEvent(String eventName) {
+    if (trigger != Trigger.ON_EVENT || triggerEvent == null) {
+      return false;
+    }
+
+    return triggerEvent.equalsIgnoreCase(eventName);
   }
 
   /**

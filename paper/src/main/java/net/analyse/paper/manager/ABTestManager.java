@@ -191,6 +191,26 @@ public class ABTestManager {
   }
 
   /**
+   * Process a custom event for A/B tests
+   *
+   * @param player    The player who triggered the event
+   * @param eventName The event name
+   */
+  public void processEvent(Player player, String eventName) {
+    for (ABTest test : testsCache.values()) {
+      if (!test.matchesEvent(eventName)) {
+        continue;
+      }
+
+      // Assign variant and execute actions
+      Variant variant = test.assignVariant(player.getUniqueId());
+      if (variant != null && variant.hasActions()) {
+        executeActions(player, test, variant);
+      }
+    }
+  }
+
+  /**
    * Execute actions for a variant
    *
    * @param player  The player

@@ -100,4 +100,15 @@ public interface AnalysePlatform {
   default void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
     // Default implementation does nothing - platforms override this
   }
+
+  /**
+   * Process a custom event for A/B test triggers.
+   * Called when an event is tracked to check for ON_EVENT triggers.
+   *
+   * @param playerUuid The player's UUID
+   * @param eventName  The event name
+   */
+  default void processEventTrigger(UUID playerUuid, String eventName) {
+    // Default implementation does nothing - platforms override this
+  }
 }

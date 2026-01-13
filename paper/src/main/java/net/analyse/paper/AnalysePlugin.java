@@ -246,4 +246,16 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
       abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
     }
   }
+
+  @Override
+  public void processEventTrigger(UUID playerUuid, String eventName) {
+    if (abTestManager == null) {
+      return;
+    }
+
+    Player player = getServer().getPlayer(playerUuid);
+    if (player != null) {
+      abTestManager.processEvent(player, eventName);
+    }
+  }
 }

@@ -236,6 +236,23 @@ A/B tests can be triggered by:
 | `FIRST_JOIN` | Executes when a player joins for the first time |
 | `EVERY_JOIN` | Executes on every player join |
 | `ON_COMMAND` | Executes when a specific command is run |
+| `ON_EVENT` | Executes when a specific custom event is tracked |
+
+#### ON_EVENT Trigger
+
+The `ON_EVENT` trigger allows A/B tests to activate when you track a custom event with `Analyse.trackEvent()`. This is useful for triggering experiments based on in-game milestones.
+
+```java
+// When this event is tracked, any A/B test configured 
+// with trigger "ON_EVENT" and event name "tutorial_completed"
+// will automatically execute its variant actions
+Analyse.trackEvent("tutorial_completed")
+    .withPlayer(player.getUniqueId(), player.getName())
+    .withData("time_seconds", 300)
+    .send();
+```
+
+**Example Use Case:** Reward players who complete the tutorial with different bonuses based on their A/B test variant.
 
 ### A/B Test Actions
 

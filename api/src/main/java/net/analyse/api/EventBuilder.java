@@ -119,6 +119,11 @@ public class EventBuilder {
       throw new IllegalStateException("Analyse client is not available. Check your configuration.");
     }
 
+    // Check A/B test ON_EVENT triggers if player is associated
+    if (playerUuid != null) {
+      platform.processEventTrigger(playerUuid, name);
+    }
+
     EventRequest request = new EventRequest(name, playerUuid, playerUsername, data, value);
 
     platform.getClient().trackEvent(request, new AnalyseCallback<>() {
