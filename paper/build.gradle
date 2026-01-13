@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation project(':api')
+    implementation project(':sdk')
     implementation "co.aikar:acf-paper:${project.property('acfVersion')}"
     compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
 }

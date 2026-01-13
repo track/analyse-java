@@ -4,20 +4,25 @@ import net.analyse.api.platform.AnalysePlatform;
 
 /**
  * Internal provider that holds the reference to the active platform plugin.
- * This allows the static Analyse API to access the underlying SDK client.
+ * This allows the static Analyse API to access the underlying implementation.
+ *
+ * <p><b>For plugin developers:</b> Use {@link Analyse} instead of this class.</p>
+ *
+ * <p><b>For platform implementations:</b> Call {@link #register(AnalysePlatform)}
+ * in your onEnable and {@link #unregister()} in your onDisable.</p>
  */
 public final class AnalyseProvider {
 
   private static AnalysePlatform platform;
 
   private AnalyseProvider() {
-    // Prevent instantiation
   }
 
   /**
    * Register the platform implementation. Called by platform plugins on enable.
    *
    * @param platform The platform implementation
+   * @throws IllegalStateException if a platform is already registered
    */
   public static void register(AnalysePlatform platform) {
     if (AnalyseProvider.platform != null) {
@@ -39,7 +44,7 @@ public final class AnalyseProvider {
    *
    * @return The platform implementation, or null if not registered
    */
-  static AnalysePlatform getPlatform() {
+  public static AnalysePlatform getPlatform() {
     return platform;
   }
 
@@ -48,7 +53,7 @@ public final class AnalyseProvider {
    *
    * @return true if a platform is registered
    */
-  static boolean isRegistered() {
+  public static boolean isRegistered() {
     return platform != null;
   }
 }

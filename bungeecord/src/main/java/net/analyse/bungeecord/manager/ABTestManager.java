@@ -1,12 +1,11 @@
 package net.analyse.bungeecord.manager;
 
+import net.analyse.api.exception.AnalyseException;
+import net.analyse.api.object.abtest.ABTest;
 import net.analyse.bungeecord.AnalyseBungee;
 import net.analyse.bungeecord.object.action.BungeeAction;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
-import net.analyse.sdk.object.abtest.ABTest;
-import net.analyse.sdk.object.abtest.Variant;
 import net.analyse.sdk.object.action.ActionData;
 import net.analyse.sdk.request.ConversionRequest;
 import net.analyse.sdk.response.ABTestsResponse;
@@ -22,12 +21,12 @@ import java.util.concurrent.TimeUnit;
  * Manages A/B tests for the BungeeCord plugin.
  * Supports SEND_MESSAGE and RUN_COMMAND actions on proxies.
  */
-public class ABTestManager {
+public class ABTestManager implements net.analyse.api.manager.ABTestManager {
 
   private static final long SYNC_INTERVAL_MINUTES = 5;
 
   private final AnalyseBungee plugin;
-  private final Map<String, ABTest> testsCache = new ConcurrentHashMap<>();
+  private final Map<String, net.analyse.sdk.object.abtest.ABTest> testsCache = new ConcurrentHashMap<>();
 
   public ABTestManager(AnalyseBungee plugin) {
     this.plugin = plugin;
@@ -73,7 +72,7 @@ public class ABTestManager {
       public void onSuccess(ABTestsResponse response) {
         if (response.isSuccess() && response.getTests() != null) {
           testsCache.clear();
-          for (ABTest test : response.getTests()) {
+          for (net.analyse.sdk.object.abtest.ABTest test : response.getTests()) {
             if (test.isActive()) {
               testsCache.put(test.getKey(), test);
             }
@@ -92,48 +91,29 @@ public class ABTestManager {
     });
   }
 
-  /**
-   * Get all active tests
-   *
-   * @return List of active tests
-   */
-  public List<ABTest> getActiveTests() {
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<net.analyse.sdk.object.abtest.ABTest> getActiveTests() {
     return List.copyOf(testsCache.values());
   }
 
-  /**
-   * Get a test by key
-   *
-   * @param testKey The test key
-   * @return The test, or null if not found
-   */
+  @Override
   public ABTest getTest(String testKey) {
     return testsCache.get(testKey);
   }
 
-  /**
-   * Get the variant assigned to a player for a test
-   *
-   * @param playerUuid The player's UUID
-   * @param testKey    The test key
-   * @return The variant key, or null if test not found
-   */
+  @Override
   public String getVariant(UUID playerUuid, String testKey) {
-    ABTest test = testsCache.get(testKey);
+    net.analyse.sdk.object.abtest.ABTest test = testsCache.get(testKey);
     if (test == null) {
       return null;
     }
 
-    Variant variant = test.assignVariant(playerUuid);
+    var variant = test.assignVariant(playerUuid);
     return variant != null ? variant.getKey() : null;
   }
 
-  /**
-   * Check if a test is active
-   *
-   * @param testKey The test key
-   * @return true if test exists and is active
-   */
+  @Override
   public boolean isTestActive(String testKey) {
     ABTest test = testsCache.get(testKey);
     return test != null && test.isActive();
@@ -142,21 +122,21 @@ public class ABTestManager {
   /**
    * Process a player join event for A/B tests
    *
-   * @param player    The player who joined
+   * @param player The player who joined
    * @param firstJoin Whether this is the player's first join
    */
   public void processJoin(ProxiedPlayer player, boolean firstJoin) {
     ABTest.Trigger trigger = firstJoin ? ABTest.Trigger.FIRST_JOIN : ABTest.Trigger.EVERY_JOIN;
 
-    for (ABTest test : testsCache.values()) {
+    for (net.analyse.sdk.object.abtest.ABTest test : testsCache.values()) {
       if (!test.matchesTrigger(trigger)) {
         continue;
       }
 
       // Assign variant and execute actions
-      Variant variant = test.assignVariant(player.getUniqueId());
+      var variant = test.assignVariant(player.getUniqueId());
       if (variant != null && variant.hasActions()) {
-        executeActions(player, test, variant);
+        executeActions(player, test, (net.analyse.sdk.object.abtest.Variant) variant);
       }
     }
   }
@@ -164,19 +144,19 @@ public class ABTestManager {
   /**
    * Process a custom event for A/B tests
    *
-   * @param player    The player who triggered the event
+   * @param player The player who triggered the event
    * @param eventName The event name
    */
   public void processEvent(ProxiedPlayer player, String eventName) {
-    for (ABTest test : testsCache.values()) {
+    for (net.analyse.sdk.object.abtest.ABTest test : testsCache.values()) {
       if (!test.matchesEvent(eventName)) {
         continue;
       }
 
       // Assign variant and execute actions
-      Variant variant = test.assignVariant(player.getUniqueId());
+      var variant = test.assignVariant(player.getUniqueId());
       if (variant != null && variant.hasActions()) {
-        executeActions(player, test, variant);
+        executeActions(player, test, (net.analyse.sdk.object.abtest.Variant) variant);
       }
     }
   }
@@ -184,11 +164,12 @@ public class ABTestManager {
   /**
    * Execute actions for a variant
    *
-   * @param player  The player
-   * @param test    The A/B test
+   * @param player The player
+   * @param test The A/B test
    * @param variant The assigned variant
    */
-  private void executeActions(ProxiedPlayer player, ABTest test, Variant variant) {
+  private void executeActions(ProxiedPlayer player, net.analyse.sdk.object.abtest.ABTest test,
+                              net.analyse.sdk.object.abtest.Variant variant) {
     if (plugin.isDebugEnabled()) {
       plugin.logInfo(String.format("[DEBUG] Player %s assigned to variant '%s' for test '%s'",
           player.getName(), variant.getKey(), test.getKey()));
@@ -202,16 +183,9 @@ public class ABTestManager {
     }
   }
 
-  /**
-   * Track a conversion event
-   *
-   * @param playerUuid     The player's UUID
-   * @param playerUsername The player's username
-   * @param testKey        The test key
-   * @param eventName      The conversion event name
-   */
+  @Override
   public void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
-    ABTest test = testsCache.get(testKey);
+    net.analyse.sdk.object.abtest.ABTest test = testsCache.get(testKey);
     if (test == null) {
       return;
     }
@@ -221,7 +195,7 @@ public class ABTestManager {
       return;
     }
 
-    Variant variant = test.assignVariant(playerUuid);
+    var variant = test.assignVariant(playerUuid);
     String variantKey = variant != null ? variant.getKey() : null;
 
     ConversionRequest request = new ConversionRequest(

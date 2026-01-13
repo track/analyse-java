@@ -9,7 +9,7 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import net.analyse.api.Analyse;
-import net.analyse.api.EventBuilder;
+import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.bungeecord.AnalyseBungee;
 import net.analyse.bungeecord.util.ComponentUtil;
 import net.md_5.bungee.api.CommandSender;
@@ -140,9 +140,9 @@ public class AnalyseCommand extends BaseCommand {
     // Send the event
     String finalPlayerName = playerName;
     Double finalValue = value;
-    builder.send(response -> {
+    builder.send(success -> {
       plugin.getProxy().getScheduler().runAsync(plugin, () -> {
-        if (response != null && response.isSuccess()) {
+        if (Boolean.TRUE.equals(success)) {
           send(sender, "&a✓ Event '&f" + eventName + "&a' sent successfully");
           if (finalPlayerName != null) {
             send(sender, "  &7Player: &f" + finalPlayerName);

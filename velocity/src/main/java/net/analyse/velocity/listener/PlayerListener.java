@@ -8,7 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
+import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.config.AnalyseConfig;
 import net.analyse.sdk.request.JoinRequest;
 import net.analyse.sdk.request.LeaveRequest;

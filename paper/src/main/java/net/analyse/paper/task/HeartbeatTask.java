@@ -4,7 +4,7 @@ import net.analyse.paper.AnalysePlugin;
 import net.analyse.paper.object.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
+import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.PlayerInfo;
 import net.analyse.sdk.response.HeartbeatResponse;

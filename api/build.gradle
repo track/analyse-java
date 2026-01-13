@@ -1,7 +1,45 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
-dependencies {
-    api project(':sdk')
+// No dependencies - api module is standalone!
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            groupId = 'net.analyse'
+            artifactId = 'analyse-api'
+            version = rootProject.version
+
+            pom {
+                name = 'Analyse API'
+                description = 'Public API for Analyse analytics plugin'
+                url = 'https://analyse.net'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'nexus'
+            def releasesUrl = System.getenv('NEXUS_RELEASES_URL') ?: 'https://nexus.example.com/repository/maven-releases/'
+            def snapshotsUrl = System.getenv('NEXUS_SNAPSHOTS_URL') ?: 'https://nexus.example.com/repository/maven-snapshots/'
+            url = version.toString().endsWith('SNAPSHOT') ? snapshotsUrl : releasesUrl
+
+            credentials {
+                username = System.getenv('NEXUS_USER') ?: ''
+                password = System.getenv('NEXUS_PASS') ?: ''
+            }
+        }
+    }
 }

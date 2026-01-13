@@ -1,5 +1,7 @@
 package net.analyse.sdk;
 
+import net.analyse.api.exception.AnalyseException;
+
 /**
  * Callback interface for async API responses
  *

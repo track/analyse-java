@@ -5,21 +5,17 @@ import net.analyse.sdk.object.action.ActionData;
 import java.util.List;
 
 /**
- * Represents a variant in an A/B test
+ * Concrete implementation of a variant in an A/B test
  */
 @Getter
-public class Variant {
+public class Variant implements net.analyse.api.object.abtest.Variant {
 
   private String key;
   private String name;
   private int weight;
   private List<ActionData> actions;
 
-  /**
-   * Check if this variant has any actions to execute
-   *
-   * @return true if this variant has actions
-   */
+  @Override
   public boolean hasActions() {
     return actions != null && !actions.isEmpty();
   }

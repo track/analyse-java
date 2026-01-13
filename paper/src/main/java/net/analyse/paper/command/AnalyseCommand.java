@@ -9,7 +9,7 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import net.analyse.api.Analyse;
-import net.analyse.api.EventBuilder;
+import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.paper.AnalysePlugin;
 import net.analyse.paper.util.ComponentUtil;
 import org.bukkit.Bukkit;
@@ -36,7 +36,7 @@ public class AnalyseCommand extends BaseCommand {
   @Description("Show plugin status")
   public void onStatus(CommandSender sender) {
     boolean connected = Analyse.isAvailable();
-    int trackedPlayers = plugin.getSessionManager().getActiveSessions().size();
+    int trackedPlayers = plugin.getSessionManager().getSessionCount();
     boolean debugEnabled = plugin.isDebugEnabled();
 
     send(sender, "&8&m                              ");
@@ -148,8 +148,8 @@ public class AnalyseCommand extends BaseCommand {
     // Send the event
     String finalPlayerName = playerName;
     Double finalValue = value;
-    builder.send(response -> {
-      if (response != null && response.isSuccess()) {
+    builder.send(success -> {
+      if (Boolean.TRUE.equals(success)) {
         Bukkit.getScheduler().runTask(plugin, () -> {
           send(sender, "&a✓ Event '&f" + eventName + "&a' sent successfully");
           if (finalPlayerName != null) {

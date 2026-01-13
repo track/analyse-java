@@ -1,11 +1,8 @@
-package net.analyse.sdk;
-
-import lombok.Getter;
+package net.analyse.api.exception;
 
 /**
- * Exception thrown when an API request fails
+ * Exception thrown when an Analyse API operation fails
  */
-@Getter
 public class AnalyseException extends Exception {
 
   private final int statusCode;
@@ -15,7 +12,7 @@ public class AnalyseException extends Exception {
    * Create a new exception with a status code and message
    *
    * @param statusCode The HTTP status code
-   * @param message    The error message
+   * @param message The error message
    */
   public AnalyseException(int statusCode, String message) {
     super(message);
@@ -27,12 +24,30 @@ public class AnalyseException extends Exception {
    * Create a new exception from a throwable
    *
    * @param message The error message
-   * @param cause   The underlying cause
+   * @param cause The underlying cause
    */
   public AnalyseException(String message, Throwable cause) {
     super(message, cause);
     this.statusCode = 0;
     this.errorType = ErrorType.NETWORK_ERROR;
+  }
+
+  /**
+   * Get the HTTP status code
+   *
+   * @return The status code, or 0 if not applicable
+   */
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  /**
+   * Get the error type
+   *
+   * @return The error type
+   */
+  public ErrorType getErrorType() {
+    return errorType;
   }
 
   /**
@@ -92,4 +107,3 @@ public class AnalyseException extends Exception {
     }
   }
 }
-

@@ -1,10 +1,8 @@
-package net.analyse.api;
+package net.analyse.api.object.builder;
 
+import net.analyse.api.Analyse;
+import net.analyse.api.AnalyseProvider;
 import net.analyse.api.platform.AnalysePlatform;
-import net.analyse.sdk.AnalyseCallback;
-import net.analyse.sdk.AnalyseException;
-import net.analyse.sdk.request.EventRequest;
-import net.analyse.sdk.response.EventResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,6 +11,16 @@ import java.util.function.Consumer;
 /**
  * Fluent builder for constructing and sending custom events.
  * Use {@link Analyse#trackEvent(String)} to create a new builder.
+ *
+ * <p>Example:</p>
+ * <pre>{@code
+ * Analyse.trackEvent("purchase")
+ *     .withPlayer(player.getUniqueId(), player.getName())
+ *     .withData("item", "diamond_sword")
+ *     .withData("price", 100)
+ *     .withValue(100.0)
+ *     .send();
+ * }</pre>
  */
 public class EventBuilder {
 
@@ -27,14 +35,14 @@ public class EventBuilder {
    *
    * @param name The event name
    */
-  EventBuilder(String name) {
+  public EventBuilder(String name) {
     this.name = name;
   }
 
   /**
    * Associate this event with a player using UUID and username
    *
-   * @param uuid     The player's UUID
+   * @param uuid The player's UUID
    * @param username The player's username
    * @return This builder for chaining
    */
@@ -58,7 +66,7 @@ public class EventBuilder {
   /**
    * Add a data field to this event
    *
-   * @param key   The field key
+   * @param key The field key
    * @param value The field value
    * @return This builder for chaining
    */
@@ -98,6 +106,51 @@ public class EventBuilder {
   }
 
   /**
+   * Get the event name
+   *
+   * @return The event name
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Get the player UUID
+   *
+   * @return The player UUID, or null if not set
+   */
+  public UUID getPlayerUuid() {
+    return playerUuid;
+  }
+
+  /**
+   * Get the player username
+   *
+   * @return The player username, or null if not set
+   */
+  public String getPlayerUsername() {
+    return playerUsername;
+  }
+
+  /**
+   * Get the event data
+   *
+   * @return The data map, or null if not set
+   */
+  public Map<String, Object> getData() {
+    return data;
+  }
+
+  /**
+   * Get the event value
+   *
+   * @return The value, or null if not set
+   */
+  public Double getValue() {
+    return value;
+  }
+
+  /**
    * Send the event (fire and forget)
    */
   public void send() {
@@ -105,49 +158,36 @@ public class EventBuilder {
   }
 
   /**
-   * Send the event with a callback for the response
+   * Send the event with a callback for success/failure
    *
-   * @param callback Optional callback to receive the response
+   * @param callback Optional callback to receive success (true) or failure (false)
    */
-  public void send(Consumer<EventResponse> callback) {
+  public void send(Consumer<Boolean> callback) {
     AnalysePlatform platform = AnalyseProvider.getPlatform();
     if (platform == null) {
       throw new IllegalStateException("Analyse is not initialized. Make sure the Analyse plugin is enabled.");
     }
 
-    if (platform.getClient() == null) {
-      throw new IllegalStateException("Analyse client is not available. Check your configuration.");
+    // Delegate to internal sender - this will be set by the platform implementation
+    EventSender sender = Analyse.getEventSender();
+    if (sender == null) {
+      throw new IllegalStateException("Analyse event sender is not available. Check your configuration.");
     }
 
-    // Check A/B test ON_EVENT triggers if player is associated
-    if (playerUuid != null) {
-      platform.processEventTrigger(playerUuid, name);
-    }
+    sender.send(this, callback);
+  }
 
-    EventRequest request = new EventRequest(name, playerUuid, playerUsername, data, value);
+  /**
+   * Internal interface for sending events - implemented by platform plugins
+   */
+  public interface EventSender {
 
-    platform.getClient().trackEvent(request, new AnalyseCallback<>() {
-      @Override
-      public void onSuccess(EventResponse response) {
-        if (platform.isDebugEnabled()) {
-          platform.logInfo(String.format("[DEBUG] Event '%s' tracked successfully (id: %s)",
-              name, response.getEventId()));
-        }
-
-        if (callback != null) {
-          callback.accept(response);
-        }
-      }
-
-      @Override
-      public void onError(AnalyseException exception) {
-        platform.logWarning(String.format("Failed to track event '%s': %s",
-            name, exception.getMessage()));
-
-        if (callback != null) {
-          callback.accept(null);
-        }
-      }
-    });
+    /**
+     * Send an event
+     *
+     * @param event The event builder with all data
+     * @param callback Optional callback for result
+     */
+    void send(EventBuilder event, Consumer<Boolean> callback);
   }
 }

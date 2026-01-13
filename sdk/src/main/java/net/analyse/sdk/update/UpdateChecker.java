@@ -3,7 +3,7 @@ package net.analyse.sdk.update;
 import lombok.Getter;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
+import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.response.VersionResponse;
 
 /**

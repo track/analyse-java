@@ -3,7 +3,7 @@ package net.analyse.sdk.http;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.analyse.sdk.AnalyseCallback;
-import net.analyse.sdk.AnalyseException;
+import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.config.AnalyseConfig;
 import okhttp3.Call;
 import okhttp3.Callback;

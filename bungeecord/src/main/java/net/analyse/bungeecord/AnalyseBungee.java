@@ -1,8 +1,10 @@
 package net.analyse.bungeecord;
 
 import co.aikar.commands.BungeeCommandManager;
-import lombok.Getter;
+import net.analyse.api.Analyse;
 import net.analyse.api.AnalyseProvider;
+import net.analyse.api.exception.AnalyseException;
+import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
 import net.analyse.bungeecord.manager.ABTestManager;
 import net.analyse.bungeecord.command.AnalyseCommand;
@@ -11,21 +13,21 @@ import net.analyse.bungeecord.listener.PlayerListener;
 import net.analyse.bungeecord.manager.SessionManager;
 import net.analyse.bungeecord.task.HeartbeatTask;
 import net.analyse.bungeecord.update.BungeeUpdateChecker;
+import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.object.abtest.ABTest;
+import net.analyse.sdk.request.EventRequest;
+import net.analyse.sdk.response.EventResponse;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Analyse plugin for BungeeCord proxy
  */
-@Getter
 public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
   private static final int HEARTBEAT_INTERVAL_SECONDS = 30;
@@ -57,6 +59,9 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
     if (playerListener.getDefaultClient() != null) {
       AnalyseProvider.register(this);
 
+      // Set up the event sender for Analyse.trackEvent()
+      Analyse.setEventSender(this::sendEvent);
+
       // Initialize A/B test manager
       abTestManager = new ABTestManager(this);
       abTestManager.start();
@@ -80,6 +85,63 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
     getLogger().info(String.format("Analyse initialized with %d server(s) configured",
         pluginConfig.getServers().size()));
+  }
+
+  /**
+   * Send an event via the SDK
+   *
+   * @param event The event builder
+   * @param callback Optional callback for result
+   */
+  private void sendEvent(EventBuilder event, Consumer<Boolean> callback) {
+    AnalyseClient client = getClient();
+    if (client == null) {
+      if (callback != null) {
+        callback.accept(false);
+      }
+      return;
+    }
+
+    // Process A/B test ON_EVENT triggers if player is associated
+    if (event.getPlayerUuid() != null && abTestManager != null) {
+      ProxiedPlayer player = getProxy().getPlayer(event.getPlayerUuid());
+      if (player != null) {
+        abTestManager.processEvent(player, event.getName());
+      }
+    }
+
+    // Send to API
+    EventRequest request = new EventRequest(
+        event.getName(),
+        event.getPlayerUuid(),
+        event.getPlayerUsername(),
+        event.getData(),
+        event.getValue()
+    );
+
+    client.trackEvent(request, new AnalyseCallback<>() {
+      @Override
+      public void onSuccess(EventResponse response) {
+        if (isDebugEnabled()) {
+          logInfo(String.format("[DEBUG] Event '%s' tracked successfully (id: %s)",
+              event.getName(), response.getEventId()));
+        }
+
+        if (callback != null) {
+          callback.accept(true);
+        }
+      }
+
+      @Override
+      public void onError(AnalyseException exception) {
+        logWarning(String.format("Failed to track event '%s': %s",
+            event.getName(), exception.getMessage()));
+
+        if (callback != null) {
+          callback.accept(false);
+        }
+      }
+    });
   }
 
   /**
@@ -124,6 +186,9 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
     // Unregister from the API provider
     AnalyseProvider.unregister();
+
+    // Clear the event sender
+    Analyse.setEventSender(null);
 
     // Stop A/B test manager
     if (abTestManager != null) {
@@ -201,9 +266,16 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
     }
   }
 
+  // ========== AnalysePlatform Interface Methods ==========
+
   @Override
-  public AnalyseClient getClient() {
-    return playerListener != null ? playerListener.getDefaultClient() : null;
+  public SessionManager getSessionManager() {
+    return sessionManager;
+  }
+
+  @Override
+  public ABTestManager getABTestManager() {
+    return abTestManager;
   }
 
   @Override
@@ -222,41 +294,45 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
   }
 
   @Override
-  public List<ABTest> getActiveTests() {
-    return abTestManager != null ? abTestManager.getActiveTests() : List.of();
+  public String getVersion() {
+    return getDescription().getVersion();
   }
 
-  @Override
-  public ABTest getTest(String testKey) {
-    return abTestManager != null ? abTestManager.getTest(testKey) : null;
+  // ========== Internal Getters ==========
+
+  /**
+   * Get the plugin configuration
+   *
+   * @return The plugin config
+   */
+  public AnalyseBungeeConfig getPluginConfig() {
+    return pluginConfig;
   }
 
-  @Override
-  public String getVariant(UUID playerUuid, String testKey) {
-    return abTestManager != null ? abTestManager.getVariant(playerUuid, testKey) : null;
+  /**
+   * Get the SDK client (from player listener)
+   *
+   * @return The Analyse client, or null
+   */
+  public AnalyseClient getClient() {
+    return playerListener != null ? playerListener.getDefaultClient() : null;
   }
 
-  @Override
-  public boolean isTestActive(String testKey) {
-    return abTestManager != null && abTestManager.isTestActive(testKey);
+  /**
+   * Get the player listener
+   *
+   * @return The player listener
+   */
+  public PlayerListener getPlayerListener() {
+    return playerListener;
   }
 
-  @Override
-  public void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
-    if (abTestManager != null) {
-      abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
-    }
-  }
-
-  @Override
-  public void processEventTrigger(UUID playerUuid, String eventName) {
-    if (abTestManager == null) {
-      return;
-    }
-
-    ProxiedPlayer player = getProxy().getPlayer(playerUuid);
-    if (player != null) {
-      abTestManager.processEvent(player, eventName);
-    }
+  /**
+   * Get the update checker
+   *
+   * @return The update checker
+   */
+  public BungeeUpdateChecker getUpdateChecker() {
+    return updateChecker;
   }
 }

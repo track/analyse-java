@@ -5,7 +5,7 @@ import net.analyse.paper.manager.SessionManager;
 import net.analyse.paper.object.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
+import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.request.JoinRequest;
 import net.analyse.sdk.request.LeaveRequest;
 import net.analyse.sdk.response.JoinResponse;
@@ -104,8 +104,8 @@ public class PlayerListener implements Listener {
 
     // Process A/B tests for this join
     boolean firstJoin = !player.hasPlayedBefore();
-    if (plugin.getAbTestManager() != null) {
-      plugin.getAbTestManager().processJoin(player, firstJoin);
+    if (plugin.getABTestManager() != null) {
+      plugin.getABTestManager().processJoin(player, firstJoin);
     }
 
     // Notify admins about updates on join

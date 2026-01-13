@@ -11,7 +11,7 @@ import co.aikar.commands.annotation.Syntax;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.analyse.api.Analyse;
-import net.analyse.api.EventBuilder;
+import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.velocity.AnalyseVelocity;
 import net.analyse.velocity.util.ComponentUtil;
 import java.util.HashMap;
@@ -140,8 +140,8 @@ public class AnalyseCommand extends BaseCommand {
     // Send the event
     String finalPlayerName = playerName;
     Double finalValue = value;
-    builder.send(response -> {
-      if (response != null && response.isSuccess()) {
+    builder.send(success -> {
+      if (Boolean.TRUE.equals(success)) {
         send(sender, "&a✓ Event '&f" + eventName + "&a' sent successfully");
         if (finalPlayerName != null) {
           send(sender, "  &7Player: &f" + finalPlayerName);

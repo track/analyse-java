@@ -5,7 +5,7 @@ import net.analyse.bungeecord.listener.PlayerListener;
 import net.analyse.bungeecord.object.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
+import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.PlayerInfo;
 import net.analyse.sdk.response.HeartbeatResponse;

@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
+    api project(':api')
     api "com.google.code.gson:gson:${project.property('gsonVersion')}"
     api "com.squareup.okhttp3:okhttp:${project.property('okhttpVersion')}"
     compileOnly 'org.jetbrains:annotations:24.1.0'
 }
-

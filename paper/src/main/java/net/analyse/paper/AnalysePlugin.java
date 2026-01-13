@@ -1,8 +1,10 @@
 package net.analyse.paper;
 
 import co.aikar.commands.PaperCommandManager;
-import lombok.Getter;
+import net.analyse.api.Analyse;
 import net.analyse.api.AnalyseProvider;
+import net.analyse.api.exception.AnalyseException;
+import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
 import net.analyse.paper.manager.ABTestManager;
 import net.analyse.paper.command.AnalyseCommand;
@@ -13,22 +15,21 @@ import net.analyse.paper.task.HeartbeatTask;
 import net.analyse.paper.update.PaperUpdateChecker;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.AnalyseException;
-import net.analyse.sdk.object.abtest.ABTest;
 import net.analyse.sdk.config.AnalyseConfig;
+import net.analyse.sdk.request.EventRequest;
 import net.analyse.sdk.request.JoinRequest;
+import net.analyse.sdk.response.EventResponse;
 import net.analyse.sdk.response.JoinResponse;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Analyse plugin for Paper/Spigot/Bukkit servers
  */
-@Getter
 public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
 
   private AnalysePaperConfig pluginConfig;
@@ -71,8 +72,11 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     AnalyseConfig sdkConfig = new AnalyseConfig(pluginConfig.getApiKey());
     client = new AnalyseClient(sdkConfig);
 
-    // Register with the API provider so other plugins can use Analyse.trackEvent()
+    // Register with the API provider so other plugins can use Analyse.get()
     AnalyseProvider.register(this);
+
+    // Set up the event sender for Analyse.trackEvent()
+    Analyse.setEventSender(this::sendEvent);
 
     // Initialize session manager
     sessionManager = new SessionManager();
@@ -105,6 +109,55 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     initializeOnlinePlayers();
 
     getLogger().info("Analyse enabled successfully!");
+  }
+
+  /**
+   * Send an event via the SDK
+   *
+   * @param event The event builder
+   * @param callback Optional callback for result
+   */
+  private void sendEvent(EventBuilder event, Consumer<Boolean> callback) {
+    // Process A/B test ON_EVENT triggers if player is associated
+    if (event.getPlayerUuid() != null && abTestManager != null) {
+      Player player = getServer().getPlayer(event.getPlayerUuid());
+      if (player != null) {
+        abTestManager.processEvent(player, event.getName());
+      }
+    }
+
+    // Send to API
+    EventRequest request = new EventRequest(
+        event.getName(),
+        event.getPlayerUuid(),
+        event.getPlayerUsername(),
+        event.getData(),
+        event.getValue()
+    );
+
+    client.trackEvent(request, new AnalyseCallback<>() {
+      @Override
+      public void onSuccess(EventResponse response) {
+        if (isDebugEnabled()) {
+          logInfo(String.format("[DEBUG] Event '%s' tracked successfully (id: %s)",
+              event.getName(), response.getEventId()));
+        }
+
+        if (callback != null) {
+          callback.accept(true);
+        }
+      }
+
+      @Override
+      public void onError(AnalyseException exception) {
+        logWarning(String.format("Failed to track event '%s': %s",
+            event.getName(), exception.getMessage()));
+
+        if (callback != null) {
+          callback.accept(false);
+        }
+      }
+    });
   }
 
   /**
@@ -170,6 +223,9 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     // Unregister from the API provider
     AnalyseProvider.unregister();
 
+    // Clear the event sender
+    Analyse.setEventSender(null);
+
     // Stop A/B test manager
     if (abTestManager != null) {
       abTestManager.stop();
@@ -216,6 +272,18 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     }
   }
 
+  // ========== AnalysePlatform Interface Methods ==========
+
+  @Override
+  public SessionManager getSessionManager() {
+    return sessionManager;
+  }
+
+  @Override
+  public ABTestManager getABTestManager() {
+    return abTestManager;
+  }
+
   @Override
   public boolean isDebugEnabled() {
     return pluginConfig != null && pluginConfig.isDebug();
@@ -232,41 +300,36 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
   }
 
   @Override
-  public List<ABTest> getActiveTests() {
-    return abTestManager != null ? abTestManager.getActiveTests() : List.of();
+  public String getVersion() {
+    return getDescription().getVersion();
   }
 
-  @Override
-  public ABTest getTest(String testKey) {
-    return abTestManager != null ? abTestManager.getTest(testKey) : null;
+  // ========== Internal Getters ==========
+
+  /**
+   * Get the plugin configuration
+   *
+   * @return The plugin config
+   */
+  public AnalysePaperConfig getPluginConfig() {
+    return pluginConfig;
   }
 
-  @Override
-  public String getVariant(UUID playerUuid, String testKey) {
-    return abTestManager != null ? abTestManager.getVariant(playerUuid, testKey) : null;
+  /**
+   * Get the SDK client
+   *
+   * @return The Analyse client
+   */
+  public AnalyseClient getClient() {
+    return client;
   }
 
-  @Override
-  public boolean isTestActive(String testKey) {
-    return abTestManager != null && abTestManager.isTestActive(testKey);
-  }
-
-  @Override
-  public void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
-    if (abTestManager != null) {
-      abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
-    }
-  }
-
-  @Override
-  public void processEventTrigger(UUID playerUuid, String eventName) {
-    if (abTestManager == null) {
-      return;
-    }
-
-    Player player = getServer().getPlayer(playerUuid);
-    if (player != null) {
-      abTestManager.processEvent(player, eventName);
-    }
+  /**
+   * Get the update checker
+   *
+   * @return The update checker
+   */
+  public PaperUpdateChecker getUpdateChecker() {
+    return updateChecker;
   }
 }

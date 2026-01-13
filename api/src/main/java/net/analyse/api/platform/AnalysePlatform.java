@@ -1,24 +1,36 @@
 package net.analyse.api.platform;
 
-import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.object.abtest.ABTest;
-import net.analyse.sdk.object.abtest.Variant;
-import java.util.List;
-import java.util.UUID;
+import net.analyse.api.manager.ABTestManager;
+import net.analyse.api.manager.SessionManager;
 
 /**
  * Interface for platform-specific plugin implementations.
  * Each platform (Paper, BungeeCord, Velocity) implements this to provide
- * access to the SDK client and logging.
+ * access to managers and logging.
+ *
+ * <p>Other plugins should use {@link net.analyse.api.Analyse} for most operations,
+ * but can access this interface for advanced functionality:</p>
+ * <pre>{@code
+ * AnalysePlatform platform = Analyse.get();
+ * SessionManager sessions = platform.getSessionManager();
+ * ABTestManager abTests = platform.getABTestManager();
+ * }</pre>
  */
 public interface AnalysePlatform {
 
   /**
-   * Get the SDK client for API communication
+   * Get the session manager for accessing player sessions
    *
-   * @return The Analyse SDK client
+   * @return The session manager
    */
-  AnalyseClient getClient();
+  SessionManager getSessionManager();
+
+  /**
+   * Get the A/B test manager for accessing tests and variants
+   *
+   * @return The A/B test manager, or null if not available
+   */
+  ABTestManager getABTestManager();
 
   /**
    * Check if debug mode is enabled
@@ -42,73 +54,9 @@ public interface AnalysePlatform {
   void logWarning(String message);
 
   /**
-   * Get all active A/B tests
+   * Get the plugin version
    *
-   * @return List of active A/B tests, or empty list if none
+   * @return The version string
    */
-  default List<ABTest> getActiveTests() {
-    return List.of();
-  }
-
-  /**
-   * Get an A/B test by its key
-   *
-   * @param testKey The test key
-   * @return The A/B test, or null if not found
-   */
-  default ABTest getTest(String testKey) {
-    return null;
-  }
-
-  /**
-   * Get the variant assigned to a player for a specific test.
-   * This is deterministic - the same player always gets the same variant.
-   *
-   * @param playerUuid The player's UUID
-   * @param testKey    The test key
-   * @return The assigned variant key, or null if test not found/inactive
-   */
-  default String getVariant(UUID playerUuid, String testKey) {
-    ABTest test = getTest(testKey);
-    if (test == null || !test.isActive()) {
-      return null;
-    }
-
-    Variant variant = test.assignVariant(playerUuid);
-    return variant != null ? variant.getKey() : null;
-  }
-
-  /**
-   * Check if a test is active
-   *
-   * @param testKey The test key
-   * @return true if the test exists and is active
-   */
-  default boolean isTestActive(String testKey) {
-    ABTest test = getTest(testKey);
-    return test != null && test.isActive();
-  }
-
-  /**
-   * Track a conversion event for an A/B test
-   *
-   * @param playerUuid     The player's UUID
-   * @param playerUsername The player's username
-   * @param testKey        The test key
-   * @param eventName      The conversion event name
-   */
-  default void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
-    // Default implementation does nothing - platforms override this
-  }
-
-  /**
-   * Process a custom event for A/B test triggers.
-   * Called when an event is tracked to check for ON_EVENT triggers.
-   *
-   * @param playerUuid The player's UUID
-   * @param eventName  The event name
-   */
-  default void processEventTrigger(UUID playerUuid, String eventName) {
-    // Default implementation does nothing - platforms override this
-  }
+  String getVersion();
 }

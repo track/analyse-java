@@ -1,6 +1,10 @@
 package net.analyse.api;
 
-import net.analyse.sdk.object.abtest.ABTest;
+import net.analyse.api.manager.ABTestManager;
+import net.analyse.api.manager.SessionManager;
+import net.analyse.api.object.abtest.ABTest;
+import net.analyse.api.object.builder.EventBuilder;
+import net.analyse.api.platform.AnalysePlatform;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,11 +35,45 @@ import java.util.UUID;
  * // Track a conversion event
  * Analyse.trackConversion(player.getUniqueId(), player.getName(), "welcome-rewards", "first_purchase");
  * }</pre>
+ *
+ * <p>Accessing managers:</p>
+ * <pre>{@code
+ * // Get the platform for advanced usage
+ * AnalysePlatform platform = Analyse.get();
+ * SessionManager sessions = platform.getSessionManager();
+ * ABTestManager abTests = platform.getABTestManager();
+ * }</pre>
  */
 public final class Analyse {
 
+  private static EventBuilder.EventSender eventSender;
+
   private Analyse() {
-    // Prevent instantiation
+  }
+
+  /**
+   * Get the Analyse platform instance for advanced usage.
+   * Use this to access managers and platform-specific functionality.
+   *
+   * @return The platform instance
+   * @throws IllegalStateException if Analyse is not initialized
+   */
+  public static AnalysePlatform get() {
+    AnalysePlatform platform = AnalyseProvider.getPlatform();
+    if (platform == null) {
+      throw new IllegalStateException("Analyse is not initialized. Make sure the Analyse plugin is enabled.");
+    }
+
+    return platform;
+  }
+
+  /**
+   * Check if Analyse is available and ready to use
+   *
+   * @return true if Analyse is initialized and ready
+   */
+  public static boolean isAvailable() {
+    return AnalyseProvider.isRegistered();
   }
 
   /**
@@ -54,18 +92,9 @@ public final class Analyse {
   }
 
   /**
-   * Check if Analyse is available and ready to track events
-   *
-   * @return true if Analyse is initialized and ready
-   */
-  public static boolean isAvailable() {
-    return AnalyseProvider.isRegistered() && AnalyseProvider.getPlatform().getClient() != null;
-  }
-
-  /**
    * Convenience method to quickly track an event with a player
    *
-   * @param name     The event name
+   * @param name The event name
    * @param playerUuid The player's UUID
    * @param playerUsername The player's username
    * @return An EventBuilder for further configuration
@@ -91,18 +120,8 @@ public final class Analyse {
    * Get the variant assigned to a player for a specific A/B test.
    * This is deterministic - the same player always gets the same variant.
    *
-   * <p>Example:</p>
-   * <pre>{@code
-   * String variant = Analyse.getVariant(player.getUniqueId(), "welcome-rewards");
-   * switch (variant) {
-   *     case "control" -> { }
-   *     case "diamonds" -> giveWelcomeDiamonds(player);
-   *     case "tutorial" -> startTutorial(player);
-   * }
-   * }</pre>
-   *
    * @param playerUuid The player's UUID
-   * @param testKey    The A/B test key
+   * @param testKey The A/B test key
    * @return The assigned variant key, or null if test not found or inactive
    */
   public static String getVariant(UUID playerUuid, String testKey) {
@@ -110,7 +129,8 @@ public final class Analyse {
       return null;
     }
 
-    return AnalyseProvider.getPlatform().getVariant(playerUuid, testKey);
+    ABTestManager manager = get().getABTestManager();
+    return manager != null ? manager.getVariant(playerUuid, testKey) : null;
   }
 
   /**
@@ -124,7 +144,8 @@ public final class Analyse {
       return false;
     }
 
-    return AnalyseProvider.getPlatform().isTestActive(testKey);
+    ABTestManager manager = get().getABTestManager();
+    return manager != null && manager.isTestActive(testKey);
   }
 
   /**
@@ -132,12 +153,13 @@ public final class Analyse {
    *
    * @return List of active A/B tests, or empty list if none
    */
-  public static List<ABTest> getActiveTests() {
+  public static List<? extends ABTest> getActiveTests() {
     if (!isAvailable()) {
       return List.of();
     }
 
-    return AnalyseProvider.getPlatform().getActiveTests();
+    ABTestManager manager = get().getABTestManager();
+    return manager != null ? manager.getActiveTests() : List.of();
   }
 
   /**
@@ -151,29 +173,69 @@ public final class Analyse {
       return null;
     }
 
-    return AnalyseProvider.getPlatform().getTest(testKey);
+    ABTestManager manager = get().getABTestManager();
+    return manager != null ? manager.getTest(testKey) : null;
   }
 
   /**
    * Track a conversion event for an A/B test.
    * This records that a player completed a desired action.
    *
-   * <p>Example:</p>
-   * <pre>{@code
-   * // Track when a player makes their first purchase
-   * Analyse.trackConversion(player.getUniqueId(), player.getName(), "welcome-rewards", "first_purchase");
-   * }</pre>
-   *
-   * @param playerUuid     The player's UUID
+   * @param playerUuid The player's UUID
    * @param playerUsername The player's username
-   * @param testKey        The A/B test key
-   * @param eventName      The conversion event name
+   * @param testKey The A/B test key
+   * @param eventName The conversion event name
    */
   public static void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
     if (!isAvailable()) {
       return;
     }
 
-    AnalyseProvider.getPlatform().trackConversion(playerUuid, playerUsername, testKey, eventName);
+    ABTestManager manager = get().getABTestManager();
+    if (manager != null) {
+      manager.trackConversion(playerUuid, playerUsername, testKey, eventName);
+    }
+  }
+
+  // ========== Manager Shortcuts ==========
+
+  /**
+   * Get the session manager
+   *
+   * @return The session manager
+   * @throws IllegalStateException if Analyse is not initialized
+   */
+  public static SessionManager sessions() {
+    return get().getSessionManager();
+  }
+
+  /**
+   * Get the A/B test manager
+   *
+   * @return The A/B test manager, or null if not available
+   * @throws IllegalStateException if Analyse is not initialized
+   */
+  public static ABTestManager abTests() {
+    return get().getABTestManager();
+  }
+
+  // ========== Internal Methods (for platform implementations) ==========
+
+  /**
+   * Set the event sender. Called by platform implementations.
+   *
+   * @param sender The event sender
+   */
+  public static void setEventSender(EventBuilder.EventSender sender) {
+    eventSender = sender;
+  }
+
+  /**
+   * Get the event sender
+   *
+   * @return The event sender, or null if not set
+   */
+  public static EventBuilder.EventSender getEventSender() {
+    return eventSender;
   }
 }

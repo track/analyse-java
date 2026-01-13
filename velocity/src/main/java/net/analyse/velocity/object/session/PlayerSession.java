@@ -1,34 +1,41 @@
 package net.analyse.velocity.object.session;
 
 import lombok.Getter;
+import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Stores session data for a connected player
  */
 @Getter
-public class PlayerSession {
+public class PlayerSession implements net.analyse.api.session.PlayerSession {
 
+  private final UUID playerUuid;
   private final String hostname;
   private final String ip;
+  private final Instant joinTime;
   private String currentServer;
   private String sessionId;
 
   /**
    * Create a new player session
    *
+   * @param playerUuid The player's UUID
    * @param hostname The hostname the player used to connect
-   * @param ip       The player's IP address
+   * @param ip The player's IP address
    */
-  public PlayerSession(String hostname, String ip) {
+  public PlayerSession(UUID playerUuid, String hostname, String ip) {
+    this.playerUuid = playerUuid;
     this.hostname = hostname;
     this.ip = ip;
+    this.joinTime = Instant.now();
   }
 
   /**
    * Update the current server and session ID after a join
    *
    * @param serverName The name of the server the player joined
-   * @param sessionId  The session ID from the API response
+   * @param sessionId The session ID from the API response
    */
   public void setCurrentSession(String serverName, String sessionId) {
     this.currentServer = serverName;
@@ -43,11 +50,7 @@ public class PlayerSession {
     this.sessionId = null;
   }
 
-  /**
-   * Check if the player has an active session
-   *
-   * @return true if the player has a session ID
-   */
+  @Override
   public boolean hasActiveSession() {
     return sessionId != null && !sessionId.isBlank();
   }

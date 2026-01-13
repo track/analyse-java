@@ -1,26 +1,33 @@
 package net.analyse.paper.object.session;
 
 import lombok.Getter;
+import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Stores session data for a connected player
  */
 @Getter
-public class PlayerSession {
+public class PlayerSession implements net.analyse.api.session.PlayerSession {
 
+  private final UUID playerUuid;
   private final String hostname;
   private final String ip;
+  private final Instant joinTime;
   private String sessionId;
 
   /**
    * Create a new player session
    *
+   * @param playerUuid The player's UUID
    * @param hostname The hostname the player used to connect
-   * @param ip       The player's IP address
+   * @param ip The player's IP address
    */
-  public PlayerSession(String hostname, String ip) {
+  public PlayerSession(UUID playerUuid, String hostname, String ip) {
+    this.playerUuid = playerUuid;
     this.hostname = hostname;
     this.ip = ip;
+    this.joinTime = Instant.now();
   }
 
   /**
@@ -32,11 +39,7 @@ public class PlayerSession {
     this.sessionId = sessionId;
   }
 
-  /**
-   * Check if the player has an active session
-   *
-   * @return true if the player has a session ID
-   */
+  @Override
   public boolean hasActiveSession() {
     return sessionId != null && !sessionId.isBlank();
   }

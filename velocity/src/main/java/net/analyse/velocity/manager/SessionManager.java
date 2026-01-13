@@ -1,6 +1,7 @@
 package net.analyse.velocity.manager;
 
 import net.analyse.velocity.object.session.PlayerSession;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,30 +10,25 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Thread-safe manager for player sessions
  */
-public class SessionManager {
+public class SessionManager implements net.analyse.api.manager.SessionManager {
 
   private final Map<UUID, PlayerSession> sessions = new ConcurrentHashMap<>();
 
   /**
    * Create a new session for a player
    *
-   * @param uuid     The player's UUID
+   * @param uuid The player's UUID
    * @param hostname The hostname the player used to connect
-   * @param ip       The player's IP address
+   * @param ip The player's IP address
    * @return The created session
    */
   public PlayerSession createSession(UUID uuid, String hostname, String ip) {
-    PlayerSession session = new PlayerSession(hostname, ip);
+    PlayerSession session = new PlayerSession(uuid, hostname, ip);
     sessions.put(uuid, session);
     return session;
   }
 
-  /**
-   * Get a player's session
-   *
-   * @param uuid The player's UUID
-   * @return The session, or empty if not found
-   */
+  @Override
   public Optional<PlayerSession> getSession(UUID uuid) {
     return Optional.ofNullable(sessions.get(uuid));
   }
@@ -47,21 +43,17 @@ public class SessionManager {
     return Optional.ofNullable(sessions.remove(uuid));
   }
 
-  /**
-   * Check if a player has a session
-   *
-   * @param uuid The player's UUID
-   * @return true if the player has a session
-   */
+  @Override
   public boolean hasSession(UUID uuid) {
     return sessions.containsKey(uuid);
   }
 
-  /**
-   * Get the number of active sessions
-   *
-   * @return The session count
-   */
+  @Override
+  public Collection<PlayerSession> getAllSessions() {
+    return sessions.values();
+  }
+
+  @Override
   public int getSessionCount() {
     return sessions.size();
   }

@@ -11,11 +11,15 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import co.aikar.commands.VelocityCommandManager;
-import lombok.Getter;
+import net.analyse.api.Analyse;
 import net.analyse.api.AnalyseProvider;
+import net.analyse.api.exception.AnalyseException;
+import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
+import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.object.abtest.ABTest;
+import net.analyse.sdk.request.EventRequest;
+import net.analyse.sdk.response.EventResponse;
 import net.analyse.velocity.command.AnalyseCommand;
 import net.analyse.velocity.config.AnalyseVelocityConfig;
 import net.analyse.velocity.listener.PlayerListener;
@@ -27,9 +31,8 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Analyse plugin for Velocity proxy
@@ -37,11 +40,10 @@ import java.util.concurrent.TimeUnit;
 @Plugin(
     id = "analyse",
     name = "Analyse",
-    version = "0.1.0",
+    version = "0.2.0",
     description = "Analytics tracking plugin for Minecraft servers",
     authors = {"VertCode"}
 )
-@Getter
 public class AnalyseVelocity implements AnalysePlatform {
 
   private final ProxyServer server;
@@ -82,6 +84,9 @@ public class AnalyseVelocity implements AnalysePlatform {
     if (playerListener.getDefaultClient() != null) {
       AnalyseProvider.register(this);
 
+      // Set up the event sender for Analyse.trackEvent()
+      Analyse.setEventSender(this::sendEvent);
+
       // Initialize A/B test manager
       abTestManager = new ABTestManager(this);
       abTestManager.start();
@@ -96,7 +101,7 @@ public class AnalyseVelocity implements AnalysePlatform {
 
     // Initialize update checker (only if we have a default client)
     if (playerListener.getDefaultClient() != null) {
-      updateChecker = new VelocityUpdateChecker(this, "0.1.0");
+      updateChecker = new VelocityUpdateChecker(this, "0.2.0");
       updateChecker.start();
     }
 
@@ -105,6 +110,62 @@ public class AnalyseVelocity implements AnalysePlatform {
 
     logger.info(String.format("Analyse initialized with %d server(s) configured",
         pluginConfig.getServers().size()));
+  }
+
+  /**
+   * Send an event via the SDK
+   *
+   * @param event The event builder
+   * @param callback Optional callback for result
+   */
+  private void sendEvent(EventBuilder event, Consumer<Boolean> callback) {
+    AnalyseClient client = getClient();
+    if (client == null) {
+      if (callback != null) {
+        callback.accept(false);
+      }
+      return;
+    }
+
+    // Process A/B test ON_EVENT triggers if player is associated
+    if (event.getPlayerUuid() != null && abTestManager != null) {
+      server.getPlayer(event.getPlayerUuid()).ifPresent(player -> {
+        abTestManager.processEvent(player, event.getName());
+      });
+    }
+
+    // Send to API
+    EventRequest request = new EventRequest(
+        event.getName(),
+        event.getPlayerUuid(),
+        event.getPlayerUsername(),
+        event.getData(),
+        event.getValue()
+    );
+
+    client.trackEvent(request, new AnalyseCallback<>() {
+      @Override
+      public void onSuccess(EventResponse response) {
+        if (isDebugEnabled()) {
+          logInfo(String.format("[DEBUG] Event '%s' tracked successfully (id: %s)",
+              event.getName(), response.getEventId()));
+        }
+
+        if (callback != null) {
+          callback.accept(true);
+        }
+      }
+
+      @Override
+      public void onError(AnalyseException exception) {
+        logWarning(String.format("Failed to track event '%s': %s",
+            event.getName(), exception.getMessage()));
+
+        if (callback != null) {
+          callback.accept(false);
+        }
+      }
+    });
   }
 
   /**
@@ -179,6 +240,9 @@ public class AnalyseVelocity implements AnalysePlatform {
 
     // Unregister from the API provider
     AnalyseProvider.unregister();
+
+    // Clear the event sender
+    Analyse.setEventSender(null);
 
     // Stop A/B test manager
     if (abTestManager != null) {
@@ -258,9 +322,16 @@ public class AnalyseVelocity implements AnalysePlatform {
     }
   }
 
+  // ========== AnalysePlatform Interface Methods ==========
+
   @Override
-  public AnalyseClient getClient() {
-    return playerListener != null ? playerListener.getDefaultClient() : null;
+  public SessionManager getSessionManager() {
+    return sessionManager;
+  }
+
+  @Override
+  public ABTestManager getABTestManager() {
+    return abTestManager;
   }
 
   @Override
@@ -279,40 +350,63 @@ public class AnalyseVelocity implements AnalysePlatform {
   }
 
   @Override
-  public List<ABTest> getActiveTests() {
-    return abTestManager != null ? abTestManager.getActiveTests() : List.of();
+  public String getVersion() {
+    return "0.1.0";
   }
 
-  @Override
-  public ABTest getTest(String testKey) {
-    return abTestManager != null ? abTestManager.getTest(testKey) : null;
+  // ========== Internal Getters ==========
+
+  /**
+   * Get the proxy server
+   *
+   * @return The proxy server
+   */
+  public ProxyServer getServer() {
+    return server;
   }
 
-  @Override
-  public String getVariant(UUID playerUuid, String testKey) {
-    return abTestManager != null ? abTestManager.getVariant(playerUuid, testKey) : null;
+  /**
+   * Get the logger
+   *
+   * @return The logger
+   */
+  public Logger getLogger() {
+    return logger;
   }
 
-  @Override
-  public boolean isTestActive(String testKey) {
-    return abTestManager != null && abTestManager.isTestActive(testKey);
+  /**
+   * Get the plugin configuration
+   *
+   * @return The plugin config
+   */
+  public AnalyseVelocityConfig getPluginConfig() {
+    return pluginConfig;
   }
 
-  @Override
-  public void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
-    if (abTestManager != null) {
-      abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
-    }
+  /**
+   * Get the SDK client (from player listener)
+   *
+   * @return The Analyse client, or null
+   */
+  public AnalyseClient getClient() {
+    return playerListener != null ? playerListener.getDefaultClient() : null;
   }
 
-  @Override
-  public void processEventTrigger(UUID playerUuid, String eventName) {
-    if (abTestManager == null) {
-      return;
-    }
+  /**
+   * Get the player listener
+   *
+   * @return The player listener
+   */
+  public PlayerListener getPlayerListener() {
+    return playerListener;
+  }
 
-    server.getPlayer(playerUuid).ifPresent(player -> {
-      abTestManager.processEvent(player, eventName);
-    });
+  /**
+   * Get the update checker
+   *
+   * @return The update checker
+   */
+  public VelocityUpdateChecker getUpdateChecker() {
+    return updateChecker;
   }
 }
