@@ -17,7 +17,8 @@ Analyse is a comprehensive analytics plugin for Minecraft servers. It provides:
 
 - **Player Session Tracking** - Automatically tracks player joins, leaves, and playtime
 - **Heartbeat System** - Regular server health checks with online player data
-- **Custom Events API** - Fluent API for other plugins to track custom analytics events
+- **Custom Events API** - Fluent static API for other plugins to track custom analytics events
+- **A/B Testing** - Built-in support for A/B tests with variant assignment and action execution
 - **Multi-Platform Support** - Works on Paper, BungeeCord, and Velocity
 
 ## Platforms
@@ -32,6 +33,17 @@ Analyse is a comprehensive analytics plugin for Minecraft servers. It provides:
 
 - **Paper**: Use for standalone servers or backend servers behind a proxy
 - **BungeeCord/Velocity**: Use for proxy servers to track cross-server analytics
+
+### Feature Comparison
+
+| Feature | Paper | BungeeCord | Velocity |
+|---------|-------|------------|----------|
+| Session Tracking | ✅ | ✅ | ✅ |
+| Heartbeat | ✅ | ✅ | ✅ |
+| Custom Events | ✅ | ✅ | ✅ |
+| A/B Testing | ✅ | ✅ | ✅ |
+| SEND_MESSAGE Action | ✅ | ✅ | ✅ |
+| RUN_COMMAND Action | ✅ | ✅ | ✅ |
 
 ## Quick Start
 

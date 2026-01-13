@@ -1,6 +1,6 @@
 # Developer API
 
-The Analyse plugin provides a simple, fluent API for other plugins to track custom analytics events.
+The Analyse plugin provides a simple, fluent static API for other plugins to track custom analytics events and interact with A/B tests.
 
 ## Maven/Gradle Setup
 
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("net.analyse:api:1.0.0")
+    compileOnly("net.analyse:api:0.1.0")
 }
 ```
 
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'net.analyse:api:1.0.0'
+    compileOnly 'net.analyse:api:0.1.0'
 }
 ```
 
@@ -39,7 +39,7 @@ dependencies {
 <dependency>
     <groupId>net.analyse</groupId>
     <artifactId>api</artifactId>
-    <version>1.0.0</version>
+    <version>0.1.0</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -66,7 +66,7 @@ Analyse.trackEvent("shop_purchase")
     .send();
 ```
 
-## API Reference
+## Custom Events API
 
 ### Analyse Class
 
@@ -184,6 +184,68 @@ Analyse.trackEvent("important_event")
     });
 ```
 
+## A/B Testing API
+
+The Analyse API provides built-in support for A/B testing.
+
+### Get Active Tests
+
+```java
+List<ABTest> tests = Analyse.getActiveTests();
+for (ABTest test : tests) {
+    System.out.println("Test: " + test.getKey() + " - " + test.getName());
+}
+```
+
+### Check if Test is Active
+
+```java
+if (Analyse.isTestActive("welcome_message_test")) {
+    // Test is running
+}
+```
+
+### Get Player's Variant
+
+```java
+String variant = Analyse.getVariant(player.getUniqueId(), "welcome_message_test");
+if ("variant_a".equals(variant)) {
+    // Show variant A experience
+} else if ("variant_b".equals(variant)) {
+    // Show variant B experience
+}
+```
+
+### Track Conversion
+
+```java
+Analyse.trackConversion(
+    player.getUniqueId(),
+    player.getName(),
+    "welcome_message_test",
+    "clicked_shop"
+);
+```
+
+### A/B Test Triggers
+
+A/B tests can be triggered by:
+
+| Trigger | Description |
+|---------|-------------|
+| `FIRST_JOIN` | Executes when a player joins for the first time |
+| `EVERY_JOIN` | Executes on every player join |
+| `ON_COMMAND` | Executes when a specific command is run |
+
+### A/B Test Actions
+
+When a test triggers, it can execute actions for the assigned variant:
+
+| Action | Description | Platforms |
+|--------|-------------|-----------|
+| `SEND_MESSAGE` | Sends a colored message to the player | All |
+| `RUN_COMMAND` | Executes a command as console or player | All |
+
 ## Complete Examples
 
 ### Track Player Quest Completion
@@ -232,6 +294,37 @@ public void onPlayerKill(Player killer, Player victim) {
 }
 ```
 
+### Implement A/B Tested Feature
+
+```java
+public void showWelcomeMessage(Player player) {
+    if (!Analyse.isAvailable() || !Analyse.isTestActive("welcome_test")) {
+        // Default behavior
+        player.sendMessage("Welcome to the server!");
+        return;
+    }
+
+    String variant = Analyse.getVariant(player.getUniqueId(), "welcome_test");
+    
+    switch (variant) {
+        case "control" -> player.sendMessage("Welcome to the server!");
+        case "variant_a" -> player.sendMessage("Hey " + player.getName() + "! Welcome back!");
+        case "variant_b" -> {
+            player.sendMessage("Welcome, " + player.getName() + "!");
+            player.sendMessage("Check out /shop for daily deals!");
+        }
+    }
+    
+    // Track that the player saw the welcome message
+    Analyse.trackConversion(
+        player.getUniqueId(),
+        player.getName(),
+        "welcome_test",
+        "message_shown"
+    );
+}
+```
+
 ### Track With Callback
 
 ```java
@@ -244,7 +337,6 @@ public void trackImportantEvent(Player player, String action) {
                 getLogger().info("Event tracked successfully: " + response.getEventId());
             } else {
                 getLogger().warning("Failed to track event - will retry later");
-                // Queue for retry
                 queueForRetry(player, action);
             }
         });
@@ -347,7 +439,7 @@ public class MyPlugin extends JavaPlugin {
 }
 ```
 
-Or use `plugin.yml` soft dependency:
+Or use `plugin.yml` / `paper-plugin.yml` soft dependency:
 
 ```yaml
 name: MyPlugin

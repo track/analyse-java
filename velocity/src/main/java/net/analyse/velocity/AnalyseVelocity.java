@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Plugin(
     id = "analyse",
     name = "Analyse",
-    version = "1.0.0-SNAPSHOT",
+    version = "0.1.0",
     description = "Analytics tracking plugin for Minecraft servers",
     authors = {"VertCode"}
 )

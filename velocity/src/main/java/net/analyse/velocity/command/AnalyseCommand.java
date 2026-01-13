@@ -40,7 +40,7 @@ public class AnalyseCommand extends BaseCommand {
     int configuredServers = plugin.getPluginConfig().getServers().size();
 
     send(sender, "&8&m                              ");
-    send(sender, "  &b&lAnalyse &7v1.0.0 &8(Velocity)");
+    send(sender, "  &b&lAnalyse &7v0.1.0 &8(Velocity)");
     send(sender, "&8&m                              ");
     send(sender, "  &7Status: " + (connected ? "&a● Connected" : "&c● Disconnected"));
     send(sender, "  &7API: &fapi.analyse.net");

@@ -64,14 +64,14 @@ plugins/
 After configuration, run `/analyse status` in-game or console to verify:
 
 ```
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-  Analyse v1.0.0
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+──────────────────────────────
+  Analyse v0.1.0
+──────────────────────────────
   Status: ● Connected
   API: api.analyse.net
   Players Tracked: 10
   Debug: Disabled
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+──────────────────────────────
 ```
 
 If the status shows "Disconnected", check:

@@ -26,17 +26,22 @@ Shows the current plugin status and connection information.
 
 **Output**:
 ```
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-  Analyse v1.0.0
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+──────────────────────────────
+  Analyse v0.1.0
+──────────────────────────────
   Status: ● Connected
   API: api.analyse.net
   Players Tracked: 5
   Debug: Disabled
-▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
+──────────────────────────────
 ```
 
-### Reload
+On proxy servers (BungeeCord/Velocity), additional info is shown:
+```
+  Servers Configured: 3
+```
+
+### Reload (Paper only)
 
 Reloads the plugin configuration from disk.
 
@@ -108,13 +113,13 @@ Shows the help menu with all available commands.
 | Permission | Description | Default |
 |------------|-------------|---------|
 | `analyse.command` | Base permission for all commands | OP |
-| `analyse.command.reload` | Permission to reload configuration | OP |
+| `analyse.command.reload` | Permission to reload configuration (Paper only) | OP |
 | `analyse.command.debug` | Permission to toggle debug mode | OP |
 | `analyse.command.event` | Permission to send custom events | OP |
 
 ## Tab Completion
 
-The plugin provides intelligent tab completion for:
+The plugin provides intelligent tab completion powered by ACF (Annotation Command Framework) for:
 - Subcommand names
 - Player names (for `--player` option)
 - Example event names
