@@ -1,8 +1,8 @@
 package net.analyse.paper.listener;
 
 import net.analyse.paper.AnalysePlugin;
-import net.analyse.paper.session.PlayerSession;
-import net.analyse.paper.session.SessionManager;
+import net.analyse.paper.manager.SessionManager;
+import net.analyse.paper.object.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
@@ -101,6 +101,12 @@ public class PlayerListener implements Listener {
             username, exception.getMessage()));
       }
     });
+
+    // Process A/B tests for this join
+    boolean firstJoin = !player.hasPlayedBefore();
+    if (plugin.getAbTestManager() != null) {
+      plugin.getAbTestManager().processJoin(player, firstJoin);
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

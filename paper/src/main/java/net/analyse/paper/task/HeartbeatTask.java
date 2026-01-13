@@ -1,7 +1,7 @@
 package net.analyse.paper.task;
 
 import net.analyse.paper.AnalysePlugin;
-import net.analyse.paper.session.PlayerSession;
+import net.analyse.paper.object.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;

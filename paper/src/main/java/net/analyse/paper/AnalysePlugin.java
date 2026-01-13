@@ -4,14 +4,16 @@ import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import net.analyse.api.AnalyseProvider;
 import net.analyse.api.platform.AnalysePlatform;
+import net.analyse.paper.manager.ABTestManager;
 import net.analyse.paper.command.AnalyseCommand;
 import net.analyse.paper.config.AnalysePaperConfig;
 import net.analyse.paper.listener.PlayerListener;
-import net.analyse.paper.session.SessionManager;
+import net.analyse.paper.manager.SessionManager;
 import net.analyse.paper.task.HeartbeatTask;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
+import net.analyse.sdk.object.abtest.ABTest;
 import net.analyse.sdk.config.AnalyseConfig;
 import net.analyse.sdk.request.JoinRequest;
 import net.analyse.sdk.response.JoinResponse;
@@ -19,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,6 +32,7 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
 
   private AnalysePaperConfig pluginConfig;
   private SessionManager sessionManager;
+  private ABTestManager abTestManager;
   private AnalyseClient client;
   private BukkitTask heartbeatTask;
   private boolean configValid = false;
@@ -86,6 +90,10 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
         600L,
         600L
     );
+
+    // Initialize A/B test manager
+    abTestManager = new ABTestManager(this);
+    abTestManager.start();
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
@@ -156,6 +164,11 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     // Unregister from the API provider
     AnalyseProvider.unregister();
 
+    // Stop A/B test manager
+    if (abTestManager != null) {
+      abTestManager.stop();
+    }
+
     // Cancel heartbeat task
     if (heartbeatTask != null) {
       heartbeatTask.cancel();
@@ -205,5 +218,32 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
   @Override
   public void logWarning(String message) {
     getLogger().warning(message);
+  }
+
+  @Override
+  public List<ABTest> getActiveTests() {
+    return abTestManager != null ? abTestManager.getActiveTests() : List.of();
+  }
+
+  @Override
+  public ABTest getTest(String testKey) {
+    return abTestManager != null ? abTestManager.getTest(testKey) : null;
+  }
+
+  @Override
+  public String getVariant(UUID playerUuid, String testKey) {
+    return abTestManager != null ? abTestManager.getVariant(playerUuid, testKey) : null;
+  }
+
+  @Override
+  public boolean isTestActive(String testKey) {
+    return abTestManager != null && abTestManager.isTestActive(testKey);
+  }
+
+  @Override
+  public void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
+    if (abTestManager != null) {
+      abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
+    }
   }
 }

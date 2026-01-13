@@ -1,5 +1,6 @@
-package net.analyse.paper.session;
+package net.analyse.paper.manager;
 
+import net.analyse.paper.object.session.PlayerSession;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -74,4 +75,3 @@ public class SessionManager {
     return sessions;
   }
 }
-

@@ -11,6 +11,7 @@ import co.aikar.commands.annotation.Syntax;
 import net.analyse.api.Analyse;
 import net.analyse.api.EventBuilder;
 import net.analyse.paper.AnalysePlugin;
+import net.analyse.paper.util.ComponentUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -38,14 +39,14 @@ public class AnalyseCommand extends BaseCommand {
     int trackedPlayers = plugin.getSessionManager().getActiveSessions().size();
     boolean debugEnabled = plugin.isDebugEnabled();
 
-    sender.sendMessage("§8§m                              ");
-    sender.sendMessage("  §b§lAnalyse §7v" + plugin.getDescription().getVersion());
-    sender.sendMessage("§8§m                              ");
-    sender.sendMessage("  §7Status: " + (connected ? "§a● Connected" : "§c● Disconnected"));
-    sender.sendMessage("  §7API: §fapi.analyse.net");
-    sender.sendMessage("  §7Players Tracked: §f" + trackedPlayers);
-    sender.sendMessage("  §7Debug: " + (debugEnabled ? "§aEnabled" : "§7Disabled"));
-    sender.sendMessage("§8§m                              ");
+    send(sender, "&8&m                              ");
+    send(sender, "  &b&lAnalyse &7v" + plugin.getDescription().getVersion());
+    send(sender, "&8&m                              ");
+    send(sender, "  &7Status: " + (connected ? "&a● Connected" : "&c● Disconnected"));
+    send(sender, "  &7API: &fapi.analyse.net");
+    send(sender, "  &7Players Tracked: &f" + trackedPlayers);
+    send(sender, "  &7Debug: " + (debugEnabled ? "&aEnabled" : "&7Disabled"));
+    send(sender, "&8&m                              ");
   }
 
   @Subcommand("reload")
@@ -53,7 +54,7 @@ public class AnalyseCommand extends BaseCommand {
   @CommandPermission("analyse.command.reload")
   public void onReload(CommandSender sender) {
     plugin.reloadConfig();
-    sender.sendMessage("§aAnalyse configuration reloaded.");
+    send(sender, "&aAnalyse configuration reloaded.");
   }
 
   @Subcommand("debug")
@@ -64,9 +65,9 @@ public class AnalyseCommand extends BaseCommand {
     plugin.getPluginConfig().setDebug(newState);
 
     if (newState) {
-      sender.sendMessage("§aDebug mode enabled.");
+      send(sender, "&aDebug mode enabled.");
     } else {
-      sender.sendMessage("§7Debug mode disabled.");
+      send(sender, "&7Debug mode disabled.");
     }
   }
 
@@ -77,12 +78,12 @@ public class AnalyseCommand extends BaseCommand {
   @CommandCompletion("test_event|custom_event @players")
   public void onEvent(CommandSender sender, String[] args) {
     if (args.length == 0) {
-      sender.sendMessage("§cUsage: /analyse event <name> [--player <name>] [--value <number>] [--data key=value...]");
+      send(sender, "&cUsage: /analyse event <name> [--player <name>] [--value <number>] [--data key=value...]");
       return;
     }
 
     if (!Analyse.isAvailable()) {
-      sender.sendMessage("§cAnalyse is not connected. Cannot send events.");
+      send(sender, "&cAnalyse is not connected. Cannot send events.");
       return;
     }
 
@@ -101,7 +102,7 @@ public class AnalyseCommand extends BaseCommand {
         try {
           value = Double.parseDouble(args[++i]);
         } catch (NumberFormatException e) {
-          sender.sendMessage("§cInvalid value. Must be a number.");
+          send(sender, "&cInvalid value. Must be a number.");
           return;
         }
       } else if (arg.equals("--data") && i + 1 < args.length) {
@@ -129,7 +130,7 @@ public class AnalyseCommand extends BaseCommand {
       if (player != null) {
         builder.withPlayer(player.getUniqueId(), player.getName());
       } else {
-        sender.sendMessage("§cPlayer '" + playerName + "' not found online.");
+        send(sender, "&cPlayer '" + playerName + "' not found online.");
         return;
       }
     }
@@ -150,20 +151,20 @@ public class AnalyseCommand extends BaseCommand {
     builder.send(response -> {
       if (response != null && response.isSuccess()) {
         Bukkit.getScheduler().runTask(plugin, () -> {
-          sender.sendMessage("§a✓ Event '§f" + eventName + "§a' sent successfully");
+          send(sender, "&a✓ Event '&f" + eventName + "&a' sent successfully");
           if (finalPlayerName != null) {
-            sender.sendMessage("  §7Player: §f" + finalPlayerName);
+            send(sender, "  &7Player: &f" + finalPlayerName);
           }
           if (finalValue != null) {
-            sender.sendMessage("  §7Value: §f" + finalValue);
+            send(sender, "  &7Value: &f" + finalValue);
           }
           if (!data.isEmpty()) {
-            sender.sendMessage("  §7Data: §f" + data);
+            send(sender, "  &7Data: &f" + data);
           }
         });
       } else {
         Bukkit.getScheduler().runTask(plugin, () -> {
-          sender.sendMessage("§c✗ Failed to send event '§f" + eventName + "§c'");
+          send(sender, "&c✗ Failed to send event '&f" + eventName + "&c'");
         });
       }
     });
@@ -172,19 +173,29 @@ public class AnalyseCommand extends BaseCommand {
   @Subcommand("help")
   @Description("Show help information")
   public void onHelp(CommandSender sender) {
-    sender.sendMessage("§8§m                              ");
-    sender.sendMessage("  §b§lAnalyse Commands");
-    sender.sendMessage("§8§m                              ");
-    sender.sendMessage("  §e/analyse §7- Show plugin status");
-    sender.sendMessage("  §e/analyse status §7- Show plugin status");
-    sender.sendMessage("  §e/analyse reload §7- Reload configuration");
-    sender.sendMessage("  §e/analyse debug §7- Toggle debug mode");
-    sender.sendMessage("  §e/analyse event <name> §7- Send custom event");
-    sender.sendMessage("    §7Options:");
-    sender.sendMessage("    §f--player <name> §7- Associate with player");
-    sender.sendMessage("    §f--value <number> §7- Set numeric value");
-    sender.sendMessage("    §f--data <key=value> §7- Add data (repeatable)");
-    sender.sendMessage("  §e/analyse help §7- Show this help");
-    sender.sendMessage("§8§m                              ");
+    send(sender, "&8&m                              ");
+    send(sender, "  &b&lAnalyse Commands");
+    send(sender, "&8&m                              ");
+    send(sender, "  &e/analyse &7- Show plugin status");
+    send(sender, "  &e/analyse status &7- Show plugin status");
+    send(sender, "  &e/analyse reload &7- Reload configuration");
+    send(sender, "  &e/analyse debug &7- Toggle debug mode");
+    send(sender, "  &e/analyse event <name> &7- Send custom event");
+    send(sender, "    &7Options:");
+    send(sender, "    &f--player <name> &7- Associate with player");
+    send(sender, "    &f--value <number> &7- Set numeric value");
+    send(sender, "    &f--data <key=value> &7- Add data (repeatable)");
+    send(sender, "  &e/analyse help &7- Show this help");
+    send(sender, "&8&m                              ");
+  }
+
+  /**
+   * Send a colored message to a command sender
+   *
+   * @param sender  The command sender
+   * @param message The message with color codes
+   */
+  private void send(CommandSender sender, String message) {
+    sender.sendMessage(ComponentUtil.parse(message));
   }
 }

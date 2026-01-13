@@ -13,7 +13,7 @@ import com.velocitypowered.api.proxy.Player;
 import net.analyse.api.Analyse;
 import net.analyse.api.EventBuilder;
 import net.analyse.velocity.AnalyseVelocity;
-import net.kyori.adventure.text.Component;
+import net.analyse.velocity.util.ComponentUtil;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,15 +39,15 @@ public class AnalyseCommand extends BaseCommand {
     boolean debugEnabled = plugin.isDebugEnabled();
     int configuredServers = plugin.getPluginConfig().getServers().size();
 
-    sender.sendMessage(Component.text("§8§m                              "));
-    sender.sendMessage(Component.text("  §b§lAnalyse §7v1.0.0 §8(Velocity)"));
-    sender.sendMessage(Component.text("§8§m                              "));
-    sender.sendMessage(Component.text("  §7Status: " + (connected ? "§a● Connected" : "§c● Disconnected")));
-    sender.sendMessage(Component.text("  §7API: §fapi.analyse.net"));
-    sender.sendMessage(Component.text("  §7Servers Configured: §f" + configuredServers));
-    sender.sendMessage(Component.text("  §7Players Tracked: §f" + trackedPlayers));
-    sender.sendMessage(Component.text("  §7Debug: " + (debugEnabled ? "§aEnabled" : "§7Disabled")));
-    sender.sendMessage(Component.text("§8§m                              "));
+    send(sender, "&8&m                              ");
+    send(sender, "  &b&lAnalyse &7v1.0.0 &8(Velocity)");
+    send(sender, "&8&m                              ");
+    send(sender, "  &7Status: " + (connected ? "&a● Connected" : "&c● Disconnected"));
+    send(sender, "  &7API: &fapi.analyse.net");
+    send(sender, "  &7Servers Configured: &f" + configuredServers);
+    send(sender, "  &7Players Tracked: &f" + trackedPlayers);
+    send(sender, "  &7Debug: " + (debugEnabled ? "&aEnabled" : "&7Disabled"));
+    send(sender, "&8&m                              ");
   }
 
   @Subcommand("debug")
@@ -58,9 +58,9 @@ public class AnalyseCommand extends BaseCommand {
     plugin.getPluginConfig().setDebug(newState);
 
     if (newState) {
-      sender.sendMessage(Component.text("§aDebug mode enabled."));
+      send(sender, "&aDebug mode enabled.");
     } else {
-      sender.sendMessage(Component.text("§7Debug mode disabled."));
+      send(sender, "&7Debug mode disabled.");
     }
   }
 
@@ -71,12 +71,12 @@ public class AnalyseCommand extends BaseCommand {
   @CommandCompletion("test_event|custom_event @players")
   public void onEvent(CommandSource sender, String[] args) {
     if (args.length == 0) {
-      sender.sendMessage(Component.text("§cUsage: /analyse event <name> [--player <name>] [--value <number>] [--data key=value...]"));
+      send(sender, "&cUsage: /analyse event <name> [--player <name>] [--value <number>] [--data key=value...]");
       return;
     }
 
     if (!Analyse.isAvailable()) {
-      sender.sendMessage(Component.text("§cAnalyse is not connected. Make sure a default server is configured."));
+      send(sender, "&cAnalyse is not connected. Make sure a default server is configured.");
       return;
     }
 
@@ -95,7 +95,7 @@ public class AnalyseCommand extends BaseCommand {
         try {
           value = Double.parseDouble(args[++i]);
         } catch (NumberFormatException e) {
-          sender.sendMessage(Component.text("§cInvalid value. Must be a number."));
+          send(sender, "&cInvalid value. Must be a number.");
           return;
         }
       } else if (arg.equals("--data") && i + 1 < args.length) {
@@ -122,7 +122,7 @@ public class AnalyseCommand extends BaseCommand {
       if (player != null) {
         builder.withPlayer(player.getUniqueId(), player.getUsername());
       } else {
-        sender.sendMessage(Component.text("§cPlayer '" + playerName + "' not found online."));
+        send(sender, "&cPlayer '" + playerName + "' not found online.");
         return;
       }
     }
@@ -142,18 +142,18 @@ public class AnalyseCommand extends BaseCommand {
     Double finalValue = value;
     builder.send(response -> {
       if (response != null && response.isSuccess()) {
-        sender.sendMessage(Component.text("§a✓ Event '§f" + eventName + "§a' sent successfully"));
+        send(sender, "&a✓ Event '&f" + eventName + "&a' sent successfully");
         if (finalPlayerName != null) {
-          sender.sendMessage(Component.text("  §7Player: §f" + finalPlayerName));
+          send(sender, "  &7Player: &f" + finalPlayerName);
         }
         if (finalValue != null) {
-          sender.sendMessage(Component.text("  §7Value: §f" + finalValue));
+          send(sender, "  &7Value: &f" + finalValue);
         }
         if (!data.isEmpty()) {
-          sender.sendMessage(Component.text("  §7Data: §f" + data));
+          send(sender, "  &7Data: &f" + data);
         }
       } else {
-        sender.sendMessage(Component.text("§c✗ Failed to send event '§f" + eventName + "§c'"));
+        send(sender, "&c✗ Failed to send event '&f" + eventName + "&c'");
       }
     });
   }
@@ -161,18 +161,28 @@ public class AnalyseCommand extends BaseCommand {
   @Subcommand("help")
   @Description("Show help information")
   public void onHelp(CommandSource sender) {
-    sender.sendMessage(Component.text("§8§m                              "));
-    sender.sendMessage(Component.text("  §b§lAnalyse Commands"));
-    sender.sendMessage(Component.text("§8§m                              "));
-    sender.sendMessage(Component.text("  §e/analyse §7- Show plugin status"));
-    sender.sendMessage(Component.text("  §e/analyse status §7- Show plugin status"));
-    sender.sendMessage(Component.text("  §e/analyse debug §7- Toggle debug mode"));
-    sender.sendMessage(Component.text("  §e/analyse event <name> §7- Send custom event"));
-    sender.sendMessage(Component.text("    §7Options:"));
-    sender.sendMessage(Component.text("    §f--player <name> §7- Associate with player"));
-    sender.sendMessage(Component.text("    §f--value <number> §7- Set numeric value"));
-    sender.sendMessage(Component.text("    §f--data <key=value> §7- Add data (repeatable)"));
-    sender.sendMessage(Component.text("  §e/analyse help §7- Show this help"));
-    sender.sendMessage(Component.text("§8§m                              "));
+    send(sender, "&8&m                              ");
+    send(sender, "  &b&lAnalyse Commands");
+    send(sender, "&8&m                              ");
+    send(sender, "  &e/analyse &7- Show plugin status");
+    send(sender, "  &e/analyse status &7- Show plugin status");
+    send(sender, "  &e/analyse debug &7- Toggle debug mode");
+    send(sender, "  &e/analyse event <name> &7- Send custom event");
+    send(sender, "    &7Options:");
+    send(sender, "    &f--player <name> &7- Associate with player");
+    send(sender, "    &f--value <number> &7- Set numeric value");
+    send(sender, "    &f--data <key=value> &7- Add data (repeatable)");
+    send(sender, "  &e/analyse help &7- Show this help");
+    send(sender, "&8&m                              ");
+  }
+
+  /**
+   * Send a colored message to a command source
+   *
+   * @param sender  The command source
+   * @param message The message with color codes
+   */
+  private void send(CommandSource sender, String message) {
+    sender.sendMessage(ComponentUtil.parse(message));
   }
 }

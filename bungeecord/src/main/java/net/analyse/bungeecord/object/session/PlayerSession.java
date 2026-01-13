@@ -1,4 +1,4 @@
-package net.analyse.paper.session;
+package net.analyse.bungeecord.object.session;
 
 import lombok.Getter;
 
@@ -10,6 +10,7 @@ public class PlayerSession {
 
   private final String hostname;
   private final String ip;
+  private String currentServer;
   private String sessionId;
 
   /**
@@ -24,12 +25,22 @@ public class PlayerSession {
   }
 
   /**
-   * Set the session ID after a successful join
+   * Update the current server and session ID after a join
    *
-   * @param sessionId The session ID from the API response
+   * @param serverName The name of the server the player joined
+   * @param sessionId  The session ID from the API response
    */
-  public void setSessionId(String sessionId) {
+  public void setCurrentSession(String serverName, String sessionId) {
+    this.currentServer = serverName;
     this.sessionId = sessionId;
+  }
+
+  /**
+   * Clear the session data when the player leaves a server
+   */
+  public void clearSession() {
+    this.currentServer = null;
+    this.sessionId = null;
   }
 
   /**
@@ -41,4 +52,3 @@ public class PlayerSession {
     return sessionId != null && !sessionId.isBlank();
   }
 }
-

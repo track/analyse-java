@@ -1,5 +1,6 @@
-package net.analyse.velocity.session;
+package net.analyse.bungeecord.manager;
 
+import net.analyse.bungeecord.object.session.PlayerSession;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;

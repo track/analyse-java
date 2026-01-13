@@ -1,4 +1,4 @@
-package net.analyse.velocity.session;
+package net.analyse.paper.object.session;
 
 import lombok.Getter;
 
@@ -10,7 +10,6 @@ public class PlayerSession {
 
   private final String hostname;
   private final String ip;
-  private String currentServer;
   private String sessionId;
 
   /**
@@ -25,22 +24,12 @@ public class PlayerSession {
   }
 
   /**
-   * Update the current server and session ID after a join
+   * Set the session ID after a successful join
    *
-   * @param serverName The name of the server the player joined
-   * @param sessionId  The session ID from the API response
+   * @param sessionId The session ID from the API response
    */
-  public void setCurrentSession(String serverName, String sessionId) {
-    this.currentServer = serverName;
+  public void setSessionId(String sessionId) {
     this.sessionId = sessionId;
-  }
-
-  /**
-   * Clear the session data when the player leaves a server
-   */
-  public void clearSession() {
-    this.currentServer = null;
-    this.sessionId = null;
   }
 
   /**

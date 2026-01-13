@@ -15,15 +15,19 @@ import lombok.Getter;
 import net.analyse.api.AnalyseProvider;
 import net.analyse.api.platform.AnalysePlatform;
 import net.analyse.sdk.AnalyseClient;
+import net.analyse.sdk.object.abtest.ABTest;
 import net.analyse.velocity.command.AnalyseCommand;
 import net.analyse.velocity.config.AnalyseVelocityConfig;
 import net.analyse.velocity.listener.PlayerListener;
-import net.analyse.velocity.session.SessionManager;
+import net.analyse.velocity.manager.ABTestManager;
+import net.analyse.velocity.manager.SessionManager;
 import net.analyse.velocity.task.HeartbeatTask;
 import org.slf4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +49,7 @@ public class AnalyseVelocity implements AnalysePlatform {
 
   private AnalyseVelocityConfig pluginConfig;
   private SessionManager sessionManager;
+  private ABTestManager abTestManager;
   private PlayerListener playerListener;
   private ScheduledTask heartbeatTask;
 
@@ -74,6 +79,10 @@ public class AnalyseVelocity implements AnalysePlatform {
     // Register with the API provider if a default server is configured
     if (playerListener.getDefaultClient() != null) {
       AnalyseProvider.register(this);
+
+      // Initialize A/B test manager
+      abTestManager = new ABTestManager(this);
+      abTestManager.start();
     }
 
     // Register commands using ACF
@@ -163,6 +172,11 @@ public class AnalyseVelocity implements AnalysePlatform {
     // Unregister from the API provider
     AnalyseProvider.unregister();
 
+    // Stop A/B test manager
+    if (abTestManager != null) {
+      abTestManager.stop();
+    }
+
     // Cancel heartbeat task
     if (heartbeatTask != null) {
       heartbeatTask.cancel();
@@ -249,5 +263,32 @@ public class AnalyseVelocity implements AnalysePlatform {
   @Override
   public void logWarning(String message) {
     logger.warn(message);
+  }
+
+  @Override
+  public List<ABTest> getActiveTests() {
+    return abTestManager != null ? abTestManager.getActiveTests() : List.of();
+  }
+
+  @Override
+  public ABTest getTest(String testKey) {
+    return abTestManager != null ? abTestManager.getTest(testKey) : null;
+  }
+
+  @Override
+  public String getVariant(UUID playerUuid, String testKey) {
+    return abTestManager != null ? abTestManager.getVariant(playerUuid, testKey) : null;
+  }
+
+  @Override
+  public boolean isTestActive(String testKey) {
+    return abTestManager != null && abTestManager.isTestActive(testKey);
+  }
+
+  @Override
+  public void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
+    if (abTestManager != null) {
+      abTestManager.trackConversion(playerUuid, playerUsername, testKey, eventName);
+    }
   }
 }

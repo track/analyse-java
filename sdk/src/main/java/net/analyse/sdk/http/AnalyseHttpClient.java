@@ -105,6 +105,63 @@ public class AnalyseHttpClient {
   }
 
   /**
+   * Make an async GET request to the API
+   *
+   * @param endpoint      The API endpoint
+   * @param responseClass The class to deserialize the response into
+   * @param callback      The callback to invoke on success or failure
+   * @param <T>           The response type
+   */
+  public <T> void get(String endpoint, Class<T> responseClass, AnalyseCallback<T> callback) {
+    String url = config.getApiUrl() + endpoint;
+    String apiKey = config.getApiKey();
+
+    // Validate API key before making request
+    if (apiKey == null || apiKey.isBlank()) {
+      callback.onError(new AnalyseException(401, "API key is not configured"));
+      return;
+    }
+
+    Request request = new Request.Builder()
+        .url(url)
+        .addHeader("X-Api-Key", apiKey)
+        .addHeader("Accept", "application/json")
+        .get()
+        .build();
+
+    httpClient.newCall(request).enqueue(new Callback() {
+      @Override
+      public void onFailure(@NotNull Call call, @NotNull IOException e) {
+        callback.onError(new AnalyseException("Network error: " + e.getMessage(), e));
+      }
+
+      @Override
+      public void onResponse(@NotNull Call call, @NotNull Response response) {
+        try (ResponseBody body = response.body()) {
+          if (!response.isSuccessful()) {
+            String errorMessage = body != null ? body.string() : "Unknown error";
+            callback.onError(new AnalyseException(response.code(), errorMessage));
+            return;
+          }
+
+          if (body == null) {
+            callback.onError(new AnalyseException(500, "Empty response body"));
+            return;
+          }
+
+          String responseJson = body.string();
+          T result = gson.fromJson(responseJson, responseClass);
+          callback.onSuccess(result);
+        } catch (IOException e) {
+          callback.onError(new AnalyseException("Failed to read response: " + e.getMessage(), e));
+        } catch (Exception e) {
+          callback.onError(new AnalyseException("Failed to parse response: " + e.getMessage(), e));
+        }
+      }
+    });
+  }
+
+  /**
    * Shutdown the HTTP client and release resources
    */
   public void shutdown() {

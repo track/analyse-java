@@ -1,4 +1,4 @@
-package net.analyse.bungeecord.session;
+package net.analyse.velocity.object.session;
 
 import lombok.Getter;
 
@@ -52,4 +52,3 @@ public class PlayerSession {
     return sessionId != null && !sessionId.isBlank();
   }
 }
-

@@ -1,5 +1,6 @@
-package net.analyse.bungeecord.session;
+package net.analyse.velocity.manager;
 
+import net.analyse.velocity.object.session.PlayerSession;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,4 +66,3 @@ public class SessionManager {
     return sessions.size();
   }
 }
-

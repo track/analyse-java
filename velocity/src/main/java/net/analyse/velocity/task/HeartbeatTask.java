@@ -10,7 +10,7 @@ import net.analyse.sdk.request.PlayerInfo;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.analyse.velocity.AnalyseVelocity;
 import net.analyse.velocity.listener.PlayerListener;
-import net.analyse.velocity.session.PlayerSession;
+import net.analyse.velocity.object.session.PlayerSession;
 import org.slf4j.Logger;
 import java.util.List;
 import java.util.Optional;

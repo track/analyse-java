@@ -2,7 +2,7 @@ package net.analyse.bungeecord.task;
 
 import net.analyse.bungeecord.AnalyseBungee;
 import net.analyse.bungeecord.listener.PlayerListener;
-import net.analyse.bungeecord.session.PlayerSession;
+import net.analyse.bungeecord.object.session.PlayerSession;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.AnalyseException;
