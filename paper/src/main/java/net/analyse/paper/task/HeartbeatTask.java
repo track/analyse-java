@@ -7,6 +7,7 @@ import net.analyse.sdk.AnalyseClient;
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.PlayerInfo;
+import net.analyse.sdk.request.ServerType;
 import net.analyse.sdk.response.HeartbeatResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -37,7 +38,7 @@ public class HeartbeatTask implements Runnable {
         .toList();
 
     String instanceId = plugin.getPluginConfig().getInstanceId();
-    HeartbeatRequest request = new HeartbeatRequest(instanceId, onlinePlayers);
+    HeartbeatRequest request = new HeartbeatRequest(instanceId, ServerType.MINECRAFT, onlinePlayers);
 
     client.heartbeat(request, new AnalyseCallback<>() {
       @Override

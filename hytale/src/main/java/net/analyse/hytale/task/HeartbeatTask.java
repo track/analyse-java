@@ -11,6 +11,7 @@ import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.PlayerInfo;
+import net.analyse.sdk.request.ServerType;
 import net.analyse.sdk.response.HeartbeatResponse;
 
 /**
@@ -37,7 +38,7 @@ public class HeartbeatTask implements Runnable {
       .toList();
 
     String instanceId = plugin.getPluginConfig().getInstanceId();
-    HeartbeatRequest request = new HeartbeatRequest(instanceId, onlinePlayers);
+    HeartbeatRequest request = new HeartbeatRequest(instanceId, ServerType.HYTALE, onlinePlayers);
 
     client.heartbeat(
       request,

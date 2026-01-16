@@ -8,6 +8,7 @@ import net.analyse.sdk.AnalyseClient;
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.PlayerInfo;
+import net.analyse.sdk.request.ServerType;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -61,7 +62,7 @@ public class HeartbeatTask implements Runnable {
         .toList();
 
     String instanceId = plugin.getPluginConfig().getInstanceId();
-    HeartbeatRequest request = new HeartbeatRequest(instanceId, onlinePlayers);
+    HeartbeatRequest request = new HeartbeatRequest(instanceId, ServerType.MINECRAFT, onlinePlayers);
 
     client.heartbeat(request, new AnalyseCallback<>() {
       @Override
