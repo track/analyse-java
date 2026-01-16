@@ -68,17 +68,32 @@ public class PlayerListener {
   }
 
   /**
-   * Get the default API client (for the configured default server)
+   * Get an API client for use with the Analyse API.
+   * Returns the configured default server's client if set, otherwise returns the first available client.
    *
-   * @return The default client, or null if not configured
+   * @return An available client, or null if none configured
    */
-  public AnalyseClient getDefaultClient() {
+  public AnalyseClient getAvailableClient() {
+    // Try configured default server first
     String defaultServer = plugin.getPluginConfig().getDefaultServer();
-    if (defaultServer == null || defaultServer.isBlank()) {
-      return null;
+    if (defaultServer != null && !defaultServer.isBlank()) {
+      AnalyseClient client = serverClients.get(defaultServer);
+      if (client != null) {
+        return client;
+      }
     }
 
-    return serverClients.get(defaultServer);
+    // Fall back to any available client
+    return serverClients.values().stream().findFirst().orElse(null);
+  }
+
+  /**
+   * Check if any API clients are configured and available
+   *
+   * @return true if at least one client is available
+   */
+  public boolean hasAnyClient() {
+    return !serverClients.isEmpty();
   }
 
   @Subscribe

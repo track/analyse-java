@@ -3,6 +3,7 @@ package net.analyse.paper;
 import co.aikar.commands.PaperCommandManager;
 import net.analyse.api.Analyse;
 import net.analyse.api.AnalyseProvider;
+import net.analyse.api.BuildConstants;
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
@@ -102,7 +103,7 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     abTestManager.start();
 
     // Initialize update checker
-    updateChecker = new PaperUpdateChecker(this, getDescription().getVersion());
+    updateChecker = new PaperUpdateChecker(this, BuildConstants.VERSION);
     updateChecker.start();
 
     // Initialize sessions for players already online (in case of reload)
@@ -301,7 +302,7 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
 
   @Override
   public String getVersion() {
-    return getDescription().getVersion();
+    return BuildConstants.VERSION;
   }
 
   // ========== Internal Getters ==========

@@ -70,7 +70,7 @@ public class UpdateChecker {
    * @param force If true, notify even if already notified for this version
    */
   public void check(UpdateListener listener, boolean force) {
-    client.checkVersion(new AnalyseCallback<>() {
+    client.checkVersion(new AnalyseCallback<VersionResponse>() {
       @Override
       public void onSuccess(VersionResponse response) {
         if (!response.isSuccess() || response.getPlatforms() == null) {

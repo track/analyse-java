@@ -13,6 +13,7 @@ import com.velocitypowered.api.scheduler.ScheduledTask;
 import co.aikar.commands.VelocityCommandManager;
 import net.analyse.api.Analyse;
 import net.analyse.api.AnalyseProvider;
+import net.analyse.api.BuildConstants;
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
@@ -40,7 +41,7 @@ import java.util.function.Consumer;
 @Plugin(
     id = "analyse",
     name = "Analyse",
-    version = "0.2.0",
+    version = BuildConstants.VERSION,
     description = "Analytics tracking plugin for Minecraft servers",
     authors = {"VertCode"}
 )
@@ -80,8 +81,8 @@ public class AnalyseVelocity implements AnalysePlatform {
     playerListener = new PlayerListener(this);
     server.getEventManager().register(this, playerListener);
 
-    // Register with the API provider if a default server is configured
-    if (playerListener.getDefaultClient() != null) {
+    // Register with the API provider if at least one server is configured
+    if (playerListener.hasAnyClient()) {
       AnalyseProvider.register(this);
 
       // Set up the event sender for Analyse.trackEvent()
@@ -99,9 +100,9 @@ public class AnalyseVelocity implements AnalysePlatform {
     // Start heartbeat task (after playerListener is initialized)
     startHeartbeatTask();
 
-    // Initialize update checker (only if we have a default client)
-    if (playerListener.getDefaultClient() != null) {
-      updateChecker = new VelocityUpdateChecker(this, "0.2.0");
+    // Initialize update checker (only if we have any client)
+    if (playerListener.hasAnyClient()) {
+      updateChecker = new VelocityUpdateChecker(this, BuildConstants.VERSION);
       updateChecker.start();
     }
 
@@ -351,7 +352,7 @@ public class AnalyseVelocity implements AnalysePlatform {
 
   @Override
   public String getVersion() {
-    return "0.1.0";
+    return BuildConstants.VERSION;
   }
 
   // ========== Internal Getters ==========
@@ -384,12 +385,13 @@ public class AnalyseVelocity implements AnalysePlatform {
   }
 
   /**
-   * Get the SDK client (from player listener)
+   * Get an SDK client for API operations.
+   * Uses the configured default server if set, otherwise returns any available client.
    *
-   * @return The Analyse client, or null
+   * @return The Analyse client, or null if none available
    */
   public AnalyseClient getClient() {
-    return playerListener != null ? playerListener.getDefaultClient() : null;
+    return playerListener != null ? playerListener.getAvailableClient() : null;
   }
 
   /**

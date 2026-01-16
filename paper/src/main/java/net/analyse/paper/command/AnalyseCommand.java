@@ -9,6 +9,7 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import net.analyse.api.Analyse;
+import net.analyse.api.BuildConstants;
 import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.paper.AnalysePlugin;
 import net.analyse.paper.util.ComponentUtil;
@@ -40,7 +41,7 @@ public class AnalyseCommand extends BaseCommand {
     boolean debugEnabled = plugin.isDebugEnabled();
 
     send(sender, "&8&m                              ");
-    send(sender, "  &b&lAnalyse &7v" + plugin.getDescription().getVersion());
+    send(sender, "  &b&lAnalyse &7v" + BuildConstants.VERSION);
     send(sender, "&8&m                              ");
     send(sender, "  &7Status: " + (connected ? "&a● Connected" : "&c● Disconnected"));
     send(sender, "  &7API: &fapi.analyse.net");

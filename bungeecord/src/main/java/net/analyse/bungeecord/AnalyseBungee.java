@@ -3,6 +3,7 @@ package net.analyse.bungeecord;
 import co.aikar.commands.BungeeCommandManager;
 import net.analyse.api.Analyse;
 import net.analyse.api.AnalyseProvider;
+import net.analyse.api.BuildConstants;
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
@@ -76,7 +77,7 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
     // Initialize update checker (only if we have a default client)
     if (playerListener.getDefaultClient() != null) {
-      updateChecker = new BungeeUpdateChecker(this, getDescription().getVersion());
+      updateChecker = new BungeeUpdateChecker(this, BuildConstants.VERSION);
       updateChecker.start();
     }
 
@@ -295,7 +296,7 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
 
   @Override
   public String getVersion() {
-    return getDescription().getVersion();
+    return BuildConstants.VERSION;
   }
 
   // ========== Internal Getters ==========

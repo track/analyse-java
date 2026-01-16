@@ -12,6 +12,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.analyse.api.Analyse;
 import net.analyse.api.object.builder.EventBuilder;
+import net.analyse.api.BuildConstants;
 import net.analyse.velocity.AnalyseVelocity;
 import net.analyse.velocity.util.ComponentUtil;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class AnalyseCommand extends BaseCommand {
     int configuredServers = plugin.getPluginConfig().getServers().size();
 
     send(sender, "&8&m                              ");
-    send(sender, "  &b&lAnalyse &7v0.1.0 &8(Velocity)");
+    send(sender, "  &b&lAnalyse &7v" + BuildConstants.VERSION + " &8(Velocity)");
     send(sender, "&8&m                              ");
     send(sender, "  &7Status: " + (connected ? "&a● Connected" : "&c● Disconnected"));
     send(sender, "  &7API: &fapi.analyse.net");

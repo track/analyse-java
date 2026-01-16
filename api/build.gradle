@@ -5,6 +5,45 @@ plugins {
 
 // No dependencies - api module is standalone!
 
+// Generate BuildConstants.java with version from gradle.properties
+def generatedDir = layout.buildDirectory.dir('generated/sources/buildConstants/java/main')
+
+sourceSets {
+    main {
+        java {
+            srcDir generatedDir
+        }
+    }
+}
+
+tasks.register('generateBuildConstants') {
+    def outputDir = generatedDir.get().asFile
+    outputs.dir(outputDir)
+
+    doLast {
+        def constantsFile = new File(outputDir, 'net/analyse/api/BuildConstants.java')
+        constantsFile.parentFile.mkdirs()
+        constantsFile.text = """package net.analyse.api;
+
+/**
+ * Auto-generated build constants from Gradle.
+ * Available to all modules that depend on the API.
+ */
+public final class BuildConstants {
+
+  public static final String VERSION = "${rootProject.version}";
+
+  private BuildConstants() {
+  }
+}
+"""
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn 'generateBuildConstants'
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
