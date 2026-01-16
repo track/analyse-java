@@ -5,4 +5,6 @@ include 'api'
 include 'paper'
 include 'velocity'
 include 'bungeecord'
+include 'hytale'
 
+ 
