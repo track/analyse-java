@@ -50,9 +50,17 @@ public class PlayerListener {
 
     // Get hostname (Hytale doesn't seem to expose this yet, use unknown)
     String hostname = "unknown";
+    PacketHandler packetHandler = playerRef.getPacketHandler();
+    if (packetHandler != null) {
+      SocketAddress address = packetHandler.getChannel().remoteAddress();
+      if (address instanceof InetSocketAddress socketAddress) {
+        hostname = socketAddress.getHostString();
+      }
+    }
 
     // Create session for this player
     sessionManager.createSession(uuid, hostname, ip);
+
     plugin.debug("Created session for %s (hostname: %s, ip: %s)", username, hostname, ip);
 
     // Send join event to the API

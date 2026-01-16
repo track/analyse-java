@@ -346,7 +346,7 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
    */
   public void debug(String format, Object... args) {
     if (pluginConfig != null && pluginConfig.isDebug()) {
-      getLogger().atInfo().log("[DEBUG] " + format, args);
+      getLogger().atInfo().log("[DEBUG] %s", String.format(format, args));
     }
   }
 
