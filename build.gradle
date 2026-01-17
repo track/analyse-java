@@ -35,3 +35,8 @@ subprojects {
     }
 }
 
+tasks.register('publishApi') {
+    dependsOn ':api:publish'
+    description = 'Publishes only the API module to Nexus'
+    group = 'publishing'
+}

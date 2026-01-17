@@ -2,8 +2,11 @@ package net.analyse.hytale.listener;
 
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerSetupConnectEvent;
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.hytale.HytalePlugin;
 import net.analyse.hytale.manager.SessionManager;
@@ -17,6 +20,8 @@ import net.analyse.sdk.response.LeaveResponse;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,10 +34,21 @@ public class PlayerListener {
   private final SessionManager sessionManager;
   private final AnalyseClient client;
 
+  private final Map<UUID, String> hostnameMap = new HashMap<>();
+
   public PlayerListener(HytalePlugin plugin, AnalyseClient client) {
     this.plugin = plugin;
     this.sessionManager = plugin.getSessionManager();
     this.client = client;
+  }
+
+  public void onPlayerSetupConnect(PlayerSetupConnectEvent event) {
+    UUID uuid = event.getUuid();
+    String hostname = event.getReferralSource().host;
+
+    hostnameMap.put(uuid, hostname);
+
+    plugin.debug("Hostname set for %s: %s", uuid, hostname);
   }
 
   /**
@@ -49,14 +65,7 @@ public class PlayerListener {
     String ip = getPlayerIp(playerRef);
 
     // Get hostname (Hytale doesn't seem to expose this yet, use unknown)
-    String hostname = "unknown";
-    PacketHandler packetHandler = playerRef.getPacketHandler();
-    if (packetHandler != null) {
-      SocketAddress address = packetHandler.getChannel().remoteAddress();
-      if (address instanceof InetSocketAddress socketAddress) {
-        hostname = socketAddress.getHostString();
-      }
-    }
+    String hostname = hostnameMap.getOrDefault(uuid, "unknown");
 
     // Create session for this player
     sessionManager.createSession(uuid, hostname, ip);
