@@ -3,7 +3,10 @@ plugins {
     id 'maven-publish'
 }
 
-// No dependencies - api module is standalone!
+dependencies {
+    // Gson for plugin messaging serialization (provided by Minecraft servers at runtime)
+    compileOnly "com.google.code.gson:gson:${project.property('gsonVersion')}"
+}
 
 // Generate BuildConstants.java with version from gradle.properties
 def generatedDir = layout.buildDirectory.dir('generated/sources/buildConstants/java/main')

@@ -7,10 +7,12 @@ import net.analyse.api.BuildConstants;
 import net.analyse.api.exception.AnalyseException;
 import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.platform.AnalysePlatform;
+import net.analyse.api.messaging.AnalyseMessaging;
 import net.analyse.bungeecord.manager.ABTestManager;
 import net.analyse.bungeecord.command.AnalyseCommand;
 import net.analyse.bungeecord.config.AnalyseBungeeConfig;
 import net.analyse.bungeecord.listener.PlayerListener;
+import net.analyse.bungeecord.listener.PluginMessageListener;
 import net.analyse.bungeecord.manager.SessionManager;
 import net.analyse.bungeecord.task.HeartbeatTask;
 import net.analyse.bungeecord.update.BungeeUpdateChecker;
@@ -55,6 +57,11 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
     // Register player listener
     playerListener = new PlayerListener(this);
     getProxy().getPluginManager().registerListener(this, playerListener);
+
+    // Register plugin message channel for backend server communication
+    getProxy().registerChannel(AnalyseMessaging.CHANNEL);
+    getProxy().getPluginManager().registerListener(this, new PluginMessageListener(this));
+    getLogger().info("Registered plugin message channel: " + AnalyseMessaging.CHANNEL);
 
     // Register with the API provider if a default server is configured
     if (playerListener.getDefaultClient() != null) {

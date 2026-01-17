@@ -21,9 +21,11 @@ import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.request.EventRequest;
 import net.analyse.sdk.response.EventResponse;
+import net.analyse.api.messaging.AnalyseMessaging;
 import net.analyse.velocity.command.AnalyseCommand;
 import net.analyse.velocity.config.AnalyseVelocityConfig;
 import net.analyse.velocity.listener.PlayerListener;
+import net.analyse.velocity.listener.PluginMessageListener;
 import net.analyse.velocity.manager.ABTestManager;
 import net.analyse.velocity.manager.SessionManager;
 import net.analyse.velocity.task.HeartbeatTask;
@@ -80,6 +82,13 @@ public class AnalyseVelocity implements AnalysePlatform {
     // Register player listener
     playerListener = new PlayerListener(this);
     server.getEventManager().register(this, playerListener);
+
+    // Register plugin message channel for backend server communication
+    server.getChannelRegistrar().register(
+        com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier.from(AnalyseMessaging.CHANNEL)
+    );
+    server.getEventManager().register(this, new PluginMessageListener(this));
+    logger.info("Registered plugin message channel: " + AnalyseMessaging.CHANNEL);
 
     // Register with the API provider if at least one server is configured
     if (playerListener.hasAnyClient()) {
