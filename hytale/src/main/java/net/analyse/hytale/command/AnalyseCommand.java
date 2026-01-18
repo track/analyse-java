@@ -112,7 +112,7 @@ public class AnalyseCommand extends AbstractCommand {
    */
   private void showPublicInfo(CommandSender sender) {
     StringBuilder message = new StringBuilder();
-    message.append("#3498db&l「 &r&fAnalyse #3498db&l」&r\n");
+    message.append("#3498db&l「 Analyse 」&r\n");
     message.append(" #5dade2┃ &7This server uses &fAnalyse &7to track\n");
     message.append(" #5dade2┃ &7player analytics and sessions.&r\n");
     message.append("&r\n");
@@ -131,7 +131,7 @@ public class AnalyseCommand extends AbstractCommand {
     boolean debugEnabled = plugin.isDebugEnabled();
 
     StringBuilder message = new StringBuilder();
-    message.append("#3498db&l「 &r&fAnalyse v").append(plugin.getVersion()).append(" #3498db&l」&r\n");
+    message.append("#3498db&l「 Analyse &r&fv").append(plugin.getVersion()).append(" #3498db&l」&r\n");
     message.append(" #5dade2┃ &fStatus: ").append(connected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
     message.append(" #5dade2┃ &fAPI: &7api.analyse.net&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
@@ -343,7 +343,7 @@ public void onError(AnalyseException exception) {
    */
   private String buildPlayerInfoMessage(String playerName, PlayerSession session, PlayerInfoResponse response) {
     StringBuilder message = new StringBuilder();
-    message.append("#3498db&l「 &r&fPlayer: &f").append(playerName).append(" #3498db&l」&r\n");
+    message.append("#3498db&l「 Player: &r&f").append(playerName).append(" #3498db&l」&r\n");
     message.append(" #5dade2┃ &fStatus: &a● Online&r\n");
 
     if (session != null) {
@@ -360,6 +360,7 @@ public void onError(AnalyseException exception) {
           || (response.getCountry() != null && !response.getCountry().isEmpty());
 
       if (hasStats) {
+        message.append("&r\n");
         message.append("#3498db&l「 Statistics 」&r\n");
       }
 
@@ -414,7 +415,7 @@ public void onError(AnalyseException exception) {
    */
   private void onHelp(CommandSender sender) {
     StringBuilder message = new StringBuilder();
-    message.append("#3498db&l「 &r&fAnalyse Commands #3498db&l」&r\n");
+    message.append("#3498db&l「 Analyse Commands 」&r\n");
     message.append(" #5dade2┃ &f/analyse &7- Show plugin info&r\n");
     message.append(" #5dade2┃ &f/analyse status &7- Show plugin status&r\n");
     message.append(" #5dade2┃ &f/analyse info &7- View server analytics&r\n");
