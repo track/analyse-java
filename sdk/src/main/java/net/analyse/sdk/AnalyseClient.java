@@ -7,12 +7,15 @@ import net.analyse.sdk.request.EventRequest;
 import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.JoinRequest;
 import net.analyse.sdk.request.LeaveRequest;
+import net.analyse.sdk.request.PlayerInfoRequest;
 import net.analyse.sdk.response.ABTestsResponse;
 import net.analyse.sdk.response.ConversionResponse;
 import net.analyse.sdk.response.EventResponse;
 import net.analyse.sdk.response.HeartbeatResponse;
 import net.analyse.sdk.response.JoinResponse;
 import net.analyse.sdk.response.LeaveResponse;
+import net.analyse.sdk.response.PlayerInfoResponse;
+import net.analyse.sdk.response.ServerInfoResponse;
 import net.analyse.sdk.response.VersionResponse;
 
 /**
@@ -27,6 +30,8 @@ public class AnalyseClient {
   private static final String ENDPOINT_AB_TESTS = "/v1/plugin/ab-tests";
   private static final String ENDPOINT_CONVERSION = "/v1/plugin/conversion";
   private static final String ENDPOINT_VERSION = "/v1/plugin/version";
+  private static final String ENDPOINT_SERVER_INFO = "/v1/plugin/info";
+  private static final String ENDPOINT_PLAYER_INFO = "/v1/plugin/player";
 
   private final AnalyseHttpClient httpClient;
 
@@ -105,6 +110,26 @@ public class AnalyseClient {
    */
   public void checkVersion(AnalyseCallback<VersionResponse> callback) {
     httpClient.get(ENDPOINT_VERSION, VersionResponse.class, callback);
+  }
+
+  /**
+   * Get real-time server analytics information
+   *
+   * @param callback The callback to invoke on success or failure
+   */
+  public void getServerInfo(AnalyseCallback<ServerInfoResponse> callback) {
+    httpClient.get(ENDPOINT_SERVER_INFO, ServerInfoResponse.class, callback);
+  }
+
+  /**
+   * Get detailed analytics information for a specific player
+   *
+   * @param request  The player info request containing the player UUID
+   * @param callback The callback to invoke on success or failure
+   */
+  public void getPlayerInfo(PlayerInfoRequest request, AnalyseCallback<PlayerInfoResponse> callback) {
+    String endpoint = ENDPOINT_PLAYER_INFO + "/" + request.getUuid();
+    httpClient.get(endpoint, PlayerInfoResponse.class, callback);
   }
 
   /**

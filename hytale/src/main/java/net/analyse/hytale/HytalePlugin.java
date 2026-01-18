@@ -49,10 +49,12 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
   private ScheduledExecutorService scheduler;
   private ScheduledFuture<?> heartbeatTask;
   private boolean configValid = false;
+  private String version;
 
   public HytalePlugin(@Nonnull JavaPluginInit init) {
     super(init);
 
+    this.version = init.getPluginManifest().getVersion().toString();
   }
 
   @Override
@@ -379,7 +381,7 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
 
   @Override
   public String getVersion() {
-    return "0.3.0"; // TODO: Get from manifest
+    return version;
   }
 
   // ========== Internal Getters ==========
