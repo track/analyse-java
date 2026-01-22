@@ -24,11 +24,11 @@ dependencies {
 }
 
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    archiveBaseName.set('analyse-hytale')
+    archiveBaseName.set('serverstats-hytale')
     archiveClassifier.set('') 
 
     // Relocate Adventure/MiniMessage to avoid conflicts
-    relocate 'net.kyori', 'net.analyse.libs.kyori'
+    relocate 'net.kyori', 'com.serverstats.libs.kyori'
 }
 
 tasks.named('build') {

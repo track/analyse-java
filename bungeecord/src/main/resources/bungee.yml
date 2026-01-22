@@ -1,6 +1,6 @@
-name: Analyse
+name: ServerStats
 version: ${version}
-main: net.analyse.bungeecord.AnalyseBungee
-description: Analyse tracking plugin
+main: com.serverstats.bungeecord.ServerStatsBungee
+description: ServerStats tracking plugin
 author: VertCode
 

@@ -24,9 +24,9 @@ tasks.register('generateBuildConstants') {
     outputs.dir(outputDir)
 
     doLast {
-        def constantsFile = new File(outputDir, 'net/analyse/api/BuildConstants.java')
+        def constantsFile = new File(outputDir, 'com/serverstats/api/BuildConstants.java')
         constantsFile.parentFile.mkdirs()
-        constantsFile.text = """package net.analyse.api;
+        constantsFile.text = """package com.serverstats.api;
 
 /**
  * Auto-generated build constants from Gradle.
@@ -52,14 +52,14 @@ publishing {
         maven(MavenPublication) {
             from components.java
 
-            groupId = 'net.analyse'
-            artifactId = 'analyse-api'
+            groupId = 'com.serverstats'
+            artifactId = 'serverstats-api'
             version = rootProject.version
 
             pom {
-                name = 'Analyse API'
-                description = 'Public API for Analyse analytics plugin'
-                url = 'https://analyse.net'
+                name = 'ServerStats API'
+                description = 'Public API for ServerStats analytics plugin'
+                url = 'https://serverstats.com'
 
                 licenses {
                     license {

@@ -4,11 +4,11 @@ This guide covers all configuration options for each platform.
 
 ## Paper Configuration
 
-Location: `plugins/Analyse/config.yml`
+Location: `plugins/ServerStats/config.yml`
 
 ```yaml
-# Your Analyse API key
-# Get this from your dashboard at https://analyse.net
+# Your ServerStats API key
+# Get this from your dashboard at https://serverstats.net
 api-key: "your-api-key-here"
 
 # Enable debug mode for verbose logging
@@ -24,13 +24,13 @@ instance-id: "auto-generated-uuid"
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `api-key` | String | `""` | Your Analyse API key (required) |
+| `api-key` | String | `""` | Your ServerStats API key (required) |
 | `debug` | Boolean | `false` | Enable verbose debug logging |
 | `instance-id` | String | Auto | Unique identifier for this server |
 
 ## BungeeCord Configuration
 
-Location: `plugins/Analyse/config.yml`
+Location: `plugins/ServerStats/config.yml`
 
 ```yaml
 # Enable debug mode
@@ -63,7 +63,7 @@ servers:
 
 ## Velocity Configuration
 
-Location: `plugins/analyse/config.yml`
+Location: `plugins/serverstats/config.yml`
 
 ```yaml
 # Enable debug mode
@@ -115,7 +115,7 @@ api-key: ${ANALYSE_API_KEY}
 After making changes, reload the configuration:
 
 ```
-/analyse reload
+/serverstats reload
 ```
 
 Note: Some changes (like adding new server entries on proxies) may require a full restart.

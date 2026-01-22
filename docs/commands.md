@@ -1,16 +1,16 @@
 # Commands
 
-The Analyse plugin provides commands to manage the plugin and send test events.
+The ServerStats plugin provides commands to manage the plugin and send test events.
 
 ## Base Command
 
 ```
-/analyse
+/serverstats
 ```
 
 **Aliases**: `/analytics`, `/anl`
 
-**Permission**: `analyse.command`
+**Permission**: `serverstats.command`
 
 ## Subcommands
 
@@ -19,18 +19,18 @@ The Analyse plugin provides commands to manage the plugin and send test events.
 Shows the current plugin status and connection information.
 
 ```
-/analyse status
+/serverstats status
 ```
 
-**Permission**: `analyse.command`
+**Permission**: `serverstats.command`
 
 **Output**:
 ```
 ──────────────────────────────
-  Analyse v0.1.0
+  ServerStats v0.1.0
 ──────────────────────────────
   Status: ● Connected
-  API: api.analyse.net
+  API: api.serverstats.net
   Players Tracked: 5
   Debug: Disabled
 ──────────────────────────────
@@ -46,30 +46,30 @@ On proxy servers (BungeeCord/Velocity), additional info is shown:
 Reloads the plugin configuration from disk.
 
 ```
-/analyse reload
+/serverstats reload
 ```
 
-**Permission**: `analyse.command.reload`
+**Permission**: `serverstats.command.reload`
 
 ### Debug
 
 Toggles debug mode on/off. Debug mode provides verbose logging for troubleshooting.
 
 ```
-/analyse debug
+/serverstats debug
 ```
 
-**Permission**: `analyse.command.debug`
+**Permission**: `serverstats.command.debug`
 
 ### Event
 
-Sends a custom event to the Analyse API. Useful for testing.
+Sends a custom event to the ServerStats API. Useful for testing.
 
 ```
-/analyse event <name> [options]
+/serverstats event <name> [options]
 ```
 
-**Permission**: `analyse.command.event`
+**Permission**: `serverstats.command.event`
 
 #### Options
 
@@ -83,19 +83,19 @@ Sends a custom event to the Analyse API. Useful for testing.
 
 ```bash
 # Simple test event
-/analyse event test_event
+/serverstats event test_event
 
 # Event with player
-/analyse event player_action --player Steve
+/serverstats event player_action --player Steve
 
 # Event with value
-/analyse event purchase --value 500.00
+/serverstats event purchase --value 500.00
 
 # Event with custom data
-/analyse event shop_purchase --player Steve --value 100 --data item=diamond_sword --data quantity=1
+/serverstats event shop_purchase --player Steve --value 100 --data item=diamond_sword --data quantity=1
 
 # Complex event
-/analyse event quest_completed --player Steve --data quest_id=dragon_slayer --data difficulty=hard --value 1000
+/serverstats event quest_completed --player Steve --data quest_id=dragon_slayer --data difficulty=hard --value 1000
 ```
 
 ### Help
@@ -103,19 +103,19 @@ Sends a custom event to the Analyse API. Useful for testing.
 Shows the help menu with all available commands.
 
 ```
-/analyse help
+/serverstats help
 ```
 
-**Permission**: `analyse.command`
+**Permission**: `serverstats.command`
 
 ## Permissions
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| `analyse.command` | Base permission for all commands | OP |
-| `analyse.command.reload` | Permission to reload configuration (Paper only) | OP |
-| `analyse.command.debug` | Permission to toggle debug mode | OP |
-| `analyse.command.event` | Permission to send custom events | OP |
+| `serverstats.command` | Base permission for all commands | OP |
+| `serverstats.command.reload` | Permission to reload configuration (Paper only) | OP |
+| `serverstats.command.debug` | Permission to toggle debug mode | OP |
+| `serverstats.command.event` | Permission to send custom events | OP |
 
 ## Tab Completion
 
@@ -130,6 +130,6 @@ The plugin provides intelligent tab completion powered by ACF (Annotation Comman
 All commands work from the console without the leading slash:
 
 ```
-analyse status
-analyse event server_restart --data reason=update
+serverstats status
+serverstats event server_restart --data reason=update
 ```

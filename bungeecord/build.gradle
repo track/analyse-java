@@ -11,7 +11,7 @@ dependencies {
 }
 
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    archiveBaseName.set('analyse-bungeecord')
+    archiveBaseName.set('serverstats-bungeecord')
     archiveClassifier.set('')
     // BungeeCord already includes Gson, so exclude it
     dependencies {

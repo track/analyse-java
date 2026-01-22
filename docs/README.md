@@ -1,6 +1,6 @@
-# Analyse Plugin Documentation
+# ServerStats Plugin Documentation
 
-Welcome to the Analyse plugin documentation. This guide covers installation, configuration, commands, and API usage for developers.
+Welcome to the ServerStats plugin documentation. This guide covers installation, configuration, commands, and API usage for developers.
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ Welcome to the Analyse plugin documentation. This guide covers installation, con
 
 ## Overview
 
-Analyse is a comprehensive analytics plugin for Minecraft servers. It provides:
+ServerStats is a comprehensive analytics plugin for Minecraft servers. It provides:
 
 - **Player Session Tracking** - Automatically tracks player joins, leaves, and playtime
 - **Heartbeat System** - Regular server health checks with online player data
@@ -50,7 +50,7 @@ Analyse is a comprehensive analytics plugin for Minecraft servers. It provides:
 1. Download the appropriate plugin jar for your platform
 2. Place it in your `plugins` folder
 3. Start the server to generate the config
-4. Add your API key from [analyse.net](https://analyse.net)
+4. Add your API key from [serverstats.net](https://serverstats.net)
 5. Restart the server
 
 ```yaml
@@ -62,5 +62,5 @@ instance-id: "auto-generated"
 
 ## Support
 
-- Website: [analyse.net](https://analyse.net)
-- API Documentation: [api.analyse.net](https://api.analyse.net)
+- Website: [serverstats.net](https://serverstats.net)
+- API Documentation: [api.serverstats.net](https://api.serverstats.net)

@@ -1,4 +1,4 @@
-# Analyse Server Plugins
+# ServerStats Server Plugins
 
 Analytics tracking plugins for Minecraft servers. Supports Paper, Velocity, and BungeeCord.
 
@@ -27,32 +27,32 @@ Download the appropriate plugin for your server:
 
 | Platform | Download |
 |----------|----------|
-| Paper/Spigot | `analyse-paper-x.x.x.jar` |
-| BungeeCord | `analyse-bungeecord-x.x.x.jar` |
-| Velocity | `analyse-velocity-x.x.x.jar` |
+| Paper/Spigot | `serverstats-paper-x.x.x.jar` |
+| BungeeCord | `serverstats-bungeecord-x.x.x.jar` |
+| Velocity | `serverstats-velocity-x.x.x.jar` |
 
 ### 2. Configure
 
-Add your API key from [analyse.net](https://analyse.net):
+Add your API key from [serverstats.net](https://serverstats.net):
 
 ```yaml
-# Paper - plugins/Analyse/config.yml
+# Paper - plugins/ServerStats/config.yml
 api-key: "your-api-key-here"
 ```
 
 ### 3. Verify
 
-Run `/analyse status` to check the connection.
+Run `/serverstats status` to check the connection.
 
 ## For Developers
 
 Track custom events from your plugin:
 
 ```java
-import net.analyse.api.Analyse;
+import net.serverstats.api.ServerStats;
 
 // Simple event
-Analyse.trackEvent("shop_purchase")
+ServerStats.trackEvent("shop_purchase")
     .withPlayer(player.getUniqueId(), player.getName())
     .withData("item", "diamond_sword")
     .withValue(500.0)
@@ -78,9 +78,9 @@ See the [Developer API Documentation](docs/api.md) for more examples.
 ```
 
 Output JARs:
-- `paper/build/libs/analyse-paper-*.jar`
-- `velocity/build/libs/analyse-velocity-*.jar`
-- `bungeecord/build/libs/analyse-bungeecord-*.jar`
+- `paper/build/libs/serverstats-paper-*.jar`
+- `velocity/build/libs/serverstats-velocity-*.jar`
+- `bungeecord/build/libs/serverstats-bungeecord-*.jar`
 
 ## Requirements
 
@@ -92,20 +92,20 @@ Output JARs:
 ## Commands
 
 ```
-/analyse              - Show plugin status
-/analyse status       - Show plugin status  
-/analyse reload       - Reload configuration
-/analyse debug        - Toggle debug mode
-/analyse event <name> - Send a custom event
-/analyse help         - Show help
+/serverstats              - Show plugin status
+/serverstats status       - Show plugin status  
+/serverstats reload       - Reload configuration
+/serverstats debug        - Toggle debug mode
+/serverstats event <name> - Send a custom event
+/serverstats help         - Show help
 ```
 
 See [Commands Documentation](docs/commands.md) for details.
 
 ## Support
 
-- Website: [analyse.net](https://analyse.net)
-- API: [api.analyse.net](https://api.analyse.net)
+- Website: [serverstats.net](https://serverstats.net)
+- API: [api.serverstats.net](https://api.serverstats.net)
 
 ## License
 

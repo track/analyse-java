@@ -1,20 +1,20 @@
-name: Analyse
+name: ServerStats
 version: ${version}
-main: net.analyse.paper.AnalysePlugin
+main: com.serverstats.paper.ServerStatsPlugin
 api-version: "1.21"
-description: Analyse tracking plugin
+description: ServerStats tracking plugin
 author: VertCode
 
 permissions:
-  analyse.command:
-    description: Base permission for analyse commands
+  serverstats.command:
+    description: Base permission for serverstats commands
     default: op
-  analyse.command.reload:
+  serverstats.command.reload:
     description: Permission to reload the plugin
     default: op
-  analyse.command.debug:
+  serverstats.command.debug:
     description: Permission to toggle debug mode
     default: op
-  analyse.command.event:
+  serverstats.command.event:
     description: Permission to send custom events
     default: op

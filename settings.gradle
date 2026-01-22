@@ -1,4 +1,4 @@
-rootProject.name = 'analyse'
+rootProject.name = 'serverstats'
 
 include 'sdk'
 include 'api'
