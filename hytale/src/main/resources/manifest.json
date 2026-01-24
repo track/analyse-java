@@ -1,6 +1,6 @@
 {
   "Group": "ServerStats",
-  "Name": "ServerStats",
+  "Name": "Hytale",
   "Version": "${version}",
   "Description": "Analytics plugin for Hytale servers",
   "Authors": [{"Name": "VertCode"}],
