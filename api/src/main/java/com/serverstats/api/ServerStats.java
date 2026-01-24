@@ -1,0 +1,241 @@
+package com.serverstats.api;
+
+import com.serverstats.api.manager.ABTestManager;
+import com.serverstats.api.manager.SessionManager;
+import com.serverstats.api.object.abtest.ABTest;
+import com.serverstats.api.object.builder.EventBuilder;
+import com.serverstats.api.platform.ServerStatsPlatform;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+/**
+ * Main entry point for the ServerStats API.
+ * Use this class to track custom analytics events and interact with A/B tests.
+ *
+ * <p>Event tracking example:</p>
+ * <pre>{@code
+ * // Track a player completing a quest
+ * ServerStats.trackEvent("quest_completed")
+ *     .withPlayer(player.getUniqueId(), player.getName())
+ *     .withData("quest_id", "dragon_slayer")
+ *     .withData("time_taken_seconds", 3600)
+ *     .withValue(500.0)
+ *     .send();
+ * }</pre>
+ *
+ * <p>A/B testing example:</p>
+ * <pre>{@code
+ * // Get the variant assigned to a player
+ * String variant = ServerStats.getVariant(player.getUniqueId(), "welcome-rewards");
+ * if ("diamonds".equals(variant)) {
+ *     giveWelcomeDiamonds(player);
+ * }
+ *
+ * // Track a conversion event
+ * ServerStats.trackConversion(player.getUniqueId(), player.getName(), "welcome-rewards", "first_purchase");
+ * }</pre>
+ *
+ * <p>Accessing managers:</p>
+ * <pre>{@code
+ * // Get the platform for advanced usage
+ * ServerStatsPlatform platform = ServerStats.get();
+ * SessionManager sessions = platform.getSessionManager();
+ * ABTestManager abTests = platform.getABTestManager();
+ * }</pre>
+ */
+public final class ServerStats {
+
+  private static EventBuilder.EventSender eventSender;
+
+  private ServerStats() {
+  }
+
+  /**
+   * Get the ServerStats platform instance for advanced usage.
+   * Use this to access managers and platform-specific functionality.
+   *
+   * @return The platform instance
+   * @throws IllegalStateException if ServerStats is not initialized
+   */
+  public static ServerStatsPlatform get() {
+    ServerStatsPlatform platform = ServerStatsProvider.getPlatform();
+    if (platform == null) {
+      throw new IllegalStateException("ServerStats is not initialized. Make sure the ServerStats plugin is enabled.");
+    }
+
+    return platform;
+  }
+
+  /**
+   * Check if ServerStats is available and ready to use
+   *
+   * @return true if ServerStats is initialized and ready
+   */
+  public static boolean isAvailable() {
+    return ServerStatsProvider.isRegistered();
+  }
+
+  /**
+   * Create a new event builder to track a custom event.
+   *
+   * @param name The event name (lowercase with underscores recommended, e.g., "quest_completed")
+   * @return An EventBuilder for configuring and sending the event
+   * @throws IllegalArgumentException if the name is null or blank
+   */
+  public static EventBuilder trackEvent(String name) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("Event name cannot be null or blank");
+    }
+
+    return new EventBuilder(name);
+  }
+
+  /**
+   * Convenience method to quickly track an event with a player
+   *
+   * @param name The event name
+   * @param playerUuid The player's UUID
+   * @param playerUsername The player's username
+   * @return An EventBuilder for further configuration
+   */
+  public static EventBuilder trackEvent(String name, UUID playerUuid, String playerUsername) {
+    return trackEvent(name).withPlayer(playerUuid, playerUsername);
+  }
+
+  /**
+   * Convenience method to quickly track an event with data
+   *
+   * @param name The event name
+   * @param data The event data
+   * @return An EventBuilder for further configuration
+   */
+  public static EventBuilder trackEvent(String name, Map<String, Object> data) {
+    return trackEvent(name).withData(data);
+  }
+
+  // ========== A/B Testing Methods ==========
+
+  /**
+   * Get the variant assigned to a player for a specific A/B test.
+   * This is deterministic - the same player always gets the same variant.
+   *
+   * @param playerUuid The player's UUID
+   * @param testKey The A/B test key
+   * @return The assigned variant key, or null if test not found or inactive
+   */
+  public static String getVariant(UUID playerUuid, String testKey) {
+    if (!isAvailable()) {
+      return null;
+    }
+
+    ABTestManager manager = get().getABTestManager();
+    return manager != null ? manager.getVariant(playerUuid, testKey) : null;
+  }
+
+  /**
+   * Check if an A/B test is currently active
+   *
+   * @param testKey The A/B test key
+   * @return true if the test exists and is active
+   */
+  public static boolean isTestActive(String testKey) {
+    if (!isAvailable()) {
+      return false;
+    }
+
+    ABTestManager manager = get().getABTestManager();
+    return manager != null && manager.isTestActive(testKey);
+  }
+
+  /**
+   * Get all active A/B tests
+   *
+   * @return List of active A/B tests, or empty list if none
+   */
+  public static List<? extends ABTest> getActiveTests() {
+    if (!isAvailable()) {
+      return List.of();
+    }
+
+    ABTestManager manager = get().getABTestManager();
+    return manager != null ? manager.getActiveTests() : List.of();
+  }
+
+  /**
+   * Get an A/B test by its key
+   *
+   * @param testKey The test key
+   * @return The A/B test, or null if not found
+   */
+  public static ABTest getTest(String testKey) {
+    if (!isAvailable()) {
+      return null;
+    }
+
+    ABTestManager manager = get().getABTestManager();
+    return manager != null ? manager.getTest(testKey) : null;
+  }
+
+  /**
+   * Track a conversion event for an A/B test.
+   * This records that a player completed a desired action.
+   *
+   * @param playerUuid The player's UUID
+   * @param playerUsername The player's username
+   * @param testKey The A/B test key
+   * @param eventName The conversion event name
+   */
+  public static void trackConversion(UUID playerUuid, String playerUsername, String testKey, String eventName) {
+    if (!isAvailable()) {
+      return;
+    }
+
+    ABTestManager manager = get().getABTestManager();
+    if (manager != null) {
+      manager.trackConversion(playerUuid, playerUsername, testKey, eventName);
+    }
+  }
+
+  // ========== Manager Shortcuts ==========
+
+  /**
+   * Get the session manager
+   *
+   * @return The session manager
+   * @throws IllegalStateException if ServerStats is not initialized
+   */
+  public static SessionManager sessions() {
+    return get().getSessionManager();
+  }
+
+  /**
+   * Get the A/B test manager
+   *
+   * @return The A/B test manager, or null if not available
+   * @throws IllegalStateException if ServerStats is not initialized
+   */
+  public static ABTestManager abTests() {
+    return get().getABTestManager();
+  }
+
+  // ========== Internal Methods (for platform implementations) ==========
+
+  /**
+   * Set the event sender. Called by platform implementations.
+   *
+   * @param sender The event sender
+   */
+  public static void setEventSender(EventBuilder.EventSender sender) {
+    eventSender = sender;
+  }
+
+  /**
+   * Get the event sender
+   *
+   * @return The event sender, or null if not set
+   */
+  public static EventBuilder.EventSender getEventSender() {
+    return eventSender;
+  }
+}

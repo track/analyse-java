@@ -22,7 +22,7 @@ java {
 }
 
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    archiveBaseName.set('analyse-paper')
+    archiveBaseName.set('serverstats-paper')
     archiveClassifier.set('')
 }
 

@@ -1,9 +1,9 @@
-# Analyse Plugin Configuration
+# ServerStats Plugin Configuration
 
 # Enable debug logging for troubleshooting
 debug: false
 
-# Your server's API key from the Analyse dashboard
+# Your server's API key from the ServerStats dashboard
 api-key: "anl_your_api_key_here"
 
 # Bedrock player username prefix (used by Floodgate/Geyser)
