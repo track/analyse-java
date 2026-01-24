@@ -3,19 +3,11 @@ package com.serverstats.hytale;
 import com.google.common.flogger.FluentLogger;
 import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import javax.annotation.Nonnull;
 import com.serverstats.api.ServerStats;
 import com.serverstats.api.ServerStatsProvider;
 import com.serverstats.api.exception.ServerStatsException;
@@ -35,6 +27,15 @@ import com.serverstats.sdk.request.EventRequest;
 import com.serverstats.sdk.request.JoinRequest;
 import com.serverstats.sdk.response.EventResponse;
 import com.serverstats.sdk.response.JoinResponse;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
 
 /**
  * ServerStats plugin for Hytale servers
@@ -53,7 +54,6 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
 
   public HytalePlugin(@Nonnull JavaPluginInit init) {
     super(init);
-
     this.version = init.getPluginManifest().getVersion().toString();
   }
 
@@ -92,7 +92,9 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
     getLogger().atInfo().log("Enabling ServerStats...");
 
     // Initialize SDK client
-    ServerStatsConfig sdkConfig = new ServerStatsConfig(pluginConfig.getApiKey());
+    ServerStatsConfig sdkConfig = new ServerStatsConfig(
+      pluginConfig.getApiKey()
+    );
     client = new ServerStatsClient(sdkConfig);
 
     // Register with the API provider so other plugins can use ServerStats.get()
@@ -107,9 +109,9 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
     // Register player listener
     PlayerListener playerListener = new PlayerListener(this, client);
     getEventRegistry()
-      .register(PlayerConnectEvent.class, playerListener::onPlayerConnect);
+      .registerGlobal(PlayerReadyEvent.class, playerListener::onPlayerReady);
     getEventRegistry()
-      .register(
+      .registerGlobal(
         PlayerDisconnectEvent.class,
         playerListener::onPlayerDisconnect
       );

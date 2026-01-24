@@ -1,11 +1,15 @@
 package com.serverstats.hytale.listener;
 
-import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.protocol.HostAddress;
+import com.hypixel.hytale.server.core.auth.PlayerAuthentication;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
-import com.hypixel.hytale.server.core.event.events.player.PlayerSetupConnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.PacketHandler;
+import com.hypixel.hytale.server.core.io.handlers.login.HandshakeHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.hytale.HytalePlugin;
 import com.serverstats.hytale.manager.SessionManager;
@@ -16,10 +20,9 @@ import com.serverstats.sdk.request.JoinRequest;
 import com.serverstats.sdk.request.LeaveRequest;
 import com.serverstats.sdk.response.JoinResponse;
 import com.serverstats.sdk.response.LeaveResponse;
+import io.netty.handler.codec.quic.QuicStreamChannel;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,81 +35,53 @@ public class PlayerListener {
   private final SessionManager sessionManager;
   private final ServerStatsClient client;
 
-  private final Map<UUID, String> hostnameMap = new HashMap<>();
-
   public PlayerListener(HytalePlugin plugin, ServerStatsClient client) {
     this.plugin = plugin;
     this.sessionManager = plugin.getSessionManager();
     this.client = client;
   }
 
-  public void onPlayerSetupConnect(PlayerSetupConnectEvent event) {
-    UUID uuid = event.getUuid();
-    String hostname = event.getReferralSource().host;
-
-    hostnameMap.put(uuid, hostname);
-
-    plugin.debug("Hostname set for %s: %s", uuid, hostname);
-  }
-
   /**
-   * Handle player connect event
+   * Handle player ready event
    *
-   * @param event The connect event
+   * @param event The ready event
    */
-  public void onPlayerConnect(PlayerConnectEvent event) {
-    PlayerRef playerRef = event.getPlayerRef();
-    UUID uuid = playerRef.getUuid();
-    String username = playerRef.getUsername();
+  public void onPlayerReady(PlayerReadyEvent event) {
+    Ref<EntityStore> ref = event.getPlayerRef();
+    if (!ref.isValid()) {
+      return;
+    }
 
-    // Get player's IP address
+    Store<EntityStore> store = ref.getStore();
+    PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+    if (playerRef == null) {
+      return;
+    }
+
+    UUID playerUuid = playerRef.getUuid();
+    String playerName = playerRef.getUsername();
     String ip = getPlayerIp(playerRef);
+    String hostname = getPlayerHostname(playerRef);
 
-    // Get hostname (Hytale doesn't seem to expose this yet, use unknown)
-    String hostname = hostnameMap.getOrDefault(uuid, "unknown");
-
-    // Create session for this player
-    sessionManager.createSession(uuid, hostname, ip);
-
-    plugin.debug(
-      "Created session for %s (hostname: %s, ip: %s)",
-      username,
-      hostname,
-      ip
-    );
+    sessionManager.createSession(playerUuid, hostname, ip);
+    plugin.debug("Created session for %s (hostname: %s, ip: %s)", playerName, hostname, ip);
 
     // Send join event to the API
-    JoinRequest request = new JoinRequest(uuid, username, hostname, ip, false);
-
-    client.join(
-      request,
-      new ServerStatsCallback<>() {
-        @Override
-        public void onSuccess(JoinResponse response) {
-          sessionManager
-            .getSession(uuid)
-            .ifPresent(session -> session.setSessionId(response.getSessionId())
-            );
-          plugin.debug(
-            "Join event sent for %s (sessionId: %s)",
-            username,
-            response.getSessionId()
-          );
-        }
-
-        @Override
-        public void onError(ServerStatsException exception) {
-          plugin.logWarning(
-            String.format(
-              "Failed to send join event for %s: %s",
-              username,
-              exception.getMessage()
-            )
-          );
-        }
+    JoinRequest request = new JoinRequest(playerUuid, playerName, hostname, ip, false);
+    client.join(request, new ServerStatsCallback<>() {
+      @Override
+      public void onSuccess(JoinResponse response) {
+        sessionManager.getSession(playerUuid).ifPresent(session -> session.setSessionId(response.getSessionId()));
+        plugin.debug("Join event sent for %s (sessionId: %s)", playerName, response.getSessionId());
       }
-    );
+
+      @Override
+      public void onError(ServerStatsException exception) {
+        plugin.logWarning(String.format("Failed to send join event for %s: %s", playerName, exception.getMessage()));
+      }
+    });
   }
+
 
   /**
    * Handle player disconnect event
@@ -177,24 +152,77 @@ public class PlayerListener {
         return "unknown";
       }
 
-      SocketAddress address = packetHandler.getChannel().remoteAddress();
-      if (!(address instanceof InetSocketAddress socketAddress)) {
-        plugin.debug(
-          String.format(
-            "Failed to get player IP for %s: %s",
-            playerRef.getUsername(),
-            "address is not an InetSocketAddress"
-          )
-        );
-        return "unknown";
+      String ip = null;
+      SocketAddress sa = (packetHandler.getChannel() instanceof
+          QuicStreamChannel quic)
+        ? quic.parent().remoteSocketAddress()
+        : packetHandler.getChannel().remoteAddress();
+      if (sa instanceof InetSocketAddress inet) {
+        ip = inet.getAddress().getHostAddress();
       }
 
-      String ip = socketAddress.getAddress().getHostAddress();
       return ip != null ? ip : "unknown";
     } catch (Exception e) {
       plugin.debug(
         String.format(
           "Failed to get player IP for %s: %s",
+          playerRef.getUsername(),
+          e.getMessage()
+        )
+      );
+      return "unknown";
+    }
+  }
+
+  /**
+   * Get the player's hostname from the player reference
+   *
+   * @param playerRef The player reference
+   * @return The IP address string
+   */
+  private String getPlayerHostname(PlayerRef playerRef) {
+    try {
+      PacketHandler packetHandler = playerRef.getPacketHandler();
+      if (packetHandler == null) {
+        plugin.debug(
+          String.format(
+            "Failed to get player hostname for %s: %s",
+            playerRef.getUsername(),
+            "packetHandler is null"
+          )
+        );
+        return "unknown";
+      }
+
+      PlayerAuthentication authentication = packetHandler.getAuth();
+      if (authentication == null) {
+        plugin.debug(
+          String.format(
+            "Failed to get player hostname for %s: %s",
+            playerRef.getUsername(),
+            "authentication is null"
+          )
+        );
+        return "unknown";
+      }
+
+      HostAddress referralSource = authentication.getReferralSource();
+      if (referralSource == null) {
+        plugin.debug(
+          String.format(
+            "Failed to get player hostname for %s: %s",
+            playerRef.getUsername(),
+            "referralSource is null"
+          )
+        );
+        return "unknown";
+      }
+
+      return referralSource.host != null ? referralSource.host : "unknown";
+    } catch (Exception e) {
+      plugin.debug(
+        String.format(
+          "Failed to get player hostname for %s: %s",
           playerRef.getUsername(),
           e.getMessage()
         )
