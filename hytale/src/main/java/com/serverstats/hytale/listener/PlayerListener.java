@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.event.events.player.PlayerSetupConnectEven
 import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
-
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.hytale.HytalePlugin;
 import com.serverstats.hytale.manager.SessionManager;
@@ -17,7 +16,6 @@ import com.serverstats.sdk.request.JoinRequest;
 import com.serverstats.sdk.request.LeaveRequest;
 import com.serverstats.sdk.response.JoinResponse;
 import com.serverstats.sdk.response.LeaveResponse;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
@@ -70,23 +68,44 @@ public class PlayerListener {
     // Create session for this player
     sessionManager.createSession(uuid, hostname, ip);
 
-    plugin.debug("Created session for %s (hostname: %s, ip: %s)", username, hostname, ip);
+    plugin.debug(
+      "Created session for %s (hostname: %s, ip: %s)",
+      username,
+      hostname,
+      ip
+    );
 
     // Send join event to the API
     JoinRequest request = new JoinRequest(uuid, username, hostname, ip, false);
 
-    client.join(request, new ServerStatsCallback<>() {
-      @Override
-      public void onSuccess(JoinResponse response) {
-        sessionManager.getSession(uuid).ifPresent(session -> session.setSessionId(response.getSessionId()));
-        plugin.debug("Join event sent for %s (sessionId: %s)", username, response.getSessionId());
-      }
+    client.join(
+      request,
+      new ServerStatsCallback<>() {
+        @Override
+        public void onSuccess(JoinResponse response) {
+          sessionManager
+            .getSession(uuid)
+            .ifPresent(session -> session.setSessionId(response.getSessionId())
+            );
+          plugin.debug(
+            "Join event sent for %s (sessionId: %s)",
+            username,
+            response.getSessionId()
+          );
+        }
 
-      @Override
-      public void onError(ServerStatsException exception) {
-        plugin.logWarning(String.format("Failed to send join event for %s: %s", username, exception.getMessage()));
+        @Override
+        public void onError(ServerStatsException exception) {
+          plugin.logWarning(
+            String.format(
+              "Failed to send join event for %s: %s",
+              username,
+              exception.getMessage()
+            )
+          );
+        }
       }
-    });
+    );
   }
 
   /**
@@ -112,17 +131,30 @@ public class PlayerListener {
     // Send leave event to the API
     LeaveRequest request = new LeaveRequest(session.getSessionId());
 
-    client.leave(request, new ServerStatsCallback<>() {
-      @Override
-      public void onSuccess(LeaveResponse response) {
-        plugin.debug("Leave event sent for %s (duration: %ds)", username, response.getDuration());
-      }
+    client.leave(
+      request,
+      new ServerStatsCallback<>() {
+        @Override
+        public void onSuccess(LeaveResponse response) {
+          plugin.debug(
+            "Leave event sent for %s (duration: %ds)",
+            username,
+            response.getDuration()
+          );
+        }
 
-      @Override
-      public void onError(ServerStatsException exception) {
-        plugin.logWarning(String.format("Failed to send leave event for %s: %s", username, exception.getMessage()));
+        @Override
+        public void onError(ServerStatsException exception) {
+          plugin.logWarning(
+            String.format(
+              "Failed to send leave event for %s: %s",
+              username,
+              exception.getMessage()
+            )
+          );
+        }
       }
-    });
+    );
   }
 
   /**
@@ -132,17 +164,42 @@ public class PlayerListener {
    * @return The IP address string
    */
   private String getPlayerIp(PlayerRef playerRef) {
-    PacketHandler packetHandler = playerRef.getPacketHandler();
-    if (packetHandler == null) {
+    try {
+      PacketHandler packetHandler = playerRef.getPacketHandler();
+      if (packetHandler == null) {
+        plugin.debug(
+          String.format(
+            "Failed to get player IP for %s: %s",
+            playerRef.getUsername(),
+            "packetHandler is null"
+          )
+        );
+        return "unknown";
+      }
+
+      SocketAddress address = packetHandler.getChannel().remoteAddress();
+      if (!(address instanceof InetSocketAddress socketAddress)) {
+        plugin.debug(
+          String.format(
+            "Failed to get player IP for %s: %s",
+            playerRef.getUsername(),
+            "address is not an InetSocketAddress"
+          )
+        );
+        return "unknown";
+      }
+
+      String ip = socketAddress.getAddress().getHostAddress();
+      return ip != null ? ip : "unknown";
+    } catch (Exception e) {
+      plugin.debug(
+        String.format(
+          "Failed to get player IP for %s: %s",
+          playerRef.getUsername(),
+          e.getMessage()
+        )
+      );
       return "unknown";
     }
-
-    SocketAddress address = packetHandler.getChannel().remoteAddress();
-    if (!(address instanceof InetSocketAddress socketAddress)) {
-      return "unknown";
-    }
-
-    String ip = socketAddress.getAddress().getHostAddress();
-    return ip != null ? ip : "unknown";
   }
 }
