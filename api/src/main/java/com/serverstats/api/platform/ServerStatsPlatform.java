@@ -1,5 +1,6 @@
 package com.serverstats.api.platform;
 
+import com.serverstats.api.addon.AddonManager;
 import com.serverstats.api.manager.ABTestManager;
 import com.serverstats.api.manager.SessionManager;
 
@@ -14,6 +15,7 @@ import com.serverstats.api.manager.SessionManager;
  * ServerStatsPlatform platform = ServerStats.get();
  * SessionManager sessions = platform.getSessionManager();
  * ABTestManager abTests = platform.getABTestManager();
+ * AddonManager addons = platform.getAddonManager();
  * }</pre>
  */
 public interface ServerStatsPlatform {
@@ -31,6 +33,13 @@ public interface ServerStatsPlatform {
    * @return The A/B test manager, or null if not available
    */
   ABTestManager getABTestManager();
+
+  /**
+   * Get the addon manager for loading and managing addons
+   *
+   * @return The addon manager
+   */
+  AddonManager getAddonManager();
 
   /**
    * Check if debug mode is enabled

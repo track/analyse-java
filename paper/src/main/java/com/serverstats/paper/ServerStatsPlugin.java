@@ -4,9 +4,11 @@ import co.aikar.commands.PaperCommandManager;
 import com.serverstats.api.ServerStats;
 import com.serverstats.api.ServerStatsProvider;
 import com.serverstats.api.BuildConstants;
+import com.serverstats.api.addon.AddonManager;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.api.platform.ServerStatsPlatform;
+import com.serverstats.paper.addon.PaperAddonManager;
 import com.serverstats.paper.manager.ABTestManager;
 import com.serverstats.paper.command.ServerStatsCommand;
 import com.serverstats.paper.config.ServerStatsPaperConfig;
@@ -36,6 +38,7 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   private ServerStatsPaperConfig pluginConfig;
   private SessionManager sessionManager;
   private ABTestManager abTestManager;
+  private PaperAddonManager addonManager;
   private ServerStatsClient client;
   private BukkitTask heartbeatTask;
   private PaperUpdateChecker updateChecker;
@@ -108,6 +111,11 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
+
+    // Initialize addon manager and load addons
+    addonManager = new PaperAddonManager(this);
+    addonManager.loadAddons();
+    addonManager.enableAddons();
 
     getLogger().info("ServerStats enabled successfully!");
   }
@@ -221,6 +229,11 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   public void onDisable() {
     getLogger().info("Disabling ServerStats...");
 
+    // Disable all addons first
+    if (addonManager != null) {
+      addonManager.disableAddons();
+    }
+
     // Unregister from the API provider
     ServerStatsProvider.unregister();
 
@@ -283,6 +296,11 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   @Override
   public ABTestManager getABTestManager() {
     return abTestManager;
+  }
+
+  @Override
+  public AddonManager getAddonManager() {
+    return addonManager;
   }
 
   @Override

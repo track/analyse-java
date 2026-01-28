@@ -6,8 +6,6 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

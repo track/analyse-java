@@ -14,6 +14,7 @@ import co.aikar.commands.VelocityCommandManager;
 import com.serverstats.api.ServerStats;
 import com.serverstats.api.ServerStatsProvider;
 import com.serverstats.api.BuildConstants;
+import com.serverstats.api.addon.AddonManager;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.api.platform.ServerStatsPlatform;
@@ -22,6 +23,7 @@ import com.serverstats.sdk.ServerStatsClient;
 import com.serverstats.sdk.request.EventRequest;
 import com.serverstats.sdk.response.EventResponse;
 import com.serverstats.api.messaging.ServerStatsMessaging;
+import com.serverstats.velocity.addon.VelocityAddonManager;
 import com.serverstats.velocity.command.ServerStatsCommand;
 import com.serverstats.velocity.config.ServerStatsVelocityConfig;
 import com.serverstats.velocity.listener.PlayerListener;
@@ -56,6 +58,7 @@ public class ServerStatsVelocity implements ServerStatsPlatform {
   private ServerStatsVelocityConfig pluginConfig;
   private SessionManager sessionManager;
   private ABTestManager abTestManager;
+  private VelocityAddonManager addonManager;
   private PlayerListener playerListener;
   private ScheduledTask heartbeatTask;
   private VelocityUpdateChecker updateChecker;
@@ -117,6 +120,11 @@ public class ServerStatsVelocity implements ServerStatsPlatform {
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
+
+    // Initialize addon manager and load addons
+    addonManager = new VelocityAddonManager(this, dataDirectory);
+    addonManager.loadAddons();
+    addonManager.enableAddons();
 
     logger.info(String.format("ServerStats initialized with %d server(s) configured",
         pluginConfig.getServers().size()));
@@ -248,6 +256,11 @@ public class ServerStatsVelocity implements ServerStatsPlatform {
   public void onProxyShutdown(ProxyShutdownEvent event) {
     logger.info("Shutting down ServerStats...");
 
+    // Disable all addons first
+    if (addonManager != null) {
+      addonManager.disableAddons();
+    }
+
     // Unregister from the API provider
     ServerStatsProvider.unregister();
 
@@ -342,6 +355,11 @@ public class ServerStatsVelocity implements ServerStatsPlatform {
   @Override
   public ABTestManager getABTestManager() {
     return abTestManager;
+  }
+
+  @Override
+  public AddonManager getAddonManager() {
+    return addonManager;
   }
 
   @Override

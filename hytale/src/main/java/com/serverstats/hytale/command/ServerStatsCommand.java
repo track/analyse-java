@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.command.system.ParseResult;
 import com.hypixel.hytale.server.core.command.system.ParserContext;
 
 import com.serverstats.api.ServerStats;
+import com.serverstats.api.addon.LoadedAddon;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.hytale.HytalePlugin;
@@ -23,6 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -72,6 +74,7 @@ public class ServerStatsCommand extends AbstractCommand {
         case "info" -> onInfo(sender, subArgs);
         case "debug" -> onDebug(sender);
         case "event" -> onEvent(sender, subArgs);
+        case "addons" -> onAddons(sender, subArgs);
         case "help" -> onHelp(sender);
         default -> onDefault(sender);
       }
@@ -409,6 +412,111 @@ public void onError(ServerStatsException exception) {
   }
 
   /**
+   * Handle addon commands
+   *
+   * @param sender The command sender
+   * @param args The command arguments
+   */
+  private void onAddons(CommandSender sender, String[] args) {
+    if (args.length == 0) {
+      // List all addons
+      Collection<LoadedAddon> addons = plugin.getAddonManager().getLoadedAddons();
+
+      StringBuilder message = new StringBuilder();
+      message.append("#3498db&l「 ServerStats Addons 」&r\n");
+
+      if (addons.isEmpty()) {
+        message.append(" &7No addons loaded.&r\n");
+        message.append(" &7Place addon JARs in the addons folder&r\n");
+      } else {
+        for (LoadedAddon addon : addons) {
+          String status = addon.isEnabled() ? "&a● Enabled" : "&c● Disabled";
+          message.append(" #5dade2┃ &f").append(addon.getName());
+          message.append(" &7v").append(addon.getVersion());
+          message.append(" ").append(status).append("&r\n");
+          if (!addon.getAuthor().isEmpty()) {
+            message.append("    &7by ").append(addon.getAuthor()).append("&r\n");
+          }
+        }
+        message.append("&r\n");
+        message.append(" &7Total: &f").append(addons.size()).append(" addon(s)&r\n");
+      }
+
+      send(sender, message.toString());
+      return;
+    }
+
+    String action = args[0].toLowerCase();
+    String[] actionArgs = new String[args.length - 1];
+    if (args.length > 1) {
+      System.arraycopy(args, 1, actionArgs, 0, actionArgs.length);
+    }
+
+    switch (action) {
+      case "reload" -> {
+        if (actionArgs.length == 0) {
+          send(sender, "&7Reloading all addons...");
+          plugin.getAddonManager().reloadAddons();
+          send(sender, "&aAll addons reloaded.");
+        } else {
+          String addonId = actionArgs[0];
+          if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
+            send(sender, "&cAddon '" + addonId + "' is not loaded.");
+            return;
+          }
+          send(sender, "&7Reloading addon '" + addonId + "'...");
+          if (plugin.getAddonManager().reloadAddon(addonId)) {
+            send(sender, "&aAddon '" + addonId + "' reloaded.");
+          } else {
+            send(sender, "&cFailed to reload addon '" + addonId + "'.");
+          }
+        }
+      }
+      case "enable" -> {
+        if (actionArgs.length == 0) {
+          send(sender, "&cUsage: /serverstats addons enable <addon>");
+          return;
+        }
+        String addonId = actionArgs[0];
+        if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
+          send(sender, "&cAddon '" + addonId + "' is not loaded.");
+          return;
+        }
+        if (plugin.getAddonManager().isAddonEnabled(addonId)) {
+          send(sender, "&7Addon '" + addonId + "' is already enabled.");
+          return;
+        }
+        if (plugin.getAddonManager().enableAddon(addonId)) {
+          send(sender, "&aAddon '" + addonId + "' enabled.");
+        } else {
+          send(sender, "&cFailed to enable addon '" + addonId + "'.");
+        }
+      }
+      case "disable" -> {
+        if (actionArgs.length == 0) {
+          send(sender, "&cUsage: /serverstats addons disable <addon>");
+          return;
+        }
+        String addonId = actionArgs[0];
+        if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
+          send(sender, "&cAddon '" + addonId + "' is not loaded.");
+          return;
+        }
+        if (!plugin.getAddonManager().isAddonEnabled(addonId)) {
+          send(sender, "&7Addon '" + addonId + "' is already disabled.");
+          return;
+        }
+        if (plugin.getAddonManager().disableAddon(addonId)) {
+          send(sender, "&aAddon '" + addonId + "' disabled.");
+        } else {
+          send(sender, "&cFailed to disable addon '" + addonId + "'.");
+        }
+      }
+      default -> send(sender, "&cUnknown addon command. Use: /serverstats addons [reload|enable|disable]");
+    }
+  }
+
+  /**
    * Show help information
    *
    * @param sender The command sender
@@ -422,6 +530,8 @@ public void onError(ServerStatsException exception) {
     message.append(" #5dade2┃ &f/serverstats info <player> &7- View player analytics&r\n");
     message.append(" #5dade2┃ &f/serverstats debug &7- Toggle debug mode&r\n");
     message.append(" #5dade2┃ &f/serverstats event <name> &7- Send custom event&r\n");
+    message.append(" #5dade2┃ &f/serverstats addons &7- List loaded addons&r\n");
+    message.append(" #5dade2┃ &f/serverstats addons reload [id] &7- Reload addons&r\n");
     message.append(" #5dade2┃ &f/serverstats help &7- Show this help&r\n");
     send(sender, message.toString());
   }

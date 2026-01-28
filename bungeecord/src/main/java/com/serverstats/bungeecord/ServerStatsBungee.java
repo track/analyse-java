@@ -4,10 +4,12 @@ import co.aikar.commands.BungeeCommandManager;
 import com.serverstats.api.ServerStats;
 import com.serverstats.api.ServerStatsProvider;
 import com.serverstats.api.BuildConstants;
+import com.serverstats.api.addon.AddonManager;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.api.platform.ServerStatsPlatform;
 import com.serverstats.api.messaging.ServerStatsMessaging;
+import com.serverstats.bungeecord.addon.BungeeAddonManager;
 import com.serverstats.bungeecord.manager.ABTestManager;
 import com.serverstats.bungeecord.command.ServerStatsCommand;
 import com.serverstats.bungeecord.config.ServerStatsBungeeConfig;
@@ -38,6 +40,7 @@ public class ServerStatsBungee extends Plugin implements ServerStatsPlatform {
   private ServerStatsBungeeConfig pluginConfig;
   private SessionManager sessionManager;
   private ABTestManager abTestManager;
+  private BungeeAddonManager addonManager;
   private PlayerListener playerListener;
   private ScheduledTask heartbeatTask;
   private BungeeUpdateChecker updateChecker;
@@ -90,6 +93,11 @@ public class ServerStatsBungee extends Plugin implements ServerStatsPlatform {
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
+
+    // Initialize addon manager and load addons
+    addonManager = new BungeeAddonManager(this);
+    addonManager.loadAddons();
+    addonManager.enableAddons();
 
     getLogger().info(String.format("ServerStats initialized with %d server(s) configured",
         pluginConfig.getServers().size()));
@@ -192,6 +200,11 @@ public class ServerStatsBungee extends Plugin implements ServerStatsPlatform {
   public void onDisable() {
     getLogger().info("Shutting down ServerStats...");
 
+    // Disable all addons first
+    if (addonManager != null) {
+      addonManager.disableAddons();
+    }
+
     // Unregister from the API provider
     ServerStatsProvider.unregister();
 
@@ -284,6 +297,11 @@ public class ServerStatsBungee extends Plugin implements ServerStatsPlatform {
   @Override
   public ABTestManager getABTestManager() {
     return abTestManager;
+  }
+
+  @Override
+  public AddonManager getAddonManager() {
+    return addonManager;
   }
 
   @Override

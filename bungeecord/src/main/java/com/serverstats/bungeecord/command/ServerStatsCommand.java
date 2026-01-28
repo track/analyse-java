@@ -10,6 +10,7 @@ import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import com.serverstats.api.ServerStats;
 import com.serverstats.api.BuildConstants;
+import com.serverstats.api.addon.LoadedAddon;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.bungeecord.ServerStatsBungee;
@@ -23,6 +24,7 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -378,6 +380,104 @@ public class ServerStatsCommand extends BaseCommand {
     }
   }
 
+  @Subcommand("addons")
+  @Description("List all loaded addons")
+  @CommandPermission("serverstats.command.addons")
+  public void onAddons(CommandSender sender) {
+    Collection<LoadedAddon> addons = plugin.getAddonManager().getLoadedAddons();
+
+    StringBuilder message = new StringBuilder();
+    message.append("#3498db&l「 ServerStats Addons 」&r\n");
+
+    if (addons.isEmpty()) {
+      message.append(" &7No addons loaded.&r\n");
+      message.append(" &7Place addon JARs in &fplugins/ServerStats/addons/&r\n");
+    } else {
+      for (LoadedAddon addon : addons) {
+        String status = addon.isEnabled() ? "&a● Enabled" : "&c● Disabled";
+        message.append(" #5dade2┃ &f").append(addon.getName());
+        message.append(" &7v").append(addon.getVersion());
+        message.append(" ").append(status).append("&r\n");
+        if (!addon.getAuthor().isEmpty()) {
+          message.append("    &7by ").append(addon.getAuthor()).append("&r\n");
+        }
+      }
+      message.append("&r\n");
+      message.append(" &7Total: &f").append(addons.size()).append(" addon(s)&r\n");
+    }
+
+    send(sender, message.toString());
+  }
+
+  @Subcommand("addons reload")
+  @Description("Reload all addons or a specific addon")
+  @CommandPermission("serverstats.command.addons.reload")
+  @Syntax("[addon]")
+  public void onAddonsReload(CommandSender sender, String[] args) {
+    if (args.length == 0) {
+      send(sender, "&7Reloading all addons...");
+      plugin.getAddonManager().reloadAddons();
+      send(sender, "&aAll addons reloaded.");
+    } else {
+      String addonId = args[0];
+      if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
+        send(sender, "&cAddon '" + addonId + "' is not loaded.");
+        return;
+      }
+
+      send(sender, "&7Reloading addon '" + addonId + "'...");
+      if (plugin.getAddonManager().reloadAddon(addonId)) {
+        send(sender, "&aAddon '" + addonId + "' reloaded.");
+      } else {
+        send(sender, "&cFailed to reload addon '" + addonId + "'.");
+      }
+    }
+  }
+
+  @Subcommand("addons enable")
+  @Description("Enable an addon")
+  @CommandPermission("serverstats.command.addons.enable")
+  @Syntax("<addon>")
+  public void onAddonsEnable(CommandSender sender, String addonId) {
+    if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
+      send(sender, "&cAddon '" + addonId + "' is not loaded.");
+      return;
+    }
+
+    if (plugin.getAddonManager().isAddonEnabled(addonId)) {
+      send(sender, "&7Addon '" + addonId + "' is already enabled.");
+      return;
+    }
+
+    if (plugin.getAddonManager().enableAddon(addonId)) {
+      send(sender, "&aAddon '" + addonId + "' enabled.");
+    } else {
+      send(sender, "&cFailed to enable addon '" + addonId + "'.");
+    }
+  }
+
+  @Subcommand("addons disable")
+  @Description("Disable an addon")
+  @CommandPermission("serverstats.command.addons.disable")
+  @Syntax("<addon>")
+  public void onAddonsDisable(CommandSender sender, String addonId) {
+    if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
+      send(sender, "&cAddon '" + addonId + "' is not loaded.");
+      return;
+    }
+
+    if (!plugin.getAddonManager().isAddonEnabled(addonId)) {
+      send(sender, "&7Addon '" + addonId + "' is already disabled.");
+      return;
+    }
+
+    if (plugin.getAddonManager().disableAddon(addonId)) {
+      send(sender, "&aAddon '" + addonId + "' disabled.");
+    } else {
+      send(sender, "&cFailed to disable addon '" + addonId + "'.");
+    }
+  }
+
   @Subcommand("help")
   @Description("Show help information")
   @CommandPermission("serverstats.command.help")
@@ -390,6 +490,8 @@ public class ServerStatsCommand extends BaseCommand {
     message.append(" #5dade2┃ &f/serverstats info <player> &7- View player analytics&r\n");
     message.append(" #5dade2┃ &f/serverstats debug &7- Toggle debug mode&r\n");
     message.append(" #5dade2┃ &f/serverstats event <name> &7- Send custom event&r\n");
+    message.append(" #5dade2┃ &f/serverstats addons &7- List loaded addons&r\n");
+    message.append(" #5dade2┃ &f/serverstats addons reload [id] &7- Reload addons&r\n");
     message.append(" #5dade2┃ &f/serverstats help &7- Show this help&r\n");
     send(sender, message.toString());
   }

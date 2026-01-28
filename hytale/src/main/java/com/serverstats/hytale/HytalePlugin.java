@@ -8,9 +8,11 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.serverstats.api.ServerStats;
 import com.serverstats.api.ServerStatsProvider;
+import com.serverstats.api.addon.AddonManager;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.api.platform.ServerStatsPlatform;
+import com.serverstats.hytale.addon.HytaleAddonManager;
 import com.serverstats.hytale.command.ServerStatsCommand;
 import com.serverstats.hytale.config.ServerStatsHytaleConfig;
 import com.serverstats.hytale.listener.PlayerListener;
@@ -43,6 +45,7 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
   private ServerStatsHytaleConfig pluginConfig;
   private SessionManager sessionManager;
   private ABTestManager abTestManager;
+  private HytaleAddonManager addonManager;
   private HytaleUpdateChecker updateChecker;
   private ServerStatsClient client;
   private ScheduledExecutorService scheduler;
@@ -136,6 +139,11 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
 
     // Initialize sessions for players already online (in case of reload)
     initializeOnlinePlayers();
+
+    // Initialize addon manager and load addons
+    addonManager = new HytaleAddonManager(this, getDataDirectory());
+    addonManager.loadAddons();
+    addonManager.enableAddons();
 
     getLogger().atInfo().log("ServerStats enabled successfully!");
   }
@@ -294,6 +302,11 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
   protected void shutdown() {
     getLogger().atInfo().log("Disabling ServerStats...");
 
+    // Disable all addons first
+    if (addonManager != null) {
+      addonManager.disableAddons();
+    }
+
     // Unregister from the API provider
     ServerStatsProvider.unregister();
 
@@ -365,6 +378,11 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
   }
 
   @Override
+  public AddonManager getAddonManager() {
+    return addonManager;
+  }
+
+  @Override
   public boolean isDebugEnabled() {
     return pluginConfig != null && pluginConfig.isDebug();
   }
@@ -377,6 +395,29 @@ public class HytalePlugin extends JavaPlugin implements ServerStatsPlatform {
   @Override
   public void logWarning(String message) {
     getLogger().atWarning().log("%s", message);
+  }
+
+  /**
+   * Log an error message
+   *
+   * @param message The message to log
+   */
+  public void logError(String message) {
+    getLogger().atSevere().log("%s", message);
+  }
+
+  /**
+   * Log an error message with an exception
+   *
+   * @param message The message to log
+   * @param throwable The exception to log
+   */
+  public void logError(String message, Throwable throwable) {
+    if (throwable != null) {
+      getLogger().atSevere().withCause(throwable).log("%s", message);
+    } else {
+      getLogger().atSevere().log("%s", message);
+    }
   }
 
   @Override
