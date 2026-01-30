@@ -19,7 +19,7 @@ public class VelocityAddonManager extends AbstractAddonManager {
      * @param dataDirectory The plugin's data directory
      */
     public VelocityAddonManager(ServerStatsVelocity plugin, Path dataDirectory) {
-        super(plugin, dataDirectory.resolve("addons"));
+        super(plugin, dataDirectory.resolve("addons"), plugin.getClass().getClassLoader());
         this.plugin = plugin;
     }
 

@@ -18,7 +18,7 @@ public class BungeeAddonManager extends AbstractAddonManager {
      * @param plugin The main plugin instance
      */
     public BungeeAddonManager(ServerStatsBungee plugin) {
-        super(plugin, plugin.getDataFolder().toPath().resolve("addons"));
+        super(plugin, plugin.getDataFolder().toPath().resolve("addons"), plugin.getClass().getClassLoader());
         this.plugin = plugin;
     }
 

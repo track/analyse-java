@@ -3,7 +3,9 @@ package com.serverstats.paper.addon;
 import com.serverstats.api.addon.AbstractAddonManager;
 import com.serverstats.api.addon.AddonLogger;
 import com.serverstats.paper.ServerStatsPlugin;
-import java.nio.file.Path;
+
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.logging.Level;
 
 /**
@@ -19,8 +21,14 @@ public class PaperAddonManager extends AbstractAddonManager {
      * @param plugin The main plugin instance
      */
     public PaperAddonManager(ServerStatsPlugin plugin) {
-        super(plugin, plugin.getDataFolder().toPath().resolve("addons"));
+        super(plugin, plugin.getDataFolder().toPath().resolve("addons"), plugin.getClass().getClassLoader());
         this.plugin = plugin;
+    }
+
+    @Override
+    protected URLClassLoader createAddonClassLoader(URL[] urls, ClassLoader parent) {
+        // Use custom classloader that can access other plugins' classes
+        return new PaperAddonClassLoader(urls, parent);
     }
 
     @Override

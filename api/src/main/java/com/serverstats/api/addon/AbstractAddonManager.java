@@ -34,15 +34,19 @@ public abstract class AbstractAddonManager implements AddonManager {
     private final Map<String, LoadedAddonImpl> loadedAddons = new LinkedHashMap<>();
     private final Map<String, URLClassLoader> addonClassLoaders = new HashMap<>();
 
+    private final ClassLoader parentClassLoader;
+
     /**
      * Create a new addon manager
      *
      * @param platform The ServerStats platform instance
      * @param addonsFolder The folder to load addons from
+     * @param parentClassLoader The parent classloader for addon classloaders (should have access to server and other plugin classes)
      */
-    public AbstractAddonManager(ServerStatsPlatform platform, Path addonsFolder) {
+    public AbstractAddonManager(ServerStatsPlatform platform, Path addonsFolder, ClassLoader parentClassLoader) {
         this.platform = platform;
         this.addonsFolder = addonsFolder;
+        this.parentClassLoader = parentClassLoader;
     }
 
     @Override
@@ -254,7 +258,7 @@ public abstract class AbstractAddonManager implements AddonManager {
         try (JarFile jarFile = new JarFile(jarPath.toFile())) {
             // Create a temporary classloader to scan classes
             URL jarUrl = jarPath.toUri().toURL();
-            try (URLClassLoader tempLoader = new URLClassLoader(new URL[]{jarUrl}, getClass().getClassLoader())) {
+            try (URLClassLoader tempLoader = new URLClassLoader(new URL[]{jarUrl}, parentClassLoader)) {
                 // Scan all classes in the JAR
                 Enumeration<JarEntry> entries = jarFile.entries();
                 while (entries.hasMoreElements()) {
@@ -363,12 +367,10 @@ public abstract class AbstractAddonManager implements AddonManager {
                 }
             }
 
-            // Create isolated classloader for this addon
             URL jarUrl = candidate.jarPath.toUri().toURL();
-            URLClassLoader addonClassLoader = new URLClassLoader(
-                new URL[]{jarUrl},
-                getClass().getClassLoader()
-            );
+            
+            // Create classloader for this addon
+            URLClassLoader addonClassLoader = createAddonClassLoader(new URL[]{jarUrl}, parentClassLoader);
 
             // Load the addon class
             Class<?> addonClass = addonClassLoader.loadClass(candidate.className);
@@ -405,6 +407,18 @@ public abstract class AbstractAddonManager implements AddonManager {
             logError("Failed to load addon '" + candidate.info.id() + "'", e);
             return false;
         }
+    }
+
+    /**
+     * Create a classloader for an addon. Platform implementations can override this
+     * to provide custom classloaders that support cross-plugin class visibility.
+     *
+     * @param urls The addon JAR URLs
+     * @param parent The parent classloader
+     * @return A classloader for the addon
+     */
+    protected URLClassLoader createAddonClassLoader(URL[] urls, ClassLoader parent) {
+        return new URLClassLoader(urls, parent);
     }
 
     /**
