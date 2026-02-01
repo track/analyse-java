@@ -4,13 +4,13 @@ import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.api.object.abtest.ABTest;
 import com.serverstats.paper.ServerStatsPlugin;
 import com.serverstats.paper.object.action.PaperAction;
+import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.ServerStatsCallback;
 import com.serverstats.sdk.object.action.ActionData;
 import com.serverstats.sdk.request.ConversionRequest;
 import com.serverstats.sdk.response.ABTestsResponse;
 import com.serverstats.sdk.response.ConversionResponse;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class ABTestManager implements com.serverstats.api.manager.ABTestManager 
 
   private final ServerStatsPlugin plugin;
   private final Map<String, com.serverstats.sdk.object.abtest.ABTest> testsCache = new ConcurrentHashMap<>();
-  private BukkitTask syncTask;
+  private SchedulerUtil.CancellableTask syncTask;
 
   public ABTestManager(ServerStatsPlugin plugin) {
     this.plugin = plugin;
@@ -39,8 +39,8 @@ public class ABTestManager implements com.serverstats.api.manager.ABTestManager 
     // Initial sync
     syncTests();
 
-    // Schedule periodic sync
-    syncTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(
+    // Schedule periodic sync (async since it only calls the API)
+    syncTask = SchedulerUtil.runAsyncTimer(
         plugin,
         this::syncTests,
         SYNC_INTERVAL_TICKS,

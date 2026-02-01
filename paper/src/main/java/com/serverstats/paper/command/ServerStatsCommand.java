@@ -16,6 +16,7 @@ import com.serverstats.api.object.builder.EventBuilder;
 import com.serverstats.paper.ServerStatsPlugin;
 import com.serverstats.paper.object.session.PlayerSession;
 import com.serverstats.paper.util.ComponentUtil;
+import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.ServerStatsCallback;
 import com.serverstats.sdk.request.PlayerInfoRequest;
 import com.serverstats.sdk.response.PlayerInfoResponse;
@@ -194,7 +195,7 @@ public class ServerStatsCommand extends BaseCommand {
     Double finalValue = value;
     builder.send(success -> {
       if (Boolean.TRUE.equals(success)) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        SchedulerUtil.runSync(plugin, () -> {
           send(sender, "&a✓ Event '&f" + eventName + "&a' sent successfully");
           if (finalPlayerName != null) {
             send(sender, "  &7Player: &f" + finalPlayerName);
@@ -207,7 +208,7 @@ public class ServerStatsCommand extends BaseCommand {
           }
         });
       } else {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        SchedulerUtil.runSync(plugin, () -> {
           send(sender, "&c✗ Failed to send event '&f" + eventName + "&c'");
         });
       }
@@ -247,7 +248,7 @@ public class ServerStatsCommand extends BaseCommand {
     plugin.getClient().getServerInfo(new ServerStatsCallback<>() {
       @Override
       public void onSuccess(ServerInfoResponse response) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        SchedulerUtil.runSync(plugin, () -> {
           StringBuilder message = new StringBuilder();
           message.append("#3498db&l「 Server Analytics 」&r\n");
           message.append(" #5dade2┃ &fOnline Players: &7").append(onlinePlayers).append("&r\n");
@@ -267,7 +268,7 @@ public class ServerStatsCommand extends BaseCommand {
 
       @Override
       public void onError(ServerStatsException exception) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        SchedulerUtil.runSync(plugin, () -> {
           StringBuilder message = new StringBuilder();
           message.append("#3498db&l「 Server Analytics 」&r\n");
           message.append(" #5dade2┃ &fOnline Players: &7").append(onlinePlayers).append("&r\n");
@@ -298,14 +299,14 @@ public class ServerStatsCommand extends BaseCommand {
     plugin.getClient().getPlayerInfo(new PlayerInfoRequest(player.getUniqueId()), new ServerStatsCallback<>() {
       @Override
       public void onSuccess(PlayerInfoResponse response) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        SchedulerUtil.runSync(plugin, () -> {
           send(sender, buildPlayerInfoMessage(player.getName(), session, response));
         });
       }
 
       @Override
       public void onError(ServerStatsException exception) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        SchedulerUtil.runSync(plugin, () -> {
           send(sender, buildPlayerInfoMessage(player.getName(), session, null));
         });
       }

@@ -3,6 +3,7 @@ package com.serverstats.paper.listener;
 import com.serverstats.paper.ServerStatsPlugin;
 import com.serverstats.paper.manager.SessionManager;
 import com.serverstats.paper.object.session.PlayerSession;
+import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.ServerStatsCallback;
 import com.serverstats.sdk.ServerStatsClient;
 import com.serverstats.api.exception.ServerStatsException;
@@ -112,13 +113,16 @@ public class PlayerListener implements Listener {
     if (player.hasPermission("serverstats.admin") && plugin.getUpdateChecker() != null) {
       if (plugin.getUpdateChecker().isUpdateAvailable()) {
         // Delay slightly so it appears after other join messages
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+        // Use entity scheduler for Folia compatibility
+        SchedulerUtil.runForEntityDelayed(plugin, player, () -> {
           plugin.getUpdateChecker().sendUpdateMessage(
               player,
               plugin.getUpdateChecker().getCurrentVersion(),
               plugin.getUpdateChecker().getLatestVersion(),
               plugin.getUpdateChecker().getDownloadUrl()
           );
+        }, () -> {
+          // Player left before message could be sent, do nothing
         }, 40L);
       }
     }

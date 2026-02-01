@@ -1,6 +1,7 @@
 package com.serverstats.paper.object.action;
 
 import com.serverstats.paper.ServerStatsPlugin;
+import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.object.action.ActionData;
 import com.serverstats.sdk.object.action.ActionType;
 import org.bukkit.Bukkit;
@@ -39,15 +40,22 @@ public class RunCommandAction extends PaperAction {
     boolean asConsole = data.getBoolean("console", true);
     String finalCommand = command;
 
-    // Execute on main thread
-    Bukkit.getScheduler().runTask(plugin, () -> {
-      if (asConsole) {
+    // Execute on appropriate thread (entity scheduler for player commands in Folia)
+    if (asConsole) {
+      // Console commands can run on global region
+      SchedulerUtil.runSync(plugin, () -> {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
-      } else {
+        debug("Executed console command for %s: %s", player.getName(), finalCommand);
+      });
+    } else {
+      // Player commands must run on the player's region thread
+      SchedulerUtil.runForEntity(plugin, player, () -> {
         player.performCommand(finalCommand);
-      }
-
-      debug("Executed command for %s: %s (console=%s)", player.getName(), finalCommand, asConsole);
-    });
+        debug("Executed player command for %s: %s", player.getName(), finalCommand);
+      }, () -> {
+        // Player left before command could be executed
+        debug("Player %s left before command could be executed: %s", player.getName(), finalCommand);
+      });
+    }
   }
 }

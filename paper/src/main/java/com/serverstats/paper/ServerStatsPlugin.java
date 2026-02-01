@@ -16,6 +16,7 @@ import com.serverstats.paper.listener.PlayerListener;
 import com.serverstats.paper.manager.SessionManager;
 import com.serverstats.paper.task.HeartbeatTask;
 import com.serverstats.paper.update.PaperUpdateChecker;
+import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.ServerStatsCallback;
 import com.serverstats.sdk.ServerStatsClient;
 import com.serverstats.sdk.config.ServerStatsConfig;
@@ -25,7 +26,6 @@ import com.serverstats.sdk.response.EventResponse;
 import com.serverstats.sdk.response.JoinResponse;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -40,7 +40,7 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   private ABTestManager abTestManager;
   private PaperAddonManager addonManager;
   private ServerStatsClient client;
-  private BukkitTask heartbeatTask;
+  private SchedulerUtil.CancellableTask heartbeatTask;
   private PaperUpdateChecker updateChecker;
   private boolean configValid = false;
 
@@ -94,7 +94,8 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
     commandManager.registerCommand(new ServerStatsCommand(this));
 
     // Start heartbeat task (every 30 seconds = 600 ticks)
-    heartbeatTask = getServer().getScheduler().runTaskTimerAsynchronously(
+    // Uses sync timer because HeartbeatTask collects player data on main thread, then sends async
+    heartbeatTask = SchedulerUtil.runSyncTimer(
         this,
         new HeartbeatTask(this, client),
         600L,
@@ -121,21 +122,25 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   }
 
   /**
-   * Send an event via the SDK
+   * Send an event via the SDK.
+   * Thread-safe: can be called from any thread.
    *
    * @param event The event builder
    * @param callback Optional callback for result
    */
   private void sendEvent(EventBuilder event, Consumer<Boolean> callback) {
     // Process A/B test ON_EVENT triggers if player is associated
+    // Must run on sync thread for Folia compatibility
     if (event.getPlayerUuid() != null && abTestManager != null) {
-      Player player = getServer().getPlayer(event.getPlayerUuid());
-      if (player != null) {
-        abTestManager.processEvent(player, event.getName());
-      }
+      SchedulerUtil.runSync(this, () -> {
+        Player player = getServer().getPlayer(event.getPlayerUuid());
+        if (player != null) {
+          abTestManager.processEvent(player, event.getName());
+        }
+      });
     }
 
-    // Send to API
+    // Send to API (async-safe operation)
     EventRequest request = new EventRequest(
         event.getName(),
         event.getPlayerUuid(),

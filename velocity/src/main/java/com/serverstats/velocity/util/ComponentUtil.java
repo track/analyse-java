@@ -20,6 +20,12 @@ public final class ComponentUtil {
   private static final Pattern HEX_PATTERN = Pattern.compile("#([A-Fa-f0-9]{6})");
   private static final Pattern AMPERSAND_HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
+  // URL pattern for detecting links (with or without protocol)
+  private static final Pattern URL_PATTERN = Pattern.compile(
+      "(https?://[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]+|(?<![\\w@])([\\w\\-]+\\.)+(?:com|net|org|io|gg|me|co|dev|app|xyz|info|biz|us|uk|de|nl|be|fr|eu)[\\w\\-._~:/?#\\[\\]@!$&'()*+,;=%]*)",
+      Pattern.CASE_INSENSITIVE
+  );
+
   // Legacy color code mappings
   private static final Map<String, String> LEGACY_COLORS = Map.ofEntries(
       Map.entry("&0", "<black>"),
@@ -71,6 +77,9 @@ public final class ComponentUtil {
 
     // Convert legacy color codes to MiniMessage
     parsed = convertLegacyCodes(parsed);
+
+    // Convert URLs to clickable links
+    parsed = convertUrls(parsed);
 
     return MINI_MESSAGE.deserialize(parsed);
   }
@@ -152,6 +161,41 @@ public final class ComponentUtil {
     }
 
     return result;
+  }
+
+  /**
+   * Convert URLs to clickable MiniMessage links
+   *
+   * @param text The text to convert
+   * @return Text with URLs converted to clickable links
+   */
+  private static String convertUrls(String text) {
+    Matcher matcher = URL_PATTERN.matcher(text);
+    StringBuilder result = new StringBuilder();
+    int lastEnd = 0;
+
+    while (matcher.find()) {
+      String url = matcher.group(0);
+      int start = matcher.start();
+
+      // Check if URL is already inside a MiniMessage click tag
+      String before = text.substring(Math.max(0, start - 20), start);
+      if (before.contains("<click:") && !before.contains(">")) {
+        continue;
+      }
+
+      // Add protocol if missing for the click action
+      String clickUrl = url.startsWith("http://") || url.startsWith("https://") ? url : "https://" + url;
+
+      result.append(text, lastEnd, start);
+      result.append("<click:open_url:'").append(clickUrl).append("'><hover:show_text:'<gray>Click to open'>");
+      result.append(url);
+      result.append("</hover></click>");
+      lastEnd = matcher.end();
+    }
+    result.append(text.substring(lastEnd));
+
+    return result.toString();
   }
 
   /**

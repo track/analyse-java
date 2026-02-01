@@ -2,9 +2,9 @@ package com.serverstats.paper.update;
 
 import com.serverstats.paper.ServerStatsPlugin;
 import com.serverstats.paper.util.ComponentUtil;
+import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.update.UpdateChecker;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 
 /**
  * Paper-specific update checker with console and in-game notifications
@@ -16,7 +16,7 @@ public class PaperUpdateChecker {
 
   private final ServerStatsPlugin plugin;
   private final UpdateChecker checker;
-  private BukkitTask task;
+  private SchedulerUtil.CancellableTask task;
 
   /**
    * Create a new Paper update checker
@@ -36,8 +36,8 @@ public class PaperUpdateChecker {
     // Initial check
     check(false);
 
-    // Schedule periodic checks
-    task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(
+    // Schedule periodic checks (async since it only calls the API)
+    task = SchedulerUtil.runAsyncTimer(
         plugin,
         () -> check(false),
         CHECK_INTERVAL_TICKS,
@@ -101,7 +101,7 @@ public class PaperUpdateChecker {
    * @param downloadUrl The download URL
    */
   private void notifyAdmins(String currentVersion, String newVersion, String downloadUrl) {
-    plugin.getServer().getScheduler().runTask(plugin, () -> {
+    SchedulerUtil.runSync(plugin, () -> {
       for (Player player : plugin.getServer().getOnlinePlayers()) {
         if (player.hasPermission(ADMIN_PERMISSION)) {
           sendUpdateMessage(player, currentVersion, newVersion, downloadUrl);
