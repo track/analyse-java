@@ -42,7 +42,8 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   private ServerStatsClient client;
   private SchedulerUtil.CancellableTask heartbeatTask;
   private PaperUpdateChecker updateChecker;
-  private boolean configValid = false;
+  private PlayerListener playerListener;
+  private boolean initialized = false;
 
   @Override
   public void onLoad() {
@@ -53,45 +54,55 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
 
     // Validate configuration
     if (!pluginConfig.isValid()) {
-      getLogger().warning("Invalid configuration! Please set your API key in config.yml");
-      return;
+      getLogger().warning("Invalid configuration! Please set your API key in config.yml and run /serverstats reload");
+    } else {
+      getLogger().info("Configuration loaded successfully!");
     }
-
-    configValid = true;
-    getLogger().info("Configuration loaded successfully!");
   }
 
   @Override
   public void onEnable() {
-    // Check if config was valid
-    if (!configValid) {
-      getLogger().severe("Cannot enable ServerStats - invalid configuration!");
-      getServer().getPluginManager().disablePlugin(this);
-      return;
-    }
-
     getLogger().info("Enabling ServerStats...");
+
+    // Register commands using ACF (always available so reload command works)
+    PaperCommandManager commandManager = new PaperCommandManager(this);
+    commandManager.registerCommand(new ServerStatsCommand(this));
+
+    // Initialize session manager (always needed)
+    sessionManager = new SessionManager();
+
+    // Register player listener (always needed, but it checks if client is available)
+    playerListener = new PlayerListener(this, null);
+    getServer().getPluginManager().registerEvents(playerListener, this);
+
+    // Try to initialize if config is valid
+    if (pluginConfig.isValid()) {
+      initializeServerStats();
+    } else {
+      getLogger().warning("ServerStats is running in limited mode. Set a valid API key and run /serverstats reload");
+    }
+  }
+
+  /**
+   * Initialize or reinitialize the ServerStats functionality.
+   * Called on startup if config is valid, and on reload when config becomes valid.
+   */
+  public void initializeServerStats() {
+    // Shutdown existing components if reinitializing
+    shutdownServerStats();
 
     // Initialize SDK client
     ServerStatsConfig sdkConfig = new ServerStatsConfig(pluginConfig.getApiKey());
     client = new ServerStatsClient(sdkConfig);
+
+    // Update the player listener with the new client
+    playerListener.setClient(client);
 
     // Register with the API provider so other plugins can use ServerStats.get()
     ServerStatsProvider.register(this);
 
     // Set up the event sender for ServerStats.trackEvent()
     ServerStats.setEventSender(this::sendEvent);
-
-    // Initialize session manager
-    sessionManager = new SessionManager();
-
-    // Register player listener
-    PlayerListener playerListener = new PlayerListener(this, client);
-    getServer().getPluginManager().registerEvents(playerListener, this);
-
-    // Register commands using ACF
-    PaperCommandManager commandManager = new PaperCommandManager(this);
-    commandManager.registerCommand(new ServerStatsCommand(this));
 
     // Start heartbeat task (every 30 seconds = 600 ticks)
     // Uses sync timer because HeartbeatTask collects player data on main thread, then sends async
@@ -118,7 +129,70 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
     addonManager.loadAddons();
     addonManager.enableAddons();
 
-    getLogger().info("ServerStats enabled successfully!");
+    initialized = true;
+    getLogger().info("ServerStats initialized successfully!");
+  }
+
+  /**
+   * Shutdown ServerStats functionality without disabling the plugin.
+   * Called before reinitializing or when the plugin is disabled.
+   */
+  private void shutdownServerStats() {
+    if (!initialized) {
+      return;
+    }
+
+    // Disable all addons first
+    if (addonManager != null) {
+      addonManager.disableAddons();
+      addonManager = null;
+    }
+
+    // Unregister from the API provider
+    ServerStatsProvider.unregister();
+
+    // Clear the event sender
+    ServerStats.setEventSender(null);
+
+    // Stop A/B test manager
+    if (abTestManager != null) {
+      abTestManager.stop();
+      abTestManager = null;
+    }
+
+    // Stop update checker
+    if (updateChecker != null) {
+      updateChecker.stop();
+      updateChecker = null;
+    }
+
+    // Cancel heartbeat task
+    if (heartbeatTask != null) {
+      heartbeatTask.cancel();
+      heartbeatTask = null;
+    }
+
+    // Shutdown SDK client
+    if (client != null) {
+      client.shutdown();
+      client = null;
+    }
+
+    // Clear client from player listener
+    if (playerListener != null) {
+      playerListener.setClient(null);
+    }
+
+    initialized = false;
+  }
+
+  /**
+   * Check if ServerStats is fully initialized and functional
+   *
+   * @return true if initialized with a valid API key
+   */
+  public boolean isInitialized() {
+    return initialized;
   }
 
   /**
@@ -129,6 +203,14 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
    * @param callback Optional callback for result
    */
   private void sendEvent(EventBuilder event, Consumer<Boolean> callback) {
+    // Can't send events if not initialized
+    if (client == null) {
+      if (callback != null) {
+        callback.accept(false);
+      }
+      return;
+    }
+
     // Process A/B test ON_EVENT triggers if player is associated
     // Must run on sync thread for Folia compatibility
     if (event.getPlayerUuid() != null && abTestManager != null) {
@@ -233,38 +315,7 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
   @Override
   public void onDisable() {
     getLogger().info("Disabling ServerStats...");
-
-    // Disable all addons first
-    if (addonManager != null) {
-      addonManager.disableAddons();
-    }
-
-    // Unregister from the API provider
-    ServerStatsProvider.unregister();
-
-    // Clear the event sender
-    ServerStats.setEventSender(null);
-
-    // Stop A/B test manager
-    if (abTestManager != null) {
-      abTestManager.stop();
-    }
-
-    // Stop update checker
-    if (updateChecker != null) {
-      updateChecker.stop();
-    }
-
-    // Cancel heartbeat task
-    if (heartbeatTask != null) {
-      heartbeatTask.cancel();
-    }
-
-    // Shutdown SDK client
-    if (client != null) {
-      client.shutdown();
-    }
-
+    shutdownServerStats();
     getLogger().info("ServerStats disabled");
   }
 

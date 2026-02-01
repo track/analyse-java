@@ -81,15 +81,23 @@ public class ServerStatsCommand extends BaseCommand {
    * @param sender The command sender
    */
   private void showStatus(CommandSender sender) {
+    boolean initialized = plugin.isInitialized();
     boolean connected = ServerStats.isAvailable();
     int trackedPlayers = plugin.getSessionManager().getSessionCount();
     boolean debugEnabled = plugin.isDebugEnabled();
 
     StringBuilder message = new StringBuilder();
     message.append("#3498db&l「 ServerStats &r&fv").append(BuildConstants.VERSION).append(" #3498db&l」&r\n");
-    message.append(" #5dade2┃ &fStatus: ").append(connected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
-    message.append(" #5dade2┃ &fAPI: &7api.serverstats.com&r\n");
-    message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
+
+    if (!initialized) {
+      message.append(" #5dade2┃ &fStatus: &c● Not Initialized&r\n");
+      message.append(" #5dade2┃ &7Set a valid API key and run &f/serverstats reload&r\n");
+    } else {
+      message.append(" #5dade2┃ &fStatus: ").append(connected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
+      message.append(" #5dade2┃ &fAPI: &7api.serverstats.com&r\n");
+      message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
+    }
+
     message.append(" #5dade2┃ &fDebug: ").append(debugEnabled ? "&aEnabled" : "&7Disabled").append("&r\n");
     send(sender, message.toString());
   }
@@ -98,8 +106,20 @@ public class ServerStatsCommand extends BaseCommand {
   @Description("Reload configuration")
   @CommandPermission("serverstats.command.reload")
   public void onReload(CommandSender sender) {
+    // Reload the Bukkit config file
     plugin.reloadConfig();
-    send(sender, "&aServerStats configuration reloaded.");
+
+    // Reload the plugin configuration object
+    plugin.getPluginConfig().reload();
+
+    // Check if the config is now valid
+    if (plugin.getPluginConfig().isValid()) {
+      // Reinitialize ServerStats with the new config
+      plugin.initializeServerStats();
+      send(sender, "&aServerStats configuration reloaded and initialized successfully.");
+    } else {
+      send(sender, "&cConfiguration reloaded, but API key is invalid. Please set a valid API key in config.yml");
+    }
   }
 
   @Subcommand("debug")

@@ -30,12 +30,21 @@ public class PlayerListener implements Listener {
   private final ServerStatsPlugin plugin;
   private final Logger logger;
   private final SessionManager sessionManager;
-  private final ServerStatsClient client;
+  private ServerStatsClient client;
 
   public PlayerListener(ServerStatsPlugin plugin, ServerStatsClient client) {
     this.plugin = plugin;
     this.logger = plugin.getLogger();
     this.sessionManager = plugin.getSessionManager();
+    this.client = client;
+  }
+
+  /**
+   * Set the SDK client. Used when reinitializing after a config reload.
+   *
+   * @param client The new client instance, or null to disable
+   */
+  public void setClient(ServerStatsClient client) {
     this.client = client;
   }
 
@@ -82,26 +91,29 @@ public class PlayerListener implements Listener {
 
     PlayerSession session = sessionOpt.get();
 
-    // Check if player is a Bedrock player
-    boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
+    // Only send to API if client is available
+    if (client != null) {
+      // Check if player is a Bedrock player
+      boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
 
-    // Send join event to the API
-    JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(), isBedrock);
+      // Send join event to the API
+      JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(), isBedrock);
 
-    client.join(request, new ServerStatsCallback<>() {
-      @Override
-      public void onSuccess(JoinResponse response) {
-        session.setSessionId(response.getSessionId());
-        plugin.debug("Join event sent for %s (sessionId: %s, bedrock: %s)",
-            username, response.getSessionId(), isBedrock);
-      }
+      client.join(request, new ServerStatsCallback<>() {
+        @Override
+        public void onSuccess(JoinResponse response) {
+          session.setSessionId(response.getSessionId());
+          plugin.debug("Join event sent for %s (sessionId: %s, bedrock: %s)",
+              username, response.getSessionId(), isBedrock);
+        }
 
-      @Override
-      public void onError(ServerStatsException exception) {
-        logger.warning(String.format("Failed to send join event for %s: %s",
-            username, exception.getMessage()));
-      }
-    });
+        @Override
+        public void onError(ServerStatsException exception) {
+          logger.warning(String.format("Failed to send join event for %s: %s",
+              username, exception.getMessage()));
+        }
+      });
+    }
 
     // Process A/B tests for this join
     boolean firstJoin = !player.hasPlayedBefore();
@@ -141,6 +153,11 @@ public class PlayerListener implements Listener {
 
     PlayerSession session = sessionOpt.get();
     if (!session.hasActiveSession()) {
+      return;
+    }
+
+    // Only send to API if client is available
+    if (client == null) {
       return;
     }
 

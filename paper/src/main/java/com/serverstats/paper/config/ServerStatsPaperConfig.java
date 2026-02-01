@@ -10,10 +10,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 @Getter
 public class ServerStatsPaperConfig {
 
+  private final JavaPlugin plugin;
   private boolean debug;
-  private final String apiKey;
-  private final String bedrockPrefix;
-  private final String instanceId;
+  private String apiKey;
+  private String bedrockPrefix;
+  private String instanceId;
 
   /**
    * Create a new configuration from the plugin's config file
@@ -21,13 +22,28 @@ public class ServerStatsPaperConfig {
    * @param plugin The plugin instance
    */
   public ServerStatsPaperConfig(JavaPlugin plugin) {
+    this.plugin = plugin;
     plugin.saveDefaultConfig();
+    loadValues();
+  }
+
+  /**
+   * Load configuration values from the config file
+   */
+  private void loadValues() {
     FileConfiguration config = plugin.getConfig();
 
     this.debug = config.getBoolean("debug", false);
     this.apiKey = config.getString("api-key", "");
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");
+  }
+
+  /**
+   * Reload configuration from the config file
+   */
+  public void reload() {
+    loadValues();
   }
 
   /**
