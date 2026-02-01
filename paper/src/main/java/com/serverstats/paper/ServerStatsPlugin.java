@@ -106,10 +106,11 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
 
     // Start heartbeat task (every 30 seconds = 600 ticks)
     // Uses sync timer because HeartbeatTask collects player data on main thread, then sends async
+    // Initial delay of 1 tick to run immediately after initialization
     heartbeatTask = SchedulerUtil.runSyncTimer(
         this,
         new HeartbeatTask(this, client),
-        600L,
+        1L,
         600L
     );
 

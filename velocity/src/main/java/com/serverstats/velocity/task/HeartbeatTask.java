@@ -1,5 +1,6 @@
 package com.serverstats.velocity.task;
 
+import com.serverstats.api.ServerStats;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.serverstats.sdk.ServerStatsCallback;
@@ -68,11 +69,13 @@ public class HeartbeatTask implements Runnable {
     client.heartbeat(request, new ServerStatsCallback<>() {
       @Override
       public void onSuccess(HeartbeatResponse response) {
+        ServerStats.setConnectionStatus(true, null);
         plugin.debug("Heartbeat sent for %s (%d players)", serverName, response.getOnlineCount());
       }
 
       @Override
       public void onError(ServerStatsException exception) {
+        ServerStats.setConnectionStatus(false, exception.getMessage());
         logger.warn(String.format("Failed to send heartbeat for %s: %s",
             serverName, exception.getMessage()));
       }

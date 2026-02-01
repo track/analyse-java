@@ -4,6 +4,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import java.util.List;
 import java.util.Optional;
+import com.serverstats.api.ServerStats;
 import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.hytale.HytalePlugin;
 import com.serverstats.hytale.object.session.PlayerSession;
@@ -45,6 +46,7 @@ public class HeartbeatTask implements Runnable {
       new ServerStatsCallback<>() {
         @Override
         public void onSuccess(HeartbeatResponse response) {
+          ServerStats.setConnectionStatus(true, null);
           plugin.debug(
             "Heartbeat sent (%d players)",
             response.getOnlineCount()
@@ -53,6 +55,7 @@ public class HeartbeatTask implements Runnable {
 
         @Override
         public void onError(ServerStatsException exception) {
+          ServerStats.setConnectionStatus(false, exception.getMessage());
           plugin.logWarning(
             String.format(
               "Failed to send heartbeat: %s",

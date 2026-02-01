@@ -82,7 +82,7 @@ public class ServerStatsCommand extends BaseCommand {
    */
   private void showStatus(CommandSender sender) {
     boolean initialized = plugin.isInitialized();
-    boolean connected = ServerStats.isAvailable();
+    boolean apiConnected = ServerStats.isConnected();
     int trackedPlayers = plugin.getSessionManager().getSessionCount();
     boolean debugEnabled = plugin.isDebugEnabled();
 
@@ -93,7 +93,10 @@ public class ServerStatsCommand extends BaseCommand {
       message.append(" #5dade2┃ &fStatus: &c● Not Initialized&r\n");
       message.append(" #5dade2┃ &7Set a valid API key and run &f/serverstats reload&r\n");
     } else {
-      message.append(" #5dade2┃ &fStatus: ").append(connected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
+      message.append(" #5dade2┃ &fStatus: ").append(apiConnected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
+      if (!apiConnected && ServerStats.getLastConnectionError() != null) {
+        message.append(" #5dade2┃ &fError: &c").append(ServerStats.getLastConnectionError()).append("&r\n");
+      }
       message.append(" #5dade2┃ &fAPI: &7api.serverstats.com&r\n");
       message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
     }

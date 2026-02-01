@@ -37,6 +37,7 @@ public final class ServerStatsProvider {
    */
   public static void unregister() {
     platform = null;
+    ServerStats.setConnectionStatus(false, null);
   }
 
   /**

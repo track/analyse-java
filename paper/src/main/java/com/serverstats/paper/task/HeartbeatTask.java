@@ -1,5 +1,6 @@
 package com.serverstats.paper.task;
 
+import com.serverstats.api.ServerStats;
 import com.serverstats.paper.ServerStatsPlugin;
 import com.serverstats.paper.object.session.PlayerSession;
 import com.serverstats.paper.util.SchedulerUtil;
@@ -56,11 +57,13 @@ public class HeartbeatTask implements Runnable {
       client.heartbeat(request, new ServerStatsCallback<>() {
         @Override
         public void onSuccess(HeartbeatResponse response) {
+          ServerStats.setConnectionStatus(true, null);
           plugin.debug("Heartbeat sent (%d players)", response.getOnlineCount());
         }
 
         @Override
         public void onError(ServerStatsException exception) {
+          ServerStats.setConnectionStatus(false, exception.getMessage());
           logger.warning(String.format("Failed to send heartbeat: %s", exception.getMessage()));
         }
       });

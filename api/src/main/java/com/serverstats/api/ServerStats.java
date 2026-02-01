@@ -47,6 +47,8 @@ import java.util.UUID;
 public final class ServerStats {
 
   private static EventBuilder.EventSender eventSender;
+  private static boolean apiConnected = false;
+  private static String lastConnectionError = null;
 
   private ServerStats() {
   }
@@ -68,12 +70,42 @@ public final class ServerStats {
   }
 
   /**
-   * Check if ServerStats is available and ready to use
+   * Check if ServerStats is available and ready to use.
+   * This checks if the plugin is initialized, not if the API connection is working.
    *
    * @return true if ServerStats is initialized and ready
    */
   public static boolean isAvailable() {
     return ServerStatsProvider.isRegistered();
+  }
+
+  /**
+   * Check if the API connection is working (based on last heartbeat/API call)
+   *
+   * @return true if the last API call was successful
+   */
+  public static boolean isConnected() {
+    return isAvailable() && apiConnected;
+  }
+
+  /**
+   * Get the last connection error message
+   *
+   * @return The error message, or null if connected
+   */
+  public static String getLastConnectionError() {
+    return lastConnectionError;
+  }
+
+  /**
+   * Set the API connection status. Called by platform implementations.
+   *
+   * @param connected Whether the last API call was successful
+   * @param errorMessage The error message if failed, or null if successful
+   */
+  public static void setConnectionStatus(boolean connected, String errorMessage) {
+    apiConnected = connected;
+    lastConnectionError = connected ? null : errorMessage;
   }
 
   /**

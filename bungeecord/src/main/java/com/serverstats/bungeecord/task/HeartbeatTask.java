@@ -1,5 +1,6 @@
 package com.serverstats.bungeecord.task;
 
+import com.serverstats.api.ServerStats;
 import com.serverstats.bungeecord.ServerStatsBungee;
 import com.serverstats.bungeecord.listener.PlayerListener;
 import com.serverstats.bungeecord.object.session.PlayerSession;
@@ -67,11 +68,13 @@ public class HeartbeatTask implements Runnable {
     client.heartbeat(request, new ServerStatsCallback<>() {
       @Override
       public void onSuccess(HeartbeatResponse response) {
+        ServerStats.setConnectionStatus(true, null);
         plugin.debug("Heartbeat sent for %s (%d players)", serverName, response.getOnlineCount());
       }
 
       @Override
       public void onError(ServerStatsException exception) {
+        ServerStats.setConnectionStatus(false, exception.getMessage());
         logger.warning(String.format("Failed to send heartbeat for %s: %s",
             serverName, exception.getMessage()));
       }

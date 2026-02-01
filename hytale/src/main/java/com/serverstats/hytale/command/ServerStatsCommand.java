@@ -129,13 +129,16 @@ public class ServerStatsCommand extends AbstractCommand {
    * @param sender The command sender
    */
   private void showStatus(CommandSender sender) {
-    boolean connected = ServerStats.isAvailable();
+    boolean connected = ServerStats.isConnected();
     int trackedPlayers = plugin.getSessionManager().getSessionCount();
     boolean debugEnabled = plugin.isDebugEnabled();
 
     StringBuilder message = new StringBuilder();
     message.append("#3498db&l「 ServerStats &r&fv").append(plugin.getVersion()).append(" #3498db&l」&r\n");
     message.append(" #5dade2┃ &fStatus: ").append(connected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
+    if (!connected && ServerStats.getLastConnectionError() != null) {
+      message.append(" #5dade2┃ &fError: &c").append(ServerStats.getLastConnectionError()).append("&r\n");
+    }
     message.append(" #5dade2┃ &fAPI: &7api.serverstats.com&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
     message.append(" #5dade2┃ &fDebug: ").append(debugEnabled ? "&aEnabled" : "&7Disabled").append("&r\n");

@@ -79,7 +79,7 @@ public class ServerStatsCommand extends BaseCommand {
    * @param sender The command sender
    */
   private void showStatus(CommandSender sender) {
-    boolean connected = ServerStats.isAvailable();
+    boolean connected = ServerStats.isConnected();
     int trackedPlayers = plugin.getSessionManager().getSessionCount();
     boolean debugEnabled = plugin.isDebugEnabled();
     int configuredServers = plugin.getPluginConfig().getServers().size();
@@ -87,6 +87,9 @@ public class ServerStatsCommand extends BaseCommand {
     StringBuilder message = new StringBuilder();
     message.append("#3498db&l「 ServerStats &r&fv").append(BuildConstants.VERSION).append(" #3498db&l」&r\n");
     message.append(" #5dade2┃ &fStatus: ").append(connected ? "&a● Connected" : "&c● Disconnected").append("&r\n");
+    if (!connected && ServerStats.getLastConnectionError() != null) {
+      message.append(" #5dade2┃ &fError: &c").append(ServerStats.getLastConnectionError()).append("&r\n");
+    }
     message.append(" #5dade2┃ &fAPI: &7api.serverstats.com&r\n");
     message.append(" #5dade2┃ &fServers Configured: &7").append(configuredServers).append("&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
