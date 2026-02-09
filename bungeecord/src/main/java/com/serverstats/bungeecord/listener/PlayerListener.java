@@ -9,6 +9,7 @@ import com.serverstats.api.exception.ServerStatsException;
 import com.serverstats.sdk.config.ServerStatsConfig;
 import com.serverstats.sdk.request.JoinRequest;
 import com.serverstats.sdk.request.LeaveRequest;
+import com.serverstats.sdk.util.ProtocolVersionUtil;
 import com.serverstats.sdk.response.JoinResponse;
 import com.serverstats.sdk.response.LeaveResponse;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -119,8 +120,9 @@ public class PlayerListener implements Listener {
       sendLeaveEvent(uuid, username, session, previousServerName);
     }
 
-    // Send join event to the new server
-    sendJoinEvent(uuid, username, session, newServerName);
+    // Send join event to the new server (include client protocol version)
+    int protocolVersion = player.getPendingConnection().getVersion();
+    sendJoinEvent(uuid, username, session, newServerName, protocolVersion);
   }
 
   @EventHandler
@@ -146,8 +148,15 @@ public class PlayerListener implements Listener {
 
   /**
    * Send a join event to the API
+   *
+   * @param uuid         Player UUID
+   * @param username     Player username
+   * @param session      Player session
+   * @param serverName   Server the player connected to
+   * @param protocolVersion Client protocol version (e.g. from getPendingConnection().getVersion()), or -1
    */
-  private void sendJoinEvent(UUID uuid, String username, PlayerSession session, String serverName) {
+  private void sendJoinEvent(UUID uuid, String username, PlayerSession session, String serverName,
+      int protocolVersion) {
     Optional<ServerStatsClient> clientOpt = getClientForServer(serverName);
     if (clientOpt.isEmpty()) {
       plugin.debug("Server %s not configured, skipping join event for %s", serverName, username);
@@ -159,7 +168,11 @@ public class PlayerListener implements Listener {
     // Check if player is a Bedrock player
     boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
 
-    JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(), isBedrock);
+    // Convert protocol to "1.x.y" for the API
+    String playerVersion = ProtocolVersionUtil.toVersionString(protocolVersion);
+
+    JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(),
+        isBedrock, playerVersion);
 
     client.join(request, new ServerStatsCallback<>() {
       @Override
@@ -252,7 +265,8 @@ public class PlayerListener implements Listener {
     }
 
     PlayerSession session = sessionOpt.get();
-    sendJoinEvent(uuid, username, session, serverName);
+    int protocolVersion = player.getPendingConnection().getVersion();
+    sendJoinEvent(uuid, username, session, serverName, protocolVersion);
   }
 
   /**

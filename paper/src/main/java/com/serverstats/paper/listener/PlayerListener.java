@@ -3,6 +3,7 @@ package com.serverstats.paper.listener;
 import com.serverstats.paper.ServerStatsPlugin;
 import com.serverstats.paper.manager.SessionManager;
 import com.serverstats.paper.object.session.PlayerSession;
+import com.serverstats.sdk.util.ProtocolVersionUtil;
 import com.serverstats.paper.util.SchedulerUtil;
 import com.serverstats.sdk.ServerStatsCallback;
 import com.serverstats.sdk.ServerStatsClient;
@@ -96,8 +97,13 @@ public class PlayerListener implements Listener {
       // Check if player is a Bedrock player
       boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
 
+      // Convert protocol version to "1.x.y" string for the API (Java clients only; Bedrock may still send "1.?")
+      int protocolVersion = player.getProtocolVersion();
+      String playerVersion = ProtocolVersionUtil.toVersionString(protocolVersion);
+
       // Send join event to the API
-      JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(), isBedrock);
+      JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(),
+          isBedrock, playerVersion);
 
       client.join(request, new ServerStatsCallback<>() {
         @Override
