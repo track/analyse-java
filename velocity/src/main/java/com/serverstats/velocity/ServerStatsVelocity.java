@@ -26,6 +26,7 @@ import com.serverstats.api.messaging.ServerStatsMessaging;
 import com.serverstats.velocity.addon.VelocityAddonManager;
 import com.serverstats.velocity.command.ServerStatsCommand;
 import com.serverstats.velocity.config.ServerStatsVelocityConfig;
+import com.serverstats.velocity.listener.ActivityListener;
 import com.serverstats.velocity.listener.PlayerListener;
 import com.serverstats.velocity.listener.PluginMessageListener;
 import com.serverstats.velocity.manager.ABTestManager;
@@ -85,6 +86,9 @@ public class ServerStatsVelocity implements ServerStatsPlatform {
     // Register player listener
     playerListener = new PlayerListener(this);
     server.getEventManager().register(this, playerListener);
+
+    // Register activity listener for built-in event tracking
+    server.getEventManager().register(this, new ActivityListener(this));
 
     // Register plugin message channel for backend server communication
     server.getChannelRegistrar().register(

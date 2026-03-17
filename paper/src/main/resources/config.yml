@@ -14,3 +14,15 @@ bedrock-prefix: "."
 # Instance ID for multi-instance setups (e.g. "survival-1", "survival-2")
 # Used to identify this specific server instance in heartbeats
 instance-id: "default"
+
+# Built-in event tracking
+# These events are automatically sent when players perform actions
+# Useful for session insights and understanding player behavior
+# High-frequency events (block-place, block-break, death, kill-entity) are disabled by default
+events:
+  chat: true
+  command: true
+  block-place: false
+  block-break: false
+  death: false
+  kill-entity: false

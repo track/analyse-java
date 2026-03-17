@@ -12,6 +12,7 @@ import com.serverstats.paper.addon.PaperAddonManager;
 import com.serverstats.paper.manager.ABTestManager;
 import com.serverstats.paper.command.ServerStatsCommand;
 import com.serverstats.paper.config.ServerStatsPaperConfig;
+import com.serverstats.paper.listener.ActivityListener;
 import com.serverstats.paper.listener.PlayerListener;
 import com.serverstats.paper.manager.SessionManager;
 import com.serverstats.paper.task.HeartbeatTask;
@@ -74,6 +75,9 @@ public class ServerStatsPlugin extends JavaPlugin implements ServerStatsPlatform
     // Register player listener (always needed, but it checks if client is available)
     playerListener = new PlayerListener(this, null);
     getServer().getPluginManager().registerEvents(playerListener, this);
+
+    // Register activity listener for built-in event tracking
+    getServer().getPluginManager().registerEvents(new ActivityListener(this), this);
 
     // Try to initialize if config is valid
     if (pluginConfig.isValid()) {

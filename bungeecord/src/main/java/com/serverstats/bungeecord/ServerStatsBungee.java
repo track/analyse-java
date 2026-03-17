@@ -13,6 +13,7 @@ import com.serverstats.bungeecord.addon.BungeeAddonManager;
 import com.serverstats.bungeecord.manager.ABTestManager;
 import com.serverstats.bungeecord.command.ServerStatsCommand;
 import com.serverstats.bungeecord.config.ServerStatsBungeeConfig;
+import com.serverstats.bungeecord.listener.ActivityListener;
 import com.serverstats.bungeecord.listener.PlayerListener;
 import com.serverstats.bungeecord.listener.PluginMessageListener;
 import com.serverstats.bungeecord.manager.SessionManager;
@@ -60,6 +61,9 @@ public class ServerStatsBungee extends Plugin implements ServerStatsPlatform {
     // Register player listener
     playerListener = new PlayerListener(this);
     getProxy().getPluginManager().registerListener(this, playerListener);
+
+    // Register activity listener for built-in event tracking
+    getProxy().getPluginManager().registerListener(this, new ActivityListener(this));
 
     // Register plugin message channel for backend server communication
     getProxy().registerChannel(ServerStatsMessaging.CHANNEL);

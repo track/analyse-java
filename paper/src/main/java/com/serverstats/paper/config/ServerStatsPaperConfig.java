@@ -1,8 +1,11 @@
 package com.serverstats.paper.config;
 
 import lombok.Getter;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configuration for the Paper plugin
@@ -10,11 +13,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 @Getter
 public class ServerStatsPaperConfig {
 
+  private static final Map<String, Boolean> DEFAULT_EVENTS = Map.of(
+      "chat", true,
+      "command", true,
+      "block-place", false,
+      "block-break", false,
+      "death", false,
+      "kill-entity", false
+  );
+
   private final JavaPlugin plugin;
   private boolean debug;
   private String apiKey;
   private String bedrockPrefix;
   private String instanceId;
+  private Map<String, Boolean> events;
 
   /**
    * Create a new configuration from the plugin's config file
@@ -37,6 +50,22 @@ public class ServerStatsPaperConfig {
     this.apiKey = config.getString("api-key", "");
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");
+
+    // Load event toggles, writing missing defaults to the config file
+    this.events = new HashMap<>(DEFAULT_EVENTS);
+    boolean modified = false;
+    for (Map.Entry<String, Boolean> entry : DEFAULT_EVENTS.entrySet()) {
+      String path = "events." + entry.getKey();
+      if (config.contains(path)) {
+        this.events.put(entry.getKey(), config.getBoolean(path));
+      } else {
+        config.set(path, entry.getValue());
+        modified = true;
+      }
+    }
+    if (modified) {
+      plugin.saveConfig();
+    }
   }
 
   /**
@@ -76,5 +105,15 @@ public class ServerStatsPaperConfig {
    */
   public void setDebug(boolean debug) {
     this.debug = debug;
+  }
+
+  /**
+   * Check if a built-in event type is enabled
+   *
+   * @param key The event key (e.g. "chat", "command", "block-place")
+   * @return true if the event is enabled in config
+   */
+  public boolean isEventEnabled(String key) {
+    return events.getOrDefault(key, false);
   }
 }

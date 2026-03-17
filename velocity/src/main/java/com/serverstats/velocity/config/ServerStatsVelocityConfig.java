@@ -21,12 +21,18 @@ public class ServerStatsVelocityConfig {
 
   private static final String CONFIG_FILE = "config.json";
 
+  private static final transient Map<String, Boolean> DEFAULT_EVENTS = Map.of(
+      "command", true,
+      "serverSwitch", true
+  );
+
   @Setter
   private boolean debug = false;
   private String bedrockPrefix = ".";
   private String instanceId = "default";
   private String defaultServer = null;
   private Map<String, ServerConfig> servers = new HashMap<>();
+  private Map<String, Boolean> events = new HashMap<>(DEFAULT_EVENTS);
 
   /**
    * Server-specific configuration
@@ -69,10 +75,19 @@ public class ServerStatsVelocityConfig {
       return defaultConfig;
     }
 
-    // Load existing config
+    // Load existing config and fill in any missing event defaults
+    ServerStatsVelocityConfig config;
     try (Reader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-      return gson.fromJson(reader, ServerStatsVelocityConfig.class);
+      config = gson.fromJson(reader, ServerStatsVelocityConfig.class);
     }
+
+    if (config.fillMissingEventDefaults()) {
+      try (Writer writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8)) {
+        gson.toJson(config, writer);
+      }
+    }
+
+    return config;
   }
 
   /**
@@ -87,6 +102,7 @@ public class ServerStatsVelocityConfig {
     config.instanceId = "default";
     config.servers.put("lobby", new ServerConfig("anl_your_lobby_key_here"));
     config.servers.put("survival", new ServerConfig("anl_your_survival_key_here"));
+    config.events = new HashMap<>(DEFAULT_EVENTS);
     return config;
   }
 
@@ -128,5 +144,41 @@ public class ServerStatsVelocityConfig {
     }
 
     return username.startsWith(bedrockPrefix);
+  }
+
+  /**
+   * Fill in any missing event keys from defaults
+   *
+   * @return true if any keys were added (config should be re-saved)
+   */
+  private boolean fillMissingEventDefaults() {
+    if (events == null) {
+      events = new HashMap<>(DEFAULT_EVENTS);
+      return true;
+    }
+
+    boolean modified = false;
+    for (Map.Entry<String, Boolean> entry : DEFAULT_EVENTS.entrySet()) {
+      if (!events.containsKey(entry.getKey())) {
+        events.put(entry.getKey(), entry.getValue());
+        modified = true;
+      }
+    }
+
+    return modified;
+  }
+
+  /**
+   * Check if a built-in event type is enabled
+   *
+   * @param key The event key (e.g. "command", "serverSwitch")
+   * @return true if the event is enabled in config
+   */
+  public boolean isEventEnabled(String key) {
+    if (events == null) {
+      return DEFAULT_EVENTS.getOrDefault(key, false);
+    }
+
+    return events.getOrDefault(key, false);
   }
 }
