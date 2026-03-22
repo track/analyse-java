@@ -119,7 +119,7 @@ public class AnalyseCommand extends AbstractCommand {
     message.append(" #5dade2┃ &7This server uses &fAnalyse &7to track\n");
     message.append(" #5dade2┃ &7player analytics and sessions.&r\n");
     message.append("&r\n");
-    message.append(" &7→ &fanalyse.com&r\n");
+    message.append(" &7→ &fanalyse.net&r\n");
     send(sender, message.toString());
   }
 
@@ -139,7 +139,7 @@ public class AnalyseCommand extends AbstractCommand {
     if (!connected && Analyse.getLastConnectionError() != null) {
       message.append(" #5dade2┃ &fError: &c").append(Analyse.getLastConnectionError()).append("&r\n");
     }
-    message.append(" #5dade2┃ &fAPI: &7api.analyse.com&r\n");
+    message.append(" #5dade2┃ &fAPI: &7api.analyse.net&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
     message.append(" #5dade2┃ &fDebug: ").append(debugEnabled ? "&aEnabled" : "&7Disabled").append("&r\n");
     send(sender, message.toString());

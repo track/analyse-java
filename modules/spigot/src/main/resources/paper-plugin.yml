@@ -7,15 +7,15 @@ description: Analyse tracking plugin
 author: VertCode Development
 
 permissions:
-  analyse.command:
+  analyse.netmand:
     description: Base permission for analyse commands
     default: op
-  analyse.command.reload:
+  analyse.netmand.reload:
     description: Permission to reload the plugin
     default: op
-  analyse.command.debug:
+  analyse.netmand.debug:
     description: Permission to toggle debug mode
     default: op
-  analyse.command.event:
+  analyse.netmand.event:
     description: Permission to send custom events
     default: op

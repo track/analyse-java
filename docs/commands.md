@@ -10,7 +10,7 @@ The Analyse plugin provides commands to manage the plugin and send test events.
 
 **Aliases**: `/ss` (where registered)
 
-**Permission**: `analyse.command.status` (default command / status view)
+**Permission**: `analyse.netmand.status` (default command / status view)
 
 ## Subcommands
 
@@ -22,7 +22,7 @@ Shows the current plugin status and connection information.
 /analyse status
 ```
 
-**Permission**: `analyse.command.status`
+**Permission**: `analyse.netmand.status`
 
 **Output**:
 
@@ -51,7 +51,7 @@ Reloads the plugin configuration from disk.
 /analyse reload
 ```
 
-**Permission**: `analyse.command.reload`
+**Permission**: `analyse.netmand.reload`
 
 ### Debug
 
@@ -61,7 +61,7 @@ Toggles debug mode on/off. Debug mode provides verbose logging for troubleshooti
 /analyse debug
 ```
 
-**Permission**: `analyse.command.debug`
+**Permission**: `analyse.netmand.debug`
 
 ### Event
 
@@ -71,7 +71,7 @@ Sends a custom event to the Analyse API. Useful for testing.
 /analyse event <name> [options]
 ```
 
-**Permission**: `analyse.command.event`
+**Permission**: `analyse.netmand.event`
 
 #### Options
 
@@ -108,17 +108,17 @@ Shows the help menu with all available commands.
 /analyse help
 ```
 
-**Permission**: `analyse.command.help`
+**Permission**: `analyse.netmand.help`
 
 ## Permissions
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| `analyse.command.status` | View status and default `/analyse` output | OP |
-| `analyse.command.reload` | Reload configuration (Spigot/Paper only) | OP |
-| `analyse.command.debug` | Toggle debug mode | OP |
-| `analyse.command.event` | Send custom events | OP |
-| `analyse.command.help` | Show help | OP |
+| `analyse.netmand.status` | View status and default `/analyse` output | OP |
+| `analyse.netmand.reload` | Reload configuration (Spigot/Paper only) | OP |
+| `analyse.netmand.debug` | Toggle debug mode | OP |
+| `analyse.netmand.event` | Send custom events | OP |
+| `analyse.netmand.help` | Show help | OP |
 
 ## Tab Completion
 

@@ -44,7 +44,7 @@ public class AnalyseCommand extends BaseCommand {
   @Description("Show plugin info")
   public void onDefault(CommandSource sender) {
     // Check if user has admin permission
-    if (sender.hasPermission("analyse.command.status")) {
+    if (sender.hasPermission("analyse.netmand.status")) {
       showStatus(sender);
     } else {
       showPublicInfo(sender);
@@ -53,7 +53,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("status")
   @Description("Show plugin status")
-  @CommandPermission("analyse.command.status")
+  @CommandPermission("analyse.netmand.status")
   public void onStatus(CommandSource sender) {
     showStatus(sender);
   }
@@ -69,7 +69,7 @@ public class AnalyseCommand extends BaseCommand {
     message.append(" #5dade2┃ &7This server uses &fAnalyse &7to track\n");
     message.append(" #5dade2┃ &7player analytics and sessions.&r\n");
     message.append("&r\n");
-    message.append(" &7→ &fanalyse.com&r\n");
+    message.append(" &7→ &fanalyse.net&r\n");
     send(sender, message.toString());
   }
 
@@ -90,7 +90,7 @@ public class AnalyseCommand extends BaseCommand {
     if (!connected && Analyse.getLastConnectionError() != null) {
       message.append(" #5dade2┃ &fError: &c").append(Analyse.getLastConnectionError()).append("&r\n");
     }
-    message.append(" #5dade2┃ &fAPI: &7api.analyse.com&r\n");
+    message.append(" #5dade2┃ &fAPI: &7api.analyse.net&r\n");
     message.append(" #5dade2┃ &fServers Configured: &7").append(configuredServers).append("&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
     message.append(" #5dade2┃ &fDebug: ").append(debugEnabled ? "&aEnabled" : "&7Disabled").append("&r\n");
@@ -99,7 +99,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("debug")
   @Description("Toggle debug mode")
-  @CommandPermission("analyse.command.debug")
+  @CommandPermission("analyse.netmand.debug")
   public void onDebug(CommandSource sender) {
     boolean newState = !plugin.getPluginConfig().isDebug();
     plugin.getPluginConfig().setDebug(newState);
@@ -113,7 +113,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("event")
   @Description("Send a custom event")
-  @CommandPermission("analyse.command.event")
+  @CommandPermission("analyse.netmand.event")
   @Syntax("<name> [--player <player>] [--value <number>] [--data <key=value>...]")
   @CommandCompletion("test_event|custom_event @players")
   public void onEvent(CommandSource sender, String[] args) {
@@ -207,7 +207,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("info")
   @Description("View server or player analytics")
-  @CommandPermission("analyse.command.info")
+  @CommandPermission("analyse.netmand.info")
   @Syntax("[player]")
   @CommandCompletion("@players")
   public void onInfo(CommandSource sender, String[] args) {
@@ -375,7 +375,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons")
   @Description("List all loaded addons")
-  @CommandPermission("analyse.command.addons")
+  @CommandPermission("analyse.netmand.addons")
   public void onAddons(CommandSource sender) {
     Collection<LoadedAddon> addons = plugin.getAddonManager().getLoadedAddons();
 
@@ -404,7 +404,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons reload")
   @Description("Reload all addons or a specific addon")
-  @CommandPermission("analyse.command.addons.reload")
+  @CommandPermission("analyse.netmand.addons.reload")
   @Syntax("[addon]")
   public void onAddonsReload(CommandSource sender, String[] args) {
     if (args.length == 0) {
@@ -429,7 +429,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons enable")
   @Description("Enable an addon")
-  @CommandPermission("analyse.command.addons.enable")
+  @CommandPermission("analyse.netmand.addons.enable")
   @Syntax("<addon>")
   public void onAddonsEnable(CommandSource sender, String addonId) {
     if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
@@ -451,7 +451,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons disable")
   @Description("Disable an addon")
-  @CommandPermission("analyse.command.addons.disable")
+  @CommandPermission("analyse.netmand.addons.disable")
   @Syntax("<addon>")
   public void onAddonsDisable(CommandSource sender, String addonId) {
     if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
@@ -473,7 +473,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("help")
   @Description("Show help information")
-  @CommandPermission("analyse.command.help")
+  @CommandPermission("analyse.netmand.help")
   public void onHelp(CommandSource sender) {
     StringBuilder message = new StringBuilder();
     message.append("#3498db&l「 Analyse Commands 」&r\n");
