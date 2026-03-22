@@ -1,0 +1,14 @@
+{
+  "Group": "Hytale",
+  "Name": "Analyse",
+  "Version": "${version}",
+  "Description": "Analytics plugin for Hytale servers",
+  "Authors": [{"Name": "VertCode Development"}],
+  "Website": "https://analyse.net",
+  "ServerVersion": "*",
+  "Dependencies": {},
+  "OptionalDependencies": {},
+  "DisabledByDefault": false,
+  "Main": "net.analyse.hytale.HytalePlugin",
+  "IncludesAssetPack": false
+}

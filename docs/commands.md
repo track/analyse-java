@@ -1,16 +1,16 @@
 # Commands
 
-The ServerStats plugin provides commands to manage the plugin and send test events.
+The Analyse plugin provides commands to manage the plugin and send test events.
 
 ## Base Command
 
 ```
-/serverstats
+/analyse
 ```
 
-**Aliases**: `/analytics`, `/anl`
+**Aliases**: `/ss` (where registered)
 
-**Permission**: `serverstats.command`
+**Permission**: `analyse.command.status` (default command / status view)
 
 ## Subcommands
 
@@ -19,57 +19,59 @@ The ServerStats plugin provides commands to manage the plugin and send test even
 Shows the current plugin status and connection information.
 
 ```
-/serverstats status
+/analyse status
 ```
 
-**Permission**: `serverstats.command`
+**Permission**: `analyse.command.status`
 
 **Output**:
+
 ```
 ──────────────────────────────
-  ServerStats v0.1.0
+  Analyse v0.7.3
 ──────────────────────────────
   Status: ● Connected
-  API: api.serverstats.net
+  API: api.analyse.net
   Players Tracked: 5
   Debug: Disabled
 ──────────────────────────────
 ```
 
 On proxy servers (BungeeCord/Velocity), additional info is shown:
+
 ```
   Servers Configured: 3
 ```
 
-### Reload (Paper only)
+### Reload (Spigot/Paper only)
 
 Reloads the plugin configuration from disk.
 
 ```
-/serverstats reload
+/analyse reload
 ```
 
-**Permission**: `serverstats.command.reload`
+**Permission**: `analyse.command.reload`
 
 ### Debug
 
 Toggles debug mode on/off. Debug mode provides verbose logging for troubleshooting.
 
 ```
-/serverstats debug
+/analyse debug
 ```
 
-**Permission**: `serverstats.command.debug`
+**Permission**: `analyse.command.debug`
 
 ### Event
 
-Sends a custom event to the ServerStats API. Useful for testing.
+Sends a custom event to the Analyse API. Useful for testing.
 
 ```
-/serverstats event <name> [options]
+/analyse event <name> [options]
 ```
 
-**Permission**: `serverstats.command.event`
+**Permission**: `analyse.command.event`
 
 #### Options
 
@@ -83,19 +85,19 @@ Sends a custom event to the ServerStats API. Useful for testing.
 
 ```bash
 # Simple test event
-/serverstats event test_event
+/analyse event test_event
 
 # Event with player
-/serverstats event player_action --player Steve
+/analyse event player_action --player Steve
 
 # Event with value
-/serverstats event purchase --value 500.00
+/analyse event purchase --value 500.00
 
 # Event with custom data
-/serverstats event shop_purchase --player Steve --value 100 --data item=diamond_sword --data quantity=1
+/analyse event shop_purchase --player Steve --value 100 --data item=diamond_sword --data quantity=1
 
 # Complex event
-/serverstats event quest_completed --player Steve --data quest_id=dragon_slayer --data difficulty=hard --value 1000
+/analyse event quest_completed --player Steve --data quest_id=dragon_slayer --data difficulty=hard --value 1000
 ```
 
 ### Help
@@ -103,23 +105,25 @@ Sends a custom event to the ServerStats API. Useful for testing.
 Shows the help menu with all available commands.
 
 ```
-/serverstats help
+/analyse help
 ```
 
-**Permission**: `serverstats.command`
+**Permission**: `analyse.command.help`
 
 ## Permissions
 
 | Permission | Description | Default |
 |------------|-------------|---------|
-| `serverstats.command` | Base permission for all commands | OP |
-| `serverstats.command.reload` | Permission to reload configuration (Paper only) | OP |
-| `serverstats.command.debug` | Permission to toggle debug mode | OP |
-| `serverstats.command.event` | Permission to send custom events | OP |
+| `analyse.command.status` | View status and default `/analyse` output | OP |
+| `analyse.command.reload` | Reload configuration (Spigot/Paper only) | OP |
+| `analyse.command.debug` | Toggle debug mode | OP |
+| `analyse.command.event` | Send custom events | OP |
+| `analyse.command.help` | Show help | OP |
 
 ## Tab Completion
 
 The plugin provides intelligent tab completion powered by ACF (Annotation Command Framework) for:
+
 - Subcommand names
 - Player names (for `--player` option)
 - Example event names
@@ -130,6 +134,6 @@ The plugin provides intelligent tab completion powered by ACF (Annotation Comman
 All commands work from the console without the leading slash:
 
 ```
-serverstats status
-serverstats event server_restart --data reason=update
+analyse status
+analyse event server_restart --data reason=update
 ```

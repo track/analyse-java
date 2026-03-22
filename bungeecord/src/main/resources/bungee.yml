@@ -1,6 +1,0 @@
-name: ServerStats
-version: ${version}
-main: com.serverstats.bungeecord.ServerStatsBungee
-description: ServerStats tracking plugin
-author: VertCode
-

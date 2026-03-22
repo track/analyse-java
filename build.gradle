@@ -11,18 +11,13 @@ allprojects {
 subprojects {
     apply plugin: 'java'
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
     repositories {
         mavenCentral()
         maven { url = 'https://repo.papermc.io/repository/maven-public/' }
         maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
         maven { url = 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
         maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        maven { url = 'https://repo.aikar.co/content/groups/aikar/' } 
+        maven { url = 'https://repo.aikar.co/content/groups/aikar/' }
     }
 
     dependencies {
@@ -36,7 +31,7 @@ subprojects {
 }
 
 tasks.register('publishApi') {
-    dependsOn ':api:publish'
+    dependsOn ':modules:api:publish'
     description = 'Publishes only the API module to Nexus'
     group = 'publishing'
 }

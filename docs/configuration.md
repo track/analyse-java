@@ -2,13 +2,13 @@
 
 This guide covers all configuration options for each platform.
 
-## Paper Configuration
+## Spigot / Paper configuration
 
-Location: `plugins/ServerStats/config.yml`
+Location: `plugins/Analyse/config.yml` (see `plugin.yml` in the Spigot/Paper module)
 
 ```yaml
-# Your ServerStats API key
-# Get this from your dashboard at https://serverstats.net
+# Your Analyse API key
+# Get this from your dashboard at https://analyse.net
 api-key: "your-api-key-here"
 
 # Enable debug mode for verbose logging
@@ -20,17 +20,17 @@ debug: false
 instance-id: "auto-generated-uuid"
 ```
 
-### Configuration Options
+### Configuration options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `api-key` | String | `""` | Your ServerStats API key (required) |
+| `api-key` | String | `""` | Your Analyse API key (required) |
 | `debug` | Boolean | `false` | Enable verbose debug logging |
 | `instance-id` | String | Auto | Unique identifier for this server |
 
-## BungeeCord Configuration
+## BungeeCord configuration
 
-Location: `plugins/ServerStats/config.yml`
+Location: `plugins/Analyse/config.yml`
 
 ```yaml
 # Enable debug mode
@@ -54,16 +54,16 @@ servers:
     api-key: "creative-api-key"
 ```
 
-### BungeeCord-Specific Options
+### BungeeCord-specific options
 
 | Option | Type | Description |
 |--------|------|-------------|
 | `default-server` | String | Server to use for static API calls |
 | `servers` | Map | Per-server API key configuration |
 
-## Velocity Configuration
+## Velocity configuration
 
-Location: `plugins/serverstats/config.yml`
+Location: `plugins/analyse/config.yml` (Velocity plugin id is `analyse`)
 
 ```yaml
 # Enable debug mode
@@ -83,7 +83,7 @@ servers:
     api-key: "survival-api-key"
 ```
 
-## Proxy Server Mapping
+## Proxy server mapping
 
 When using BungeeCord or Velocity, the plugin tracks which backend server each player is connected to. Configure an API key for each server you want to track:
 
@@ -102,7 +102,7 @@ servers:
 
 If a player connects to a server without an API key configured, their session won't be tracked for that server.
 
-## Environment Variables
+## Environment variables
 
 You can use environment variables for sensitive configuration:
 
@@ -110,12 +110,12 @@ You can use environment variables for sensitive configuration:
 api-key: ${ANALYSE_API_KEY}
 ```
 
-## Reloading Configuration
+## Reloading configuration
 
 After making changes, reload the configuration:
 
 ```
-/serverstats reload
+/analyse reload
 ```
 
-Note: Some changes (like adding new server entries on proxies) may require a full restart.
+Note: Config reload is available on **Spigot/Paper** only. On proxies, some changes (like adding new server entries) may require a full restart.

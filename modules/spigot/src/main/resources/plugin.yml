@@ -1,0 +1,19 @@
+name: Analyse
+version: ${version}
+main: net.analyse.spigot.AnalysePlugin
+description: Analyse tracking plugin
+author: VertCode Development
+
+permissions:
+  analyse.command:
+    description: Base permission for analyse commands
+    default: op
+  analyse.command.reload:
+    description: Permission to reload the plugin
+    default: op
+  analyse.command.debug:
+    description: Permission to toggle debug mode
+    default: op
+  analyse.command.event:
+    description: Permission to send custom events
+    default: op

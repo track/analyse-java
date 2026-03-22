@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
+dependencies {
+    implementation project(':modules:api')
+    implementation project(':modules:sdk')
+    implementation "co.aikar:acf-bukkit:${project.property('acfVersion')}"
+    compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
+
+    // Adventure platform adapter (auto-detects Paper native vs Spigot legacy)
+    implementation 'net.kyori:adventure-api:4.17.0'
+    implementation 'net.kyori:adventure-text-minimessage:4.17.0'
+    implementation 'net.kyori:adventure-text-serializer-legacy:4.17.0'
+    implementation 'net.kyori:adventure-platform-bukkit:4.4.1'
+}
+
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveBaseName.set('analyse-spigot')
+    archiveClassifier.set('')
+
+    relocate 'net.kyori', 'net.analyse.libs.kyori'
+    relocate 'co.aikar.commands', 'net.analyse.libs.acf'
+    relocate 'co.aikar.locales', 'net.analyse.libs.locales'
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
