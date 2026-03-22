@@ -20,6 +20,7 @@ public class AnalyseHytaleConfig {
   private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private boolean debug;
+  private boolean development;
   private String apiKey;
   private String instanceId;
 
@@ -56,6 +57,7 @@ public class AnalyseHytaleConfig {
   private static AnalyseHytaleConfig createDefault() {
     AnalyseHytaleConfig config = new AnalyseHytaleConfig();
     config.debug = false;
+    config.development = false;
     config.apiKey = "";
     config.instanceId = "default";
     return config;

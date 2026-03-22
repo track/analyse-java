@@ -28,6 +28,7 @@ public class AnalyseSpigotConfig {
 
   private final JavaPlugin plugin;
   private boolean debug;
+  private boolean development;
   private String apiKey;
   private String bedrockPrefix;
   private String instanceId;
@@ -51,6 +52,7 @@ public class AnalyseSpigotConfig {
     FileConfiguration config = plugin.getConfig();
 
     this.debug = config.getBoolean("debug", false);
+    this.development = config.getBoolean("development", false);
     this.apiKey = config.getString("api-key", "");
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");

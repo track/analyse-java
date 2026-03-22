@@ -51,7 +51,8 @@ public class PlayerListener implements Listener {
     plugin.getPluginConfig().getServers().forEach((serverName, serverConfig) -> {
       String apiKey = serverConfig.getApiKey();
       if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("anl_your_")) {
-        AnalyseConfig config = new AnalyseConfig(apiKey);
+        boolean development = plugin.getPluginConfig().isDevelopment();
+        AnalyseConfig config = new AnalyseConfig(apiKey, development);
         serverClients.put(serverName, new AnalyseClient(config));
         logger.info(String.format("Initialized analytics client for server: %s", serverName));
       }

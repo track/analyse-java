@@ -28,6 +28,7 @@ public class AnalyseVelocityConfig {
 
   @Setter
   private boolean debug = false;
+  private boolean development = false;
   private String bedrockPrefix = ".";
   private String instanceId = "default";
   private String defaultServer = null;

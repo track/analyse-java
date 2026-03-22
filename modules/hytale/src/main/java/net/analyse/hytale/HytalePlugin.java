@@ -114,7 +114,8 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
 
     // Initialize SDK client
     AnalyseConfig sdkConfig = new AnalyseConfig(
-      pluginConfig.getApiKey()
+      pluginConfig.getApiKey(),
+      pluginConfig.isDevelopment()
     );
     client = new AnalyseClient(sdkConfig);
 

@@ -119,7 +119,7 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     shutdownAnalyse();
 
     // Initialize SDK client
-    AnalyseConfig sdkConfig = new AnalyseConfig(pluginConfig.getApiKey());
+    AnalyseConfig sdkConfig = new AnalyseConfig(pluginConfig.getApiKey(), pluginConfig.isDevelopment());
     client = new AnalyseClient(sdkConfig);
 
     // Update the player listener with the new client
