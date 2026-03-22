@@ -87,10 +87,10 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
    * Automatically renames the old folder if it exists.
    */
   private void migrateDataFolder() {
-    File dataFolder = getDataFolder().toFile();
-    File oldFolder = new File(dataFolder.getParentFile(), "ServerStats");
-    if (oldFolder.exists() && oldFolder.isDirectory() && !dataFolder.exists()) {
-      if (oldFolder.renameTo(dataFolder)) {
+    File dataDir = getDataDirectory().toFile();
+    File oldFolder = new File(dataDir.getParentFile(), "ServerStats");
+    if (oldFolder.exists() && oldFolder.isDirectory() && !dataDir.exists()) {
+      if (oldFolder.renameTo(dataDir)) {
         getLogger().atInfo().log("Migrated data folder from ServerStats to Analyse");
       } else {
         getLogger().atWarning().log("Failed to migrate data folder from ServerStats to Analyse. Please rename it manually.");
