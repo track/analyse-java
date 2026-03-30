@@ -75,12 +75,21 @@ public class PlayerListener implements Listener {
    * @return The default client, or null if not configured
    */
   public AnalyseClient getDefaultClient() {
+    // Try the explicitly configured default server first
     String defaultServer = plugin.getPluginConfig().getDefaultServer();
-    if (defaultServer == null || defaultServer.trim().isEmpty()) {
-      return null;
+    if (defaultServer != null && !defaultServer.trim().isEmpty()) {
+      AnalyseClient client = serverClients.get(defaultServer);
+      if (client != null) {
+        return client;
+      }
     }
 
-    return serverClients.get(defaultServer);
+    // Fall back to the first available client
+    if (!serverClients.isEmpty()) {
+      return serverClients.values().iterator().next();
+    }
+
+    return null;
   }
 
   @EventHandler
