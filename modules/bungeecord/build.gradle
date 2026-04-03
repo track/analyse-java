@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
+dependencies {
+    implementation project(':modules:api')
+    implementation project(':modules:sdk')
+    implementation "co.aikar:acf-bungee:${project.property('acfVersion')}"
+    compileOnly "net.md-5:bungeecord-api:${project.property('bungeecordVersion')}"
+}
+
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    archiveBaseName.set('analyse-bungeecord')
+    archiveClassifier.set('')
+    // BungeeCord already includes Gson, so exclude it
+    dependencies {
+        exclude(dependency('com.google.code.gson:gson'))
+    }
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('bungee.yml') {
+        expand props
+    }
+}

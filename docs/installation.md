@@ -1,80 +1,90 @@
 # Installation
 
-This guide covers installing the ServerStats plugin on different platforms.
+This guide covers installing the Analyse plugin on different platforms.
 
 ## Requirements
 
 - **Java**: 21 or higher
-- **Server Software**: Paper 1.21+, BungeeCord, or Velocity 3.x
+- **Server software**: Spigot 1.8+, Paper, BungeeCord, or Velocity 3.x
 
-## Paper Installation
+## Spigot / Paper installation
 
-1. Download `serverstats-paper-x.x.x.jar` from the releases
+1. Download `analyse-spigot-x.x.x.jar` from the releases
 2. Place the jar file in your server's `plugins` folder
 3. Start the server to generate the configuration file
-4. Edit `plugins/ServerStats/config.yml` with your API key
-5. Restart the server or run `/serverstats reload`
+4. Edit `plugins/Analyse/config.yml` with your API key
+5. Restart the server or run `/analyse reload`
 
-### Paper Config Location
+### Spigot / Paper config location
+
 ```
 plugins/
-└── ServerStats/
+└── Analyse/
     └── config.yml
 ```
 
-## BungeeCord Installation
+## BungeeCord installation
 
-1. Download `serverstats-bungeecord-x.x.x.jar` from the releases
+1. Download `analyse-bungeecord-x.x.x.jar` from the releases
 2. Place the jar file in your proxy's `plugins` folder
 3. Start the proxy to generate the configuration file
-4. Edit `plugins/ServerStats/config.yml` with your server API keys
+4. Edit `plugins/Analyse/config.yml` with your server API keys
 5. Restart the proxy
 
-### BungeeCord Config Location
+### BungeeCord config location
+
 ```
 plugins/
-└── ServerStats/
+└── Analyse/
     └── config.yml
 ```
 
-## Velocity Installation
+## Velocity installation
 
-1. Download `serverstats-velocity-x.x.x.jar` from the releases
+1. Download `analyse-velocity-x.x.x.jar` from the releases
 2. Place the jar file in your proxy's `plugins` folder
 3. Start the proxy to generate the configuration file
-4. Edit `plugins/serverstats/config.yml` with your server API keys
+4. Edit `plugins/analyse/config.yml` with your server API keys
 5. Restart the proxy
 
-### Velocity Config Location
+### Velocity config location
+
 ```
 plugins/
-└── serverstats/
+└── analyse/
     └── config.yml
 ```
 
-## Getting Your API Key
+## Hytale installation
 
-1. Log in to your [ServerStats Dashboard](https://serverstats.net)
+1. Download `analyse-hytale-x.x.x.jar` from the releases
+2. Install per Hytale server mod/plugin instructions for your environment
+3. Configure using the generated config and your API key from [analyse.net](https://analyse.net)
+
+## Getting your API key
+
+1. Log in to your [Analyse dashboard](https://analyse.net)
 2. Navigate to your server settings
 3. Copy your API key
 4. Paste it in your configuration file
 
-## Verifying Installation
+## Verifying installation
 
-After configuration, run `/serverstats status` in-game or console to verify:
+After configuration, run `/analyse status` in-game or console to verify:
 
 ```
 ──────────────────────────────
-  ServerStats v0.1.0
+  Analyse v0.7.3
 ──────────────────────────────
   Status: ● Connected
-  API: api.serverstats.net
+  API: api.analyse.net
   Players Tracked: 10
   Debug: Disabled
 ──────────────────────────────
 ```
 
 If the status shows "Disconnected", check:
+
 - Your API key is correct
 - The server has internet access
 - Firewall allows outbound HTTPS connections

@@ -7,14 +7,15 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-echo "Building serverstats v${VERSION}..."
+echo "Building analyse v${VERSION}..."
 ./gradlew build --no-daemon -q
 
-OUTPUT="serverstats-${VERSION}.zip"
+OUTPUT="analyse-${VERSION}.zip"
 JARS=(
-  "paper/build/libs/serverstats-paper-${VERSION}.jar"
-  "bungeecord/build/libs/serverstats-bungeecord-${VERSION}.jar"
-  "velocity/build/libs/serverstats-velocity-${VERSION}.jar"
+  "modules/spigot/build/libs/analyse-spigot-${VERSION}.jar"
+  "modules/bungeecord/build/libs/analyse-bungeecord-${VERSION}.jar"
+  "modules/velocity/build/libs/analyse-velocity-${VERSION}.jar"
+  "modules/hytale/build/libs/analyse-hytale-${VERSION}.jar"
 )
 
 FOUND=()

@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
+dependencies {
+    api project(':modules:api')
+    api "com.google.code.gson:gson:${project.property('gsonVersion')}"
+    api "com.squareup.okhttp3:okhttp:${project.property('okhttpVersion')}"
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+}

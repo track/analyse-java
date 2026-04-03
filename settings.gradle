@@ -1,10 +1,8 @@
-rootProject.name = 'serverstats'
+rootProject.name = 'analyse'
 
-include 'sdk'
-include 'api'
-include 'paper'
-include 'velocity'
-include 'bungeecord'
-include 'hytale'
-
- 
+include 'modules:sdk'
+include 'modules:api'
+include 'modules:spigot'
+include 'modules:velocity'
+include 'modules:bungeecord'
+include 'modules:hytale'

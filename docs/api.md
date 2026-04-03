@@ -1,18 +1,18 @@
 # Developer API
 
-The ServerStats plugin provides a simple, fluent static API for other plugins to track custom analytics events and interact with A/B tests.
+The Analyse plugin provides a simple, fluent static API for other plugins to track custom analytics events and interact with A/B tests.
 
-## Maven/Gradle Setup
+## Maven/Gradle setup
 
 ### Gradle (Kotlin DSL)
 
 ```kotlin
 repositories {
-    maven("https://repo.serverstats.net/releases")
+    maven("https://repo.analyse.net/releases")
 }
 
 dependencies {
-    compileOnly("net.serverstats:api:0.1.0")
+    compileOnly("net.analyse:analyse-api:0.7.3")
 }
 ```
 
@@ -20,11 +20,11 @@ dependencies {
 
 ```groovy
 repositories {
-    maven { url 'https://repo.serverstats.net/releases' }
+    maven { url 'https://repo.analyse.net/releases' }
 }
 
 dependencies {
-    compileOnly 'net.serverstats:api:0.1.0'
+    compileOnly 'net.analyse:analyse-api:0.7.3'
 }
 ```
 
@@ -32,33 +32,33 @@ dependencies {
 
 ```xml
 <repository>
-    <id>serverstats</id>
-    <url>https://repo.serverstats.net/releases</url>
+    <id>analyse</id>
+    <url>https://repo.analyse.net/releases</url>
 </repository>
 
 <dependency>
-    <groupId>net.serverstats</groupId>
-    <artifactId>api</artifactId>
-    <version>0.1.0</version>
+    <groupId>net.analyse</groupId>
+    <artifactId>analyse-api</artifactId>
+    <version>0.7.3</version>
     <scope>provided</scope>
 </dependency>
 ```
 
-## Quick Start
+## Quick start
 
 ```java
-import net.serverstats.api.ServerStats;
+import net.analyse.api.Analyse;
 
 // Simple event
-ServerStats.trackEvent("my_event").send();
+Analyse.trackEvent("my_event").send();
 
 // Event with player
-ServerStats.trackEvent("player_action")
+Analyse.trackEvent("player_action")
     .withPlayer(player.getUniqueId(), player.getName())
     .send();
 
 // Event with data
-ServerStats.trackEvent("shop_purchase")
+Analyse.trackEvent("shop_purchase")
     .withPlayer(player.getUniqueId(), player.getName())
     .withData("item", "diamond_sword")
     .withData("price", 500)
@@ -68,7 +68,7 @@ ServerStats.trackEvent("shop_purchase")
 
 ## Custom Events API
 
-### ServerStats Class
+### Analyse class
 
 The main entry point for tracking events.
 
@@ -77,10 +77,11 @@ The main entry point for tracking events.
 Creates a new event builder.
 
 ```java
-EventBuilder builder = ServerStats.trackEvent("event_name");
+EventBuilder builder = Analyse.trackEvent("event_name");
 ```
 
 **Parameters:**
+
 - `name` - The event name (lowercase with underscores recommended)
 
 **Returns:** An `EventBuilder` for configuring the event
@@ -89,17 +90,17 @@ EventBuilder builder = ServerStats.trackEvent("event_name");
 
 #### isAvailable()
 
-Checks if ServerStats is ready to track events.
+Checks if Analyse is ready to track events.
 
 ```java
-if (ServerStats.isAvailable()) {
-    ServerStats.trackEvent("my_event").send();
+if (Analyse.isAvailable()) {
+    Analyse.trackEvent("my_event").send();
 }
 ```
 
-**Returns:** `true` if ServerStats is initialized and connected
+**Returns:** `true` if Analyse is initialized and connected
 
-### EventBuilder Class
+### EventBuilder class
 
 Fluent builder for configuring events.
 
@@ -108,7 +109,7 @@ Fluent builder for configuring events.
 Associates the event with a player.
 
 ```java
-ServerStats.trackEvent("login")
+Analyse.trackEvent("login")
     .withPlayer(player.getUniqueId(), player.getName())
     .send();
 ```
@@ -118,7 +119,7 @@ ServerStats.trackEvent("login")
 Associates the event with a player using only UUID.
 
 ```java
-ServerStats.trackEvent("achievement")
+Analyse.trackEvent("achievement")
     .withPlayer(player.getUniqueId())
     .send();
 ```
@@ -128,7 +129,7 @@ ServerStats.trackEvent("achievement")
 Adds a custom data field to the event.
 
 ```java
-ServerStats.trackEvent("purchase")
+Analyse.trackEvent("purchase")
     .withData("item", "diamond_sword")
     .withData("quantity", 1)
     .withData("total_price", 500)
@@ -145,7 +146,7 @@ eventData.put("quest_id", "dragon_slayer");
 eventData.put("difficulty", "hard");
 eventData.put("time_seconds", 3600);
 
-ServerStats.trackEvent("quest_completed")
+Analyse.trackEvent("quest_completed")
     .withData(eventData)
     .send();
 ```
@@ -155,7 +156,7 @@ ServerStats.trackEvent("quest_completed")
 Sets a numeric value for aggregations (sum, average, etc.).
 
 ```java
-ServerStats.trackEvent("coins_earned")
+Analyse.trackEvent("coins_earned")
     .withPlayer(player.getUniqueId(), player.getName())
     .withValue(1000.0)
     .send();
@@ -166,7 +167,7 @@ ServerStats.trackEvent("coins_earned")
 Sends the event asynchronously (fire and forget).
 
 ```java
-ServerStats.trackEvent("server_start").send();
+Analyse.trackEvent("server_start").send();
 ```
 
 #### send(Consumer<EventResponse> callback)
@@ -174,7 +175,7 @@ ServerStats.trackEvent("server_start").send();
 Sends the event with a callback for the response.
 
 ```java
-ServerStats.trackEvent("important_event")
+Analyse.trackEvent("important_event")
     .send(response -> {
         if (response != null && response.isSuccess()) {
             System.out.println("Event tracked: " + response.getEventId());
@@ -186,29 +187,29 @@ ServerStats.trackEvent("important_event")
 
 ## A/B Testing API
 
-The ServerStats API provides built-in support for A/B testing.
+The Analyse API provides built-in support for A/B testing.
 
-### Get Active Tests
+### Get active tests
 
 ```java
-List<ABTest> tests = ServerStats.getActiveTests();
+List<ABTest> tests = Analyse.getActiveTests();
 for (ABTest test : tests) {
     System.out.println("Test: " + test.getKey() + " - " + test.getName());
 }
 ```
 
-### Check if Test is Active
+### Check if test is active
 
 ```java
-if (ServerStats.isTestActive("welcome_message_test")) {
+if (Analyse.isTestActive("welcome_message_test")) {
     // Test is running
 }
 ```
 
-### Get Player's Variant
+### Get player's variant
 
 ```java
-String variant = ServerStats.getVariant(player.getUniqueId(), "welcome_message_test");
+String variant = Analyse.getVariant(player.getUniqueId(), "welcome_message_test");
 if ("variant_a".equals(variant)) {
     // Show variant A experience
 } else if ("variant_b".equals(variant)) {
@@ -216,10 +217,10 @@ if ("variant_a".equals(variant)) {
 }
 ```
 
-### Track Conversion
+### Track conversion
 
 ```java
-ServerStats.trackConversion(
+Analyse.trackConversion(
     player.getUniqueId(),
     player.getName(),
     "welcome_message_test",
@@ -227,7 +228,7 @@ ServerStats.trackConversion(
 );
 ```
 
-### A/B Test Triggers
+### A/B test triggers
 
 A/B tests can be triggered by:
 
@@ -238,23 +239,23 @@ A/B tests can be triggered by:
 | `ON_COMMAND` | Executes when a specific command is run |
 | `ON_EVENT` | Executes when a specific custom event is tracked |
 
-#### ON_EVENT Trigger
+#### ON_EVENT trigger
 
-The `ON_EVENT` trigger allows A/B tests to activate when you track a custom event with `ServerStats.trackEvent()`. This is useful for triggering experiments based on in-game milestones.
+The `ON_EVENT` trigger allows A/B tests to activate when you track a custom event with `Analyse.trackEvent()`. This is useful for triggering experiments based on in-game milestones.
 
 ```java
 // When this event is tracked, any A/B test configured 
 // with trigger "ON_EVENT" and event name "tutorial_completed"
 // will automatically execute its variant actions
-ServerStats.trackEvent("tutorial_completed")
+Analyse.trackEvent("tutorial_completed")
     .withPlayer(player.getUniqueId(), player.getName())
     .withData("time_seconds", 300)
     .send();
 ```
 
-**Example Use Case:** Reward players who complete the tutorial with different bonuses based on their A/B test variant.
+**Example use case:** Reward players who complete the tutorial with different bonuses based on their A/B test variant.
 
-### A/B Test Actions
+### A/B test actions
 
 When a test triggers, it can execute actions for the assigned variant:
 
@@ -263,17 +264,17 @@ When a test triggers, it can execute actions for the assigned variant:
 | `SEND_MESSAGE` | Sends a colored message to the player | All |
 | `RUN_COMMAND` | Executes a command as console or player | All |
 
-## Complete Examples
+## Complete examples
 
-### Track Player Quest Completion
+### Track player quest completion
 
 ```java
 public void onQuestComplete(Player player, Quest quest) {
-    if (!ServerStats.isAvailable()) {
+    if (!Analyse.isAvailable()) {
         return;
     }
 
-    ServerStats.trackEvent("quest_completed")
+    Analyse.trackEvent("quest_completed")
         .withPlayer(player.getUniqueId(), player.getName())
         .withData("quest_id", quest.getId())
         .withData("quest_name", quest.getName())
@@ -284,11 +285,11 @@ public void onQuestComplete(Player player, Quest quest) {
 }
 ```
 
-### Track Economy Transactions
+### Track economy transactions
 
 ```java
 public void onTransaction(Player player, double amount, String type) {
-    ServerStats.trackEvent("economy_transaction")
+    Analyse.trackEvent("economy_transaction")
         .withPlayer(player.getUniqueId(), player.getName())
         .withData("type", type) // "deposit", "withdraw", "transfer"
         .withData("currency", "coins")
@@ -297,11 +298,11 @@ public void onTransaction(Player player, double amount, String type) {
 }
 ```
 
-### Track PvP Combat
+### Track PvP combat
 
 ```java
 public void onPlayerKill(Player killer, Player victim) {
-    ServerStats.trackEvent("pvp_kill")
+    Analyse.trackEvent("pvp_kill")
         .withPlayer(killer.getUniqueId(), killer.getName())
         .withData("victim_uuid", victim.getUniqueId().toString())
         .withData("victim_name", victim.getName())
@@ -311,17 +312,17 @@ public void onPlayerKill(Player killer, Player victim) {
 }
 ```
 
-### Implement A/B Tested Feature
+### Implement A/B tested feature
 
 ```java
 public void showWelcomeMessage(Player player) {
-    if (!ServerStats.isAvailable() || !ServerStats.isTestActive("welcome_test")) {
+    if (!Analyse.isAvailable() || !Analyse.isTestActive("welcome_test")) {
         // Default behavior
         player.sendMessage("Welcome to the server!");
         return;
     }
 
-    String variant = ServerStats.getVariant(player.getUniqueId(), "welcome_test");
+    String variant = Analyse.getVariant(player.getUniqueId(), "welcome_test");
     
     switch (variant) {
         case "control" -> player.sendMessage("Welcome to the server!");
@@ -333,7 +334,7 @@ public void showWelcomeMessage(Player player) {
     }
     
     // Track that the player saw the welcome message
-    ServerStats.trackConversion(
+    Analyse.trackConversion(
         player.getUniqueId(),
         player.getName(),
         "welcome_test",
@@ -342,11 +343,11 @@ public void showWelcomeMessage(Player player) {
 }
 ```
 
-### Track With Callback
+### Track with callback
 
 ```java
 public void trackImportantEvent(Player player, String action) {
-    ServerStats.trackEvent("important_action")
+    Analyse.trackEvent("important_action")
         .withPlayer(player.getUniqueId(), player.getName())
         .withData("action", action)
         .send(response -> {
@@ -360,19 +361,19 @@ public void trackImportantEvent(Player player, String action) {
 }
 ```
 
-## Best Practices
+## Best practices
 
-### 1. Check Availability
+### 1. Check availability
 
-Always check if ServerStats is available before tracking:
+Always check if Analyse is available before tracking:
 
 ```java
-if (ServerStats.isAvailable()) {
-    ServerStats.trackEvent("my_event").send();
+if (Analyse.isAvailable()) {
+    Analyse.trackEvent("my_event").send();
 }
 ```
 
-### 2. Use Consistent Event Names
+### 2. Use consistent event names
 
 Use lowercase with underscores for event names:
 
@@ -388,7 +389,7 @@ Use lowercase with underscores for event names:
 "PLAYER-DEATH"
 ```
 
-### 3. Meaningful Data Keys
+### 3. Meaningful data keys
 
 Use descriptive, consistent key names:
 
@@ -402,7 +403,7 @@ Use descriptive, consistent key names:
 .withData("q", 1)
 ```
 
-### 4. Use Values for Aggregations
+### 4. Use values for aggregations
 
 Use `withValue()` for numeric data you want to aggregate (sum, average):
 
@@ -414,7 +415,7 @@ Use `withValue()` for numeric data you want to aggregate (sum, average):
 .withValue(damageAmount)
 ```
 
-### 5. Don't Block the Main Thread
+### 5. Don't block the main thread
 
 The `send()` method is asynchronous and won't block. Don't add callbacks that do heavy processing:
 
@@ -430,35 +431,35 @@ The `send()` method is asynchronous and won't block. Don't add callbacks that do
 });
 ```
 
-## Soft Dependency
+## Soft dependency
 
-To make ServerStats a soft dependency, check for its presence:
+To make Analyse a soft dependency, check for its presence:
 
 ```java
 public class MyPlugin extends JavaPlugin {
     
-    private boolean serverstatsEnabled = false;
+    private boolean analyseEnabled = false;
     
     @Override
     public void onEnable() {
-        // Check if ServerStats is installed
-        if (getServer().getPluginManager().getPlugin("ServerStats") != null) {
-            serverstatsEnabled = true;
-            getLogger().info("ServerStats integration enabled");
+        // Check if Analyse is installed
+        if (getServer().getPluginManager().getPlugin("Analyse") != null) {
+            analyseEnabled = true;
+            getLogger().info("Analyse integration enabled");
         }
     }
     
     public void trackEvent(String name) {
-        if (serverstatsEnabled && ServerStats.isAvailable()) {
-            ServerStats.trackEvent(name).send();
+        if (analyseEnabled && Analyse.isAvailable()) {
+            Analyse.trackEvent(name).send();
         }
     }
 }
 ```
 
-Or use `plugin.yml` / `paper-plugin.yml` soft dependency:
+Or use `plugin.yml` soft dependency:
 
 ```yaml
 name: MyPlugin
-softdepend: [ServerStats]
+softdepend: [Analyse]
 ```
