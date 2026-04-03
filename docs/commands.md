@@ -28,7 +28,7 @@ Shows the current plugin status and connection information.
 
 ```
 ──────────────────────────────
-  Analyse v0.7.3
+  Analyse v1.0.0
 ──────────────────────────────
   Status: ● Connected
   API: api.analyse.net

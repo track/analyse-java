@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("net.analyse:analyse-api:0.7.3")
+    compileOnly("net.analyse:analyse-api:1.0.0")
 }
 ```
 
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'net.analyse:analyse-api:0.7.3'
+    compileOnly 'net.analyse:analyse-api:1.0.0'
 }
 ```
 
@@ -39,7 +39,7 @@ dependencies {
 <dependency>
     <groupId>net.analyse</groupId>
     <artifactId>analyse-api</artifactId>
-    <version>0.7.3</version>
+    <version>1.0.0</version>
     <scope>provided</scope>
 </dependency>
 ```
