@@ -31,12 +31,12 @@ public class RunCommandAction extends HytaleAction {
     // Replace placeholders
     command = replacePlaceholders(command, playerRef);
 
-    // Remove leading slash if present
     if (command.startsWith("/")) {
       command = command.substring(1);
     }
 
-    // TODO: Figure out how to execute commands in Hytale
-
+    plugin.getLogger()
+        .atWarning()
+        .log("RUN_COMMAND action is not yet supported on Hytale; skipping command: %s", command);
   }
 }

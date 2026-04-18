@@ -1,66 +1,33 @@
-# Analyse Plugin Documentation
+# Documentation
 
-Welcome to the Analyse plugin documentation. This guide covers installation, configuration, commands, and API usage for developers.
+Welcome to the Analyse plugin documentation. These pages cover everything you need to install, configure, and extend the Analyse plugin on your server.
 
-## Table of Contents
+If you're looking for the product-side docs (dashboards, features, billing, campaigns, and so on), head to [analyse.net/docs](https://analyse.net/docs). This repository only documents the plugin and the SDK.
 
-- [Overview](#overview)
-- [Installation](installation.md)
-- [Configuration](configuration.md)
-- [Commands](commands.md)
-- [Developer API](api.md)
-- [Platforms](#platforms)
+## Plugin
 
-## Overview
+| Page | What's in it |
+| --- | --- |
+| [Installation](installation.md) | Installing the plugin on Spigot, BungeeCord, Velocity, and Hytale |
+| [Configuration](configuration.md) | Every config option for every platform, with examples |
+| [Commands](commands.md) | `/analyse` subcommands, permissions, and usage |
 
-Analyse is a comprehensive analytics plugin for Minecraft servers. It provides:
+## SDK
 
-- **Player Session Tracking** - Automatically tracks player joins, leaves, and playtime
-- **Heartbeat System** - Regular server health checks with online player data
-- **Custom Events API** - Fluent static API for other plugins to track custom analytics events
-- **A/B Testing** - Built-in support for A/B tests with variant assignment and action execution
-- **Multi-Platform Support** - Works on Spigot 1.8+, Paper, BungeeCord, and Velocity
+The Analyse SDK (`analyse-api`) lets your own plugins talk to Analyse. Use it to send custom events, read A/B test variants, and look up the current session of a player.
 
-## Platforms
+| Page | What's in it |
+| --- | --- |
+| [Overview &amp; installation](sdk/README.md) | What the SDK is and how to add it to your project |
+| [Custom events](sdk/events.md) | Send your own events with the fluent builder |
+| [A/B testing](sdk/ab-testing.md) | Read variants and track conversions from code |
+| [Sessions](sdk/sessions.md) | Read the live session of an online player |
+| [Plugin messaging](sdk/plugin-messaging.md) | Send events from a backend server through a proxy |
+| [Reference](sdk/reference.md) | A table of every public class and method |
 
-| Platform | Server Type | Java Version |
-|----------|-------------|--------------|
-| **Spigot / Paper** | Single server / backend | Java 21+ (runtime); Spigot API targets 1.8+ |
-| **BungeeCord** | Proxy | Java 21+ |
-| **Velocity** | Proxy | Java 21+ |
+## Quick links
 
-### Choosing the Right Version
-
-- **Spigot / Paper**: Use for standalone servers or backend servers behind a proxy
-- **BungeeCord/Velocity**: Use for proxy servers to track cross-server analytics
-
-### Feature Comparison
-
-| Feature | Spigot/Paper | BungeeCord | Velocity |
-|---------|----------------|------------|----------|
-| Session Tracking | ✅ | ✅ | ✅ |
-| Heartbeat | ✅ | ✅ | ✅ |
-| Custom Events | ✅ | ✅ | ✅ |
-| A/B Testing | ✅ | ✅ | ✅ |
-| SEND_MESSAGE Action | ✅ | ✅ | ✅ |
-| RUN_COMMAND Action | ✅ | ✅ | ✅ |
-
-## Quick Start
-
-1. Download the appropriate plugin jar for your platform
-2. Place it in your `plugins` folder
-3. Start the server to generate the config
-4. Add your API key from [analyse.net](https://analyse.net)
-5. Restart the server
-
-```yaml
-# Spigot/Paper config.yml (plugins/Analyse/config.yml)
-api-key: "your-api-key-here"
-debug: false
-instance-id: "auto-generated"
-```
-
-## Support
-
-- Website: [analyse.net](https://analyse.net)
-- API Documentation: [api.analyse.net](https://api.analyse.net)
+- [analyse.net](https://analyse.net)
+- [Dashboard](https://analyse.net/dashboard)
+- [Downloads](https://analyse.net/downloads)
+- [Product docs](https://analyse.net/docs)

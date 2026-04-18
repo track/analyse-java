@@ -33,3 +33,7 @@ config.json
 
 # Local properties
 local.properties
+
+# Release artifacts
+*.zip
+*.tar.gz

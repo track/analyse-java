@@ -1,116 +1,96 @@
-# Analyse Server Plugins
+# Analyse
 
-Analytics tracking plugins for Minecraft servers. Supports Spigot 1.8+, Paper, Velocity, and BungeeCord.
+[![CI](https://github.com/Analyse-net/analyse-java/actions/workflows/ci.yml/badge.svg)](https://github.com/Analyse-net/analyse-java/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Analyse-net/analyse-java?sort=semver)](https://github.com/Analyse-net/analyse-java/releases/latest)
+[![Java 21](https://img.shields.io/badge/java-21-f89820?logo=openjdk&logoColor=white)](https://adoptium.net/)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
-## Features
+The source repository for the [Analyse](https://analyse.net) plugins and developer SDK &mdash; the analytics platform purpose-built for Minecraft and Hytale servers.
 
-- **Automatic Session Tracking** - Player joins, leaves, and playtime
-- **Heartbeat System** - Regular server health checks
-- **Custom Events API** - Fluent API for other plugins to track analytics
-- **Multi-Platform** - Spigot 1.8+, Paper, BungeeCord, and Velocity support
-- **ACF Commands** - Clean command system using [Annotation Command Framework](https://github.com/aikar/commands)
+Analyse tells you **who** plays on your server, **where** they came from, and **what** keeps them coming back. Install the plugin, paste your API key, and start the server: sessions, retention, revenue, and everything in between show up in your dashboard automatically.
+
+This repository is the home of:
+
+- `analyse-spigot` &mdash; the plugin for Spigot, Paper, Purpur, and Folia
+- `analyse-bungeecord` &mdash; the plugin for BungeeCord proxies
+- `analyse-velocity` &mdash; the plugin for Velocity proxies
+- `analyse-hytale` &mdash; the plugin for Hytale servers
+- `analyse-api` &mdash; the public Java SDK for tracking custom events from your own plugins
+- `analyse-sdk` &mdash; the internal HTTP client shared by all platform plugins
+
+## Getting started
+
+The shortest path from zero to data:
+
+1. Sign up at [analyse.net](https://analyse.net) and create a Server.
+2. Copy your API key from the dashboard (it starts with `anl_`).
+3. Download the plugin for your server software from the [releases page](https://analyse.net/downloads).
+4. Drop the jar in your `plugins/` folder and start your server once so the config generates.
+5. Paste your API key into `plugins/Analyse/config.yml` (or `plugins/analyse/config.json` on Velocity).
+6. Restart. Join your server. You should see the session in the dashboard within a few seconds.
+
+Full walkthroughs live in [`docs/`](docs/README.md).
 
 ## Documentation
 
-📖 **[Full Documentation](docs/README.md)**
+| Guide | What's in it |
+| --- | --- |
+| [Installation](docs/installation.md) | Install the plugin on Spigot, BungeeCord, Velocity, or Hytale |
+| [Configuration](docs/configuration.md) | Every config option for every platform |
+| [Commands](docs/commands.md) | `/analyse` subcommands, permissions, and examples |
+| [SDK overview](docs/sdk/README.md) | Use the `analyse-api` artifact from your own plugin |
+| [SDK reference](docs/sdk/reference.md) | Every public class and method |
 
-- [Installation Guide](docs/installation.md)
-- [Configuration](docs/configuration.md)
-- [Commands](docs/commands.md)
-- [Developer API](docs/api.md)
+## For plugin developers
 
-## Quick Start
-
-### 1. Download
-
-Download the appropriate plugin for your server:
-
-| Platform | Download |
-|----------|----------|
-| Spigot/Paper | `analyse-spigot-x.x.x.jar` |
-| BungeeCord | `analyse-bungeecord-x.x.x.jar` |
-| Velocity | `analyse-velocity-x.x.x.jar` |
-| Hytale | `analyse-hytale-x.x.x.jar` |
-
-### 2. Configure
-
-Add your API key from [analyse.net](https://analyse.net):
-
-```yaml
-# Spigot/Paper - plugins/Analyse/config.yml
-api-key: "your-api-key-here"
-```
-
-### 3. Verify
-
-Run `/analyse status` to check the connection.
-
-## For Developers
-
-Track custom events from your plugin:
+Track your own events with a one-line static call:
 
 ```java
 import net.analyse.api.Analyse;
 
-// Simple event
-Analyse.trackEvent("shop_purchase")
+Analyse.trackEvent("quest_completed")
     .withPlayer(player.getUniqueId(), player.getName())
-    .withData("item", "diamond_sword")
+    .withData("quest_id", "dragon_slayer")
     .withValue(500.0)
     .send();
 ```
 
-See the [Developer API Documentation](docs/api.md) for more examples.
+Everything you need is documented in [`docs/sdk/`](docs/sdk/README.md).
 
-## Modules
+## Supported platforms
 
-| Module | Description |
-|--------|-------------|
-| `sdk` | Core SDK with HTTP client and data models |
-| `api` | Public API for other plugins to track events |
-| `spigot` | Plugin for Spigot 1.8+ and Paper servers |
-| `velocity` | Plugin for Velocity proxies |
-| `bungeecord` | Plugin for BungeeCord proxies |
-| `hytale` | Plugin for Hytale servers |
+| Platform | Role | Minimum version |
+| --- | --- | --- |
+| Spigot / Paper / Purpur / Folia | Backend game server | 1.8+ (Java 21 runtime) |
+| BungeeCord | Proxy | 1.21+ |
+| Velocity | Proxy | 3.4.0+ |
+| Hytale | Game server | Current Hytale API |
 
-## Building
+The plugin only needs Java 21 at runtime; the Spigot module still targets the 1.8 API for broad compatibility.
+
+## Building from source
 
 ```bash
 ./gradlew clean build
 ```
 
-Output JARs:
+Output jars land in:
 
-- `modules/spigot/build/libs/analyse-spigot-*.jar`
-- `modules/velocity/build/libs/analyse-velocity-*.jar`
-- `modules/bungeecord/build/libs/analyse-bungeecord-*.jar`
-- `modules/hytale/build/libs/analyse-hytale-*.jar`
+- `modules/spigot/build/libs/analyse-spigot-<version>.jar`
+- `modules/bungeecord/build/libs/analyse-bungeecord-<version>.jar`
+- `modules/velocity/build/libs/analyse-velocity-<version>.jar`
+- `modules/hytale/build/libs/analyse-hytale-<version>.jar`
 
-## Requirements
-
-- **Java**: 21+
-- **Spigot/Paper**: Spigot 1.8+ or Paper (see module for tested API level)
-- **Velocity**: 3.4.0+
-- **BungeeCord**: 1.21+
-
-## Commands
-
-```
-/analyse              - Show plugin status
-/analyse status       - Show plugin status  
-/analyse reload       - Reload configuration (Spigot/Paper only)
-/analyse debug        - Toggle debug mode
-/analyse event <name> - Send a custom event
-/analyse help         - Show help
-```
-
-See [Commands Documentation](docs/commands.md) for details.
+The `release.sh` script builds all four and bundles them into a single zip.
 
 ## Support
 
 - Website: [analyse.net](https://analyse.net)
-- API: [api.analyse.net](https://api.analyse.net)
+- Dashboard: [analyse.net/dashboard](https://analyse.net/dashboard)
+- Documentation: [analyse.net/docs](https://analyse.net/docs)
 
 ## License
 
-Proprietary - All rights reserved.
+Copyright &copy; VertCode Development E.E. All rights reserved.
+
+The source in this repository is published for transparency and reference. It is **not** open source; copying, modifying, redistributing, or running modified builds is not permitted. See [`LICENSE`](LICENSE) for the full terms.

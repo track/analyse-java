@@ -62,14 +62,20 @@ publishing {
 
             pom {
                 name = 'Analyse API'
-                description = 'Public API for Analyse analytics plugin'
+                description = 'Public API for the Analyse analytics plugin'
                 url = 'https://analyse.net'
 
                 licenses {
                     license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
+                        name = 'Analyse Proprietary License'
+                        url = 'https://github.com/Analyse-net/analyse-java/blob/main/LICENSE'
+                        distribution = 'repo'
                     }
+                }
+
+                organization {
+                    name = 'VertCode Development E.E.'
+                    url = 'https://analyse.net'
                 }
             }
         }

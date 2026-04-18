@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Derive version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build core modules
+        run: |
+          ./gradlew \
+            :modules:api:build \
+            :modules:sdk:build \
+            :modules:spigot:build \
+            :modules:bungeecord:build \
+            :modules:velocity:build \
+            --no-daemon
+
+      - name: Build Hytale module
+        if: env.HYTALE_MAVEN_USER != ''
+        env:
+          HYTALE_MAVEN_USER: ${{ secrets.HYTALE_MAVEN_USER }}
+          HYTALE_MAVEN_PASS: ${{ secrets.HYTALE_MAVEN_PASS }}
+        run: ./gradlew :modules:hytale:build --no-daemon
+
+      - name: Bundle jars
+        run: |
+          mkdir -p dist
+          cp modules/spigot/build/libs/analyse-spigot-*.jar dist/ 2>/dev/null || true
+          cp modules/bungeecord/build/libs/analyse-bungeecord-*.jar dist/ 2>/dev/null || true
+          cp modules/velocity/build/libs/analyse-velocity-*.jar dist/ 2>/dev/null || true
+          cp modules/hytale/build/libs/analyse-hytale-*.jar dist/ 2>/dev/null || true
+          cd dist && zip -j "analyse-${{ steps.version.outputs.version }}.zip" *.jar
+
+      - name: Publish API to Nexus
+        if: env.NEXUS_USER != ''
+        env:
+          NEXUS_USER: ${{ secrets.NEXUS_USER }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+          NEXUS_RELEASES_URL: ${{ secrets.NEXUS_RELEASES_URL }}
+          NEXUS_SNAPSHOTS_URL: ${{ secrets.NEXUS_SNAPSHOTS_URL }}
+        run: ./gradlew publishApi --no-daemon
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Analyse ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          generate_release_notes: true
+          files: |
+            dist/analyse-spigot-*.jar
+            dist/analyse-bungeecord-*.jar
+            dist/analyse-velocity-*.jar
+            dist/analyse-hytale-*.jar
+            dist/analyse-${{ steps.version.outputs.version }}.zip

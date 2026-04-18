@@ -1,121 +1,175 @@
 # Configuration
 
-This guide covers all configuration options for each platform.
+Every platform plugin has its own config file with sensible defaults. You only ever need to set one thing to get going: your API key.
 
-## Spigot / Paper configuration
+This page is the reference for every option. Jump to the section for your platform.
 
-Location: `plugins/Analyse/config.yml` (see `plugin.yml` in the Spigot/Paper module)
+- [Spigot / Paper](#spigot--paper)
+- [BungeeCord](#bungeecord)
+- [Velocity](#velocity)
+- [Hytale](#hytale)
+- [Reloading](#reloading)
+
+## Spigot / Paper
+
+**File:** `plugins/Analyse/config.yml`
 
 ```yaml
-# Your Analyse API key
-# Get this from your dashboard at https://analyse.net
-api-key: "your-api-key-here"
-
-# Enable debug mode for verbose logging
-# Useful for troubleshooting API communication
+# Enable debug logging for troubleshooting
 debug: false
 
-# Unique identifier for this server instance
-# Auto-generated on first run, usually leave as-is
-instance-id: "auto-generated-uuid"
+# Your server's API key from the Analyse dashboard
+api-key: "anl_your_api_key_here"
+
+# Bedrock player username prefix (used by Floodgate/Geyser)
+# Common values: "." or "_" or "*"
+# Leave empty to disable bedrock detection
+bedrock-prefix: "."
+
+# Instance ID for multi-instance setups (e.g. "survival-1", "survival-2")
+# Used to identify this specific server instance in heartbeats
+instance-id: "default"
+
+# Built-in event tracking
+# These events are automatically sent when players perform actions.
+# High-frequency events are disabled by default.
+events:
+  chat: true
+  command: true
+  block-place: false
+  block-break: false
+  death: false
+  kill-entity: false
 ```
 
-### Configuration options
+### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `api-key` | String | `""` | Your Analyse API key (required) |
-| `debug` | Boolean | `false` | Enable verbose debug logging |
-| `instance-id` | String | Auto | Unique identifier for this server |
+| Option | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `api-key` | string | `""` | Your Analyse API key. Required. Starts with `anl_`. |
+| `debug` | boolean | `false` | Turns on verbose logging. Useful for troubleshooting; noisy otherwise. |
+| `bedrock-prefix` | string | `"."` | Prefix used by Floodgate/Geyser. Players whose names start with it are tagged as Bedrock. Empty string disables detection. |
+| `instance-id` | string | `"default"` | Distinguishes multiple instances of the same Analyse Server (e.g. `survival-1`, `survival-2`). |
+| `events.chat` | boolean | `true` | Track player chat as a session-level event. |
+| `events.command` | boolean | `true` | Track command usage. |
+| `events.block-place` | boolean | `false` | Track every block place. High volume. |
+| `events.block-break` | boolean | `false` | Track every block break. High volume. |
+| `events.death` | boolean | `false` | Track every player death. |
+| `events.kill-entity` | boolean | `false` | Track every entity kill. High volume. |
 
-## BungeeCord configuration
+> [!TIP]
+> Only enable the high-volume events (`block-place`, `block-break`, `kill-entity`) if you have a specific use case in mind. They can generate hundreds of events per player per minute.
 
-Location: `plugins/Analyse/config.yml`
+## BungeeCord
+
+**File:** `plugins/Analyse/config.yml`
 
 ```yaml
-# Enable debug mode
 debug: false
+instance-id: "default"
+bedrock-prefix: "."
 
-# Unique identifier for this proxy instance
-instance-id: "auto-generated-uuid"
-
-# Default server for API calls (optional)
-# Used for the static API when no specific server context
+# Optional: server name to use when the plugin can't determine context
 default-server: "lobby"
 
-# Per-server API keys
-# Each backend server can have its own API key
+# Per-backend API keys
+# The backend name must match the name you use in your BungeeCord config
 servers:
   lobby:
-    api-key: "lobby-api-key"
+    api-key: "anl_your_lobby_key_here"
   survival:
-    api-key: "survival-api-key"
-  creative:
-    api-key: "creative-api-key"
+    api-key: "anl_your_survival_key_here"
 ```
 
-### BungeeCord-specific options
+### Options
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `default-server` | String | Server to use for static API calls |
-| `servers` | Map | Per-server API key configuration |
+| Option | Type | What it does |
+| --- | --- | --- |
+| `debug` | boolean | Verbose logging. |
+| `instance-id` | string | Distinguishes multiple proxy instances. |
+| `bedrock-prefix` | string | Floodgate/Geyser prefix (same as on Spigot). |
+| `default-server` | string | Backend name used when the plugin cannot determine the current backend (e.g. for API calls from commands). |
+| `servers.<name>.api-key` | string | API key for a backend called `<name>`. The name must match your BungeeCord server config. |
 
-## Velocity configuration
+> [!NOTE]
+> The BungeeCord plugin is only needed when you run the proxy without Analyse installed on each backend. The recommended setup is the Spigot plugin on every backend &mdash; it gives you more data.
 
-Location: `plugins/analyse/config.yml` (Velocity plugin id is `analyse`)
+## Velocity
 
-```yaml
-# Enable debug mode
-debug: false
+**File:** `plugins/analyse/config.json`
 
-# Unique identifier for this proxy instance
-instance-id: "auto-generated-uuid"
-
-# Default server for API calls (optional)
-default-server: "lobby"
-
-# Per-server API keys
-servers:
-  lobby:
-    api-key: "lobby-api-key"
-  survival:
-    api-key: "survival-api-key"
+```json
+{
+  "debug": false,
+  "development": false,
+  "bedrockPrefix": ".",
+  "instanceId": "default",
+  "defaultServer": null,
+  "servers": {
+    "lobby": { "apiKey": "anl_your_lobby_key_here" },
+    "survival": { "apiKey": "anl_your_survival_key_here" }
+  },
+  "events": {
+    "command": true,
+    "serverSwitch": true
+  }
+}
 ```
 
-## Proxy server mapping
+### Options
 
-When using BungeeCord or Velocity, the plugin tracks which backend server each player is connected to. Configure an API key for each server you want to track:
+| Option | Type | What it does |
+| --- | --- | --- |
+| `debug` | boolean | Verbose logging. |
+| `bedrockPrefix` | string | Floodgate/Geyser prefix. |
+| `instanceId` | string | Distinguishes multiple proxy instances. |
+| `defaultServer` | string \| null | Backend used for API calls without context. |
+| `servers.<name>.apiKey` | string | API key for the backend named `<name>`. |
+| `events.command` | boolean | Track command usage across the proxy. |
+| `events.serverSwitch` | boolean | Track when a player moves between backends. |
 
-```yaml
-servers:
-  # Server name must match the name in your proxy config
-  lobby:
-    api-key: "key-for-lobby-server"
-  
-  skyblock:
-    api-key: "key-for-skyblock-server"
-  
-  factions:
-    api-key: "key-for-factions-server"
+## Hytale
+
+**File:** Analyse data folder &rarr; `config.json`
+
+```json
+{
+  "debug": false,
+  "apiKey": "",
+  "instanceId": "default"
+}
 ```
 
-If a player connects to a server without an API key configured, their session won't be tracked for that server.
+### Options
+
+| Option | Type | What it does |
+| --- | --- | --- |
+| `apiKey` | string | Your Analyse API key. Required. |
+| `debug` | boolean | Verbose logging. |
+| `instanceId` | string | Distinguishes multiple instances of the same Server. |
 
 ## Environment variables
 
-You can use environment variables for sensitive configuration:
+You can reference environment variables in your config files on platforms that support them. This is useful when your API keys live in a secrets manager rather than on disk.
 
 ```yaml
 api-key: ${ANALYSE_API_KEY}
 ```
 
-## Reloading configuration
+> [!WARNING]
+> Never commit your filled-in config to a public repository. Use an environment variable or a git-ignored config when your repo is public.
 
-After making changes, reload the configuration:
+## Reloading
 
-```
-/analyse reload
-```
+| Platform | Command | Notes |
+| --- | --- | --- |
+| Spigot / Paper | `/analyse reload` | Reloads the config on the fly. |
+| BungeeCord | *(restart)* | Config is loaded on proxy start. Adding a new backend requires a full restart. |
+| Velocity | *(restart)* | Same as BungeeCord. |
+| Hytale | *(restart)* | Same. |
 
-Note: Config reload is available on **Spigot/Paper** only. On proxies, some changes (like adding new server entries) may require a full restart.
+## Related
+
+- [Installation](installation.md)
+- [Commands](commands.md)
+- [SDK overview](sdk/README.md)

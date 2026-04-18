@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Main command handler for the Analyse plugin using ACF
  */
-@CommandAlias("analyse|analyse|ss")
+@CommandAlias("analyse|ss")
 public class AnalyseCommand extends BaseCommand {
 
   private final AnalysePlugin plugin;
@@ -46,7 +46,7 @@ public class AnalyseCommand extends BaseCommand {
   @Description("Show plugin info")
   public void onDefault(CommandSender sender) {
     // Check if user has admin permission
-    if (sender.hasPermission("analyse.netmand.status")) {
+    if (sender.hasPermission("analyse.status")) {
       showStatus(sender);
     } else {
       showPublicInfo(sender);
@@ -55,7 +55,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("status")
   @Description("Show plugin status")
-  @CommandPermission("analyse.netmand.status")
+  @CommandPermission("analyse.status")
   public void onStatus(CommandSender sender) {
     showStatus(sender);
   }
@@ -107,7 +107,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("reload")
   @Description("Reload configuration")
-  @CommandPermission("analyse.netmand.reload")
+  @CommandPermission("analyse.reload")
   public void onReload(CommandSender sender) {
     // Reload the Bukkit config file
     plugin.reloadConfig();
@@ -127,7 +127,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("debug")
   @Description("Toggle debug mode")
-  @CommandPermission("analyse.netmand.debug")
+  @CommandPermission("analyse.debug")
   public void onDebug(CommandSender sender) {
     boolean newState = !plugin.getPluginConfig().isDebug();
     plugin.getPluginConfig().setDebug(newState);
@@ -141,7 +141,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("event")
   @Description("Send a custom event")
-  @CommandPermission("analyse.netmand.event")
+  @CommandPermission("analyse.event")
   @Syntax("<name> [--player <player>] [--value <number>] [--data <key=value>...]")
   @CommandCompletion("test_event|custom_event @players")
   public void onEvent(CommandSender sender, String[] args) {
@@ -240,7 +240,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("info")
   @Description("View server or player analytics")
-  @CommandPermission("analyse.netmand.info")
+  @CommandPermission("analyse.info")
   @Syntax("[player]")
   @CommandCompletion("@players")
   public void onInfo(CommandSender sender, String[] args) {
@@ -413,7 +413,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons")
   @Description("List all loaded addons")
-  @CommandPermission("analyse.netmand.addons")
+  @CommandPermission("analyse.addons")
   public void onAddons(CommandSender sender) {
     Collection<LoadedAddon> addons = plugin.getAddonManager().getLoadedAddons();
 
@@ -442,7 +442,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons reload")
   @Description("Reload all addons or a specific addon")
-  @CommandPermission("analyse.netmand.addons.reload")
+  @CommandPermission("analyse.addons.reload")
   @Syntax("[addon]")
   public void onAddonsReload(CommandSender sender, String[] args) {
     if (args.length == 0) {
@@ -469,7 +469,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons enable")
   @Description("Enable an addon")
-  @CommandPermission("analyse.netmand.addons.enable")
+  @CommandPermission("analyse.addons.enable")
   @Syntax("<addon>")
   public void onAddonsEnable(CommandSender sender, String addonId) {
     if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
@@ -491,7 +491,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("addons disable")
   @Description("Disable an addon")
-  @CommandPermission("analyse.netmand.addons.disable")
+  @CommandPermission("analyse.addons.disable")
   @Syntax("<addon>")
   public void onAddonsDisable(CommandSender sender, String addonId) {
     if (!plugin.getAddonManager().isAddonLoaded(addonId)) {
@@ -513,7 +513,7 @@ public class AnalyseCommand extends BaseCommand {
 
   @Subcommand("help")
   @Description("Show help information")
-  @CommandPermission("analyse.netmand.help")
+  @CommandPermission("analyse.help")
   public void onHelp(CommandSender sender) {
     StringBuilder message = new StringBuilder();
     message.append("#3498db&l「 Analyse Commands 」&r\n");

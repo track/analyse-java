@@ -1,137 +1,191 @@
 # Commands
 
-The Analyse plugin provides commands to manage the plugin and send test events.
+The plugin registers a single top-level command, `/analyse`, with subcommands for status, configuration, custom events, analytics lookups, and addon management.
 
-## Base Command
+Every subcommand has its own permission node (e.g. `analyse.status`, `analyse.event`). Grant `analyse.*` on Spigot/Paper to give a role access to all of them, or `analyse.addons.*` for the addon management subset.
 
-```
-/analyse
-```
+## The base command
 
-**Aliases**: `/ss` (where registered)
-
-**Permission**: `analyse.netmand.status` (default command / status view)
+| Command | Alias | Permission | What it does |
+| --- | --- | --- | --- |
+| `/analyse` | `/ss` | *(none)* | Shows a short info banner. Same output as `/analyse help`. |
 
 ## Subcommands
 
-### Status
+### `status`
 
-Shows the current plugin status and connection information.
+Prints the current plugin status and connection health.
 
 ```
 /analyse status
 ```
 
-**Permission**: `analyse.netmand.status`
+**Permission:** `analyse.status`
 
-**Output**:
+**Example output:**
 
 ```
 ──────────────────────────────
   Analyse v1.0.0
 ──────────────────────────────
-  Status: ● Connected
+  Status: Connected
   API: api.analyse.net
   Players Tracked: 5
   Debug: Disabled
 ──────────────────────────────
 ```
 
-On proxy servers (BungeeCord/Velocity), additional info is shown:
+On a proxy you'll also see the number of configured backends.
 
-```
-  Servers Configured: 3
-```
+### `reload` &nbsp;*(Spigot/Paper only)*
 
-### Reload (Spigot/Paper only)
-
-Reloads the plugin configuration from disk.
+Reloads the config from disk without restarting the server.
 
 ```
 /analyse reload
 ```
 
-**Permission**: `analyse.netmand.reload`
+**Permission:** `analyse.reload`
 
-### Debug
+Proxy plugins don't support hot reload &mdash; see the [configuration guide](configuration.md#reloading).
 
-Toggles debug mode on/off. Debug mode provides verbose logging for troubleshooting.
+### `debug`
+
+Toggles debug mode. Debug mode logs every outgoing API request and every event payload to the server console. It's noisy; leave it off unless you're troubleshooting.
 
 ```
 /analyse debug
 ```
 
-**Permission**: `analyse.netmand.debug`
+**Permission:** `analyse.debug`
 
-### Event
+### `event`
 
-Sends a custom event to the Analyse API. Useful for testing.
+Sends a custom event to the Analyse API. Handy for smoke-testing your dashboards and confirming that events make it through.
 
 ```
-/analyse event <name> [options]
+/analyse event <name> [--player <player>] [--value <number>] [--data <key=value>...]
 ```
 
-**Permission**: `analyse.netmand.event`
+**Permission:** `analyse.event`
 
-#### Options
+**Options:**
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--player <name>` | Associate event with an online player | `--player Steve` |
-| `--value <number>` | Set a numeric value for the event | `--value 100.50` |
-| `--data <key=value>` | Add custom data (can be repeated) | `--data item=diamond` |
+| Option | What it does | Example |
+| --- | --- | --- |
+| `--player <name>` | Associate the event with an online player | `--player Steve` |
+| `--value <number>` | Set the numeric "main value" of the event | `--value 100.50` |
+| `--data <key=value>` | Add a custom property. Can be repeated. | `--data item=diamond` |
 
-#### Examples
+**Examples:**
 
 ```bash
-# Simple test event
+# Simple event
 /analyse event test_event
 
-# Event with player
+# Event with a player
 /analyse event player_action --player Steve
 
-# Event with value
+# Event with a numeric value
 /analyse event purchase --value 500.00
 
-# Event with custom data
+# Event with data
 /analyse event shop_purchase --player Steve --value 100 --data item=diamond_sword --data quantity=1
 
-# Complex event
+# A richer event with several data fields
 /analyse event quest_completed --player Steve --data quest_id=dragon_slayer --data difficulty=hard --value 1000
 ```
 
-### Help
+### `info`
 
-Shows the help menu with all available commands.
+Looks up analytics for your server or a specific player.
+
+```
+/analyse info [player]
+```
+
+**Permission:** `analyse.info`
+
+Without arguments, it prints recent server-level stats. With a player name it prints that player's summary.
+
+### `addons`
+
+Lists every loaded Analyse addon.
+
+```
+/analyse addons
+```
+
+**Permission:** `analyse.addons`
+
+### `addons reload [addon]`
+
+Reloads every loaded addon, or a single one by name.
+
+```
+/analyse addons reload
+/analyse addons reload MyAddon
+```
+
+**Permission:** `analyse.addons.reload`
+
+### `addons enable <addon>`
+
+Enables a disabled addon.
+
+```
+/analyse addons enable MyAddon
+```
+
+**Permission:** `analyse.addons.enable`
+
+### `addons disable <addon>`
+
+Disables a running addon.
+
+```
+/analyse addons disable MyAddon
+```
+
+**Permission:** `analyse.addons.disable`
+
+### `help`
+
+Prints the help menu with every subcommand and its description.
 
 ```
 /analyse help
 ```
 
-**Permission**: `analyse.netmand.help`
+**Permission:** `analyse.help`
 
-## Permissions
+## Permissions summary
 
-| Permission | Description | Default |
-|------------|-------------|---------|
-| `analyse.netmand.status` | View status and default `/analyse` output | OP |
-| `analyse.netmand.reload` | Reload configuration (Spigot/Paper only) | OP |
-| `analyse.netmand.debug` | Toggle debug mode | OP |
-| `analyse.netmand.event` | Send custom events | OP |
-| `analyse.netmand.help` | Show help | OP |
+| Permission | Default | What it grants |
+| --- | --- | --- |
+| `analyse.status` | OP | `/analyse status` |
+| `analyse.reload` | OP | `/analyse reload` *(Spigot/Paper only)* |
+| `analyse.debug` | OP | `/analyse debug` |
+| `analyse.event` | OP | `/analyse event ...` |
+| `analyse.info` | OP | `/analyse info ...` |
+| `analyse.addons` | OP | `/analyse addons` |
+| `analyse.addons.reload` | OP | `/analyse addons reload ...` |
+| `analyse.addons.enable` | OP | `/analyse addons enable ...` |
+| `analyse.addons.disable` | OP | `/analyse addons disable ...` |
+| `analyse.help` | OP | `/analyse help` |
 
-## Tab Completion
+## Tab completion
 
-The plugin provides intelligent tab completion powered by ACF (Annotation Command Framework) for:
+All commands ship with ACF-powered tab completion, including:
 
 - Subcommand names
-- Player names (for `--player` option)
+- Player names for `--player`
 - Example event names
 - Option flags
 
-## Console Usage
+## Console usage
 
-All commands work from the console without the leading slash:
+Every command works from the console exactly like in-game, minus the leading slash:
 
 ```
 analyse status

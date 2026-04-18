@@ -94,8 +94,6 @@ public class AnalyseCommand extends AbstractCommand {
    * @param sender The command sender
    */
   private void onDefault(CommandSender sender) {
-    // For Hytale, we'll show status to all for now (permission system may differ)
-    // TODO: Add proper permission check when Hytale permission API is available
     showPublicInfo(sender);
   }
 

@@ -7,15 +7,52 @@ description: Analyse tracking plugin
 author: VertCode Development
 
 permissions:
-  analyse.netmand:
-    description: Base permission for analyse commands
+  analyse.*:
+    description: Grants every Analyse command
     default: op
-  analyse.netmand.reload:
-    description: Permission to reload the plugin
+    children:
+      analyse.status: true
+      analyse.reload: true
+      analyse.debug: true
+      analyse.event: true
+      analyse.info: true
+      analyse.help: true
+      analyse.addons.*: true
+  analyse.status:
+    description: View plugin status
     default: op
-  analyse.netmand.debug:
-    description: Permission to toggle debug mode
+  analyse.reload:
+    description: Reload the plugin configuration
     default: op
-  analyse.netmand.event:
-    description: Permission to send custom events
+  analyse.debug:
+    description: Toggle debug mode
+    default: op
+  analyse.event:
+    description: Send custom events from commands
+    default: op
+  analyse.info:
+    description: View server or player analytics
+    default: op
+  analyse.help:
+    description: Show the command help menu
+    default: op
+  analyse.addons.*:
+    description: Manage every Analyse addon
+    default: op
+    children:
+      analyse.addons: true
+      analyse.addons.reload: true
+      analyse.addons.enable: true
+      analyse.addons.disable: true
+  analyse.addons:
+    description: List loaded addons
+    default: op
+  analyse.addons.reload:
+    description: Reload one or every addon
+    default: op
+  analyse.addons.enable:
+    description: Enable a disabled addon
+    default: op
+  analyse.addons.disable:
+    description: Disable a running addon
     default: op
