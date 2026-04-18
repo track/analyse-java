@@ -30,30 +30,16 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Build core modules
-        run: |
-          ./gradlew \
-            :modules:api:build \
-            :modules:sdk:build \
-            :modules:spigot:build \
-            :modules:bungeecord:build \
-            :modules:velocity:build \
-            --no-daemon
-
-      - name: Build Hytale module
-        if: env.HYTALE_MAVEN_USER != ''
-        env:
-          HYTALE_MAVEN_USER: ${{ secrets.HYTALE_MAVEN_USER }}
-          HYTALE_MAVEN_PASS: ${{ secrets.HYTALE_MAVEN_PASS }}
-        run: ./gradlew :modules:hytale:build --no-daemon
+      - name: Build
+        run: ./gradlew build --no-daemon
 
       - name: Bundle jars
         run: |
           mkdir -p dist
-          cp modules/spigot/build/libs/analyse-spigot-*.jar dist/ 2>/dev/null || true
-          cp modules/bungeecord/build/libs/analyse-bungeecord-*.jar dist/ 2>/dev/null || true
-          cp modules/velocity/build/libs/analyse-velocity-*.jar dist/ 2>/dev/null || true
-          cp modules/hytale/build/libs/analyse-hytale-*.jar dist/ 2>/dev/null || true
+          cp modules/spigot/build/libs/analyse-spigot-*.jar dist/
+          cp modules/bungeecord/build/libs/analyse-bungeecord-*.jar dist/
+          cp modules/velocity/build/libs/analyse-velocity-*.jar dist/
+          cp modules/hytale/build/libs/analyse-hytale-*.jar dist/
           cd dist && zip -j "analyse-${{ steps.version.outputs.version }}.zip" *.jar
 
       - name: Publish API to Nexus

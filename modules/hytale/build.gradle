@@ -15,7 +15,7 @@ repositories {
 dependencies {
     implementation project(':modules:api')
     implementation project(':modules:sdk')
-    compileOnly 'com.hypixel.hytale:Server:2026.01.24-6e2d4fc36'
+    compileOnly "com.hypixel.hytale:Server:${project.property('hytaleServerVersion')}"
 
     // MiniMessage for text formatting
     implementation 'net.kyori:adventure-api:4.17.0'

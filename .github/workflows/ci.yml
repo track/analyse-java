@@ -28,24 +28,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build core modules
-        run: |
-          ./gradlew \
-            :modules:api:build \
-            :modules:sdk:build \
-            :modules:spigot:build \
-            :modules:bungeecord:build \
-            :modules:velocity:build \
-            --no-daemon
-
-      - name: Build Hytale module
-        # The Hytale module pulls from a private maven repo. Only build it when
-        # credentials are present (push to main from the owning org).
-        if: env.HYTALE_MAVEN_USER != ''
-        env:
-          HYTALE_MAVEN_USER: ${{ secrets.HYTALE_MAVEN_USER }}
-          HYTALE_MAVEN_PASS: ${{ secrets.HYTALE_MAVEN_PASS }}
-        run: ./gradlew :modules:hytale:build --no-daemon
+      - name: Build
+        run: ./gradlew build --no-daemon
 
       - name: Upload jars
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
