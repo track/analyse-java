@@ -68,7 +68,7 @@ publishing {
                 licenses {
                     license {
                         name = 'Analyse Proprietary License'
-                        url = 'https://github.com/Analyse-net/analyse-java/blob/main/LICENSE'
+                        url = 'https://github.com/track/analyse-java/blob/main/LICENSE'
                         distribution = 'repo'
                     }
                 }

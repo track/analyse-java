@@ -9,7 +9,7 @@ Thanks for taking the time to help improve Analyse. This page is the short versi
 
 Also:
 
-- Check the [issue tracker](https://github.com/Analyse-net/analyse-java/issues) first. If an issue doesn't exist for what you want to change, open one. Large unsolicited PRs are unlikely to be merged without prior discussion.
+- Check the [issue tracker](https://github.com/track/analyse-java/issues) first. If an issue doesn't exist for what you want to change, open one. Large unsolicited PRs are unlikely to be merged without prior discussion.
 - Keep PRs focused. One logical change per PR. Refactors and feature work in separate PRs please.
 - Follow the code style below.
 
@@ -21,7 +21,7 @@ Requirements:
 - Git
 
 ```bash
-git clone https://github.com/Analyse-net/analyse-java
+git clone https://github.com/track/analyse-java
 cd analyse-java
 ./gradlew build
 ```
@@ -95,7 +95,7 @@ Before you click "ready for review":
 
 ## Reporting bugs
 
-Open a [bug report](https://github.com/Analyse-net/analyse-java/issues/new?template=bug_report.md). Include:
+Open a [bug report](https://github.com/track/analyse-java/issues/new?template=bug_report.md). Include:
 
 - Server software and version (`/version` output is perfect)
 - Analyse plugin version
@@ -109,6 +109,6 @@ Please do NOT open a public issue for security vulnerabilities. See [SECURITY.md
 
 ## Questions
 
-For usage questions, use [GitHub Discussions](https://github.com/Analyse-net/analyse-java/discussions) or the [Analyse Discord](https://analyse.net). Issues are for bugs and feature requests only.
+For usage questions, use [GitHub Discussions](https://github.com/track/analyse-java/discussions) or the [Analyse Discord](https://analyse.net). Issues are for bugs and feature requests only.
 
 Thanks again.
