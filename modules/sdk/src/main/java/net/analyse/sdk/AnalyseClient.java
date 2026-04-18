@@ -8,6 +8,7 @@ import net.analyse.sdk.request.HeartbeatRequest;
 import net.analyse.sdk.request.JoinRequest;
 import net.analyse.sdk.request.LeaveRequest;
 import net.analyse.sdk.request.PlayerInfoRequest;
+import net.analyse.sdk.request.PurchaseRequest;
 import net.analyse.sdk.response.ABTestsResponse;
 import net.analyse.sdk.response.ConversionResponse;
 import net.analyse.sdk.response.EventResponse;
@@ -15,6 +16,7 @@ import net.analyse.sdk.response.HeartbeatResponse;
 import net.analyse.sdk.response.JoinResponse;
 import net.analyse.sdk.response.LeaveResponse;
 import net.analyse.sdk.response.PlayerInfoResponse;
+import net.analyse.sdk.response.PurchaseResponse;
 import net.analyse.sdk.response.ServerInfoResponse;
 import net.analyse.sdk.response.VersionResponse;
 
@@ -32,6 +34,7 @@ public class AnalyseClient {
   private static final String ENDPOINT_VERSION = "/v1/plugin/version";
   private static final String ENDPOINT_SERVER_INFO = "/v1/plugin/info";
   private static final String ENDPOINT_PLAYER_INFO = "/v1/plugin/player";
+  private static final String ENDPOINT_PURCHASE = "/v1/plugin/purchase";
 
   private final AnalyseHttpClient httpClient;
 
@@ -130,6 +133,16 @@ public class AnalyseClient {
   public void getPlayerInfo(PlayerInfoRequest request, AnalyseCallback<PlayerInfoResponse> callback) {
     String endpoint = ENDPOINT_PLAYER_INFO + "/" + request.getUuid();
     httpClient.get(endpoint, PlayerInfoResponse.class, callback);
+  }
+
+  /**
+   * Track a purchase for a player in this project
+   *
+   * @param request  The purchase request containing player UUID, value, and product name
+   * @param callback The callback to invoke on success or failure
+   */
+  public void trackPurchase(PurchaseRequest request, AnalyseCallback<PurchaseResponse> callback) {
+    httpClient.post(ENDPOINT_PURCHASE, request, PurchaseResponse.class, callback);
   }
 
   /**

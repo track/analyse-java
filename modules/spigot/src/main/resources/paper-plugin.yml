@@ -16,6 +16,7 @@ permissions:
       analyse.debug: true
       analyse.event: true
       analyse.info: true
+      analyse.purchase: true
       analyse.help: true
       analyse.addons.*: true
   analyse.status:
@@ -32,6 +33,9 @@ permissions:
     default: op
   analyse.info:
     description: View server or player analytics
+    default: op
+  analyse.purchase:
+    description: Record a purchase for a player
     default: op
   analyse.help:
     description: Show the command help menu

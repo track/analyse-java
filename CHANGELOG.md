@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] &mdash; 2026-04-19
+
+### Added
+
+- New SDK endpoint for recording purchases: `AnalyseClient#trackPurchase(PurchaseRequest, AnalyseCallback<PurchaseResponse>)` backed by `POST /v1/plugin/purchase`.
+- New `PurchaseRequest` and `PurchaseResponse` models in `net.analyse.sdk.request` / `net.analyse.sdk.response`.
+- New `/analyse purchase <player_uuid> <purchase_value> <product_name>` subcommand on Spigot/Paper, Velocity, BungeeCord, and Hytale. Remaining args after the value are joined with spaces so multi-word product names work.
+- New `analyse.purchase` permission (declared in `plugin.yml` and `paper-plugin.yml`, included in `analyse.*`).
+- Documented the new command and permission in [`docs/commands.md`](docs/commands.md).
+
 ## [1.0.0] &mdash; 2026-04-18
 
 First public release of the source repository.

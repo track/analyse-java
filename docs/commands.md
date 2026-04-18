@@ -96,6 +96,36 @@ Sends a custom event to the Analyse API. Handy for smoke-testing your dashboards
 /analyse event quest_completed --player Steve --data quest_id=dragon_slayer --data difficulty=hard --value 1000
 ```
 
+### `purchase`
+
+Records a purchase for a player in this project. Useful for scripting purchases triggered from other plugins or external tools.
+
+```
+/analyse purchase <player_uuid> <purchase_value> <product_name>
+```
+
+**Permission:** `analyse.purchase`
+
+**Arguments:**
+
+| Argument | What it is | Example |
+| --- | --- | --- |
+| `<player_uuid>` | The player's Minecraft UUID (must already be linked to the project via a join) | `11111111-2222-3333-4444-555555555555` |
+| `<purchase_value>` | Non-negative purchase value | `9.99` |
+| `<product_name>` | Product name. Remaining args are joined with spaces so multi-word names work. | `VIP Rank Upgrade` |
+
+**Examples:**
+
+```bash
+# Simple purchase
+/analyse purchase 11111111-2222-3333-4444-555555555555 9.99 VIP
+
+# Multi-word product
+/analyse purchase 11111111-2222-3333-4444-555555555555 49.99 VIP Rank Upgrade
+```
+
+On success the command prints the transaction ID and indicates whether this is the player's first purchase in the project.
+
 ### `info`
 
 Looks up analytics for your server or a specific player.
@@ -168,6 +198,7 @@ Prints the help menu with every subcommand and its description.
 | `analyse.debug` | OP | `/analyse debug` |
 | `analyse.event` | OP | `/analyse event ...` |
 | `analyse.info` | OP | `/analyse info ...` |
+| `analyse.purchase` | OP | `/analyse purchase ...` |
 | `analyse.addons` | OP | `/analyse addons` |
 | `analyse.addons.reload` | OP | `/analyse addons reload ...` |
 | `analyse.addons.enable` | OP | `/analyse addons enable ...` |

@@ -16,8 +16,11 @@ import net.analyse.api.exception.AnalyseException;
 import net.analyse.api.object.builder.EventBuilder;
 import net.analyse.api.BuildConstants;
 import net.analyse.sdk.AnalyseCallback;
+import net.analyse.sdk.AnalyseClient;
 import net.analyse.sdk.request.PlayerInfoRequest;
+import net.analyse.sdk.request.PurchaseRequest;
 import net.analyse.sdk.response.PlayerInfoResponse;
+import net.analyse.sdk.response.PurchaseResponse;
 import net.analyse.sdk.response.ServerInfoResponse;
 import net.analyse.velocity.AnalyseVelocity;
 import net.analyse.velocity.object.session.PlayerSession;
@@ -27,6 +30,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Main command handler for the Analyse plugin using ACF
@@ -201,6 +205,90 @@ public class AnalyseCommand extends BaseCommand {
         }
       } else {
         send(sender, "&c✗ Failed to send event '&f" + eventName + "&c'");
+      }
+    });
+  }
+
+  @Subcommand("purchase")
+  @Description("Record a purchase for a player")
+  @CommandPermission("analyse.purchase")
+  @Syntax("<player_uuid> <purchase_value> <product_name>")
+  public void onPurchase(CommandSource sender, String[] args) {
+    if (args.length < 3) {
+      send(sender, "&cUsage: /analyse purchase <player_uuid> <purchase_value> <product_name>");
+      return;
+    }
+
+    if (!Analyse.isAvailable()) {
+      send(sender, "&cAnalyse is not connected. Cannot record purchases.");
+      return;
+    }
+
+    UUID playerUuid;
+    try {
+      playerUuid = UUID.fromString(args[0]);
+    } catch (IllegalArgumentException e) {
+      send(sender, "&cInvalid player UUID. Must be a valid UUID string.");
+      return;
+    }
+
+    double purchaseValue;
+    try {
+      purchaseValue = Double.parseDouble(args[1]);
+    } catch (NumberFormatException e) {
+      send(sender, "&cInvalid purchase value. Must be a number.");
+      return;
+    }
+
+    if (purchaseValue < 0) {
+      send(sender, "&cPurchase value cannot be negative.");
+      return;
+    }
+
+    StringBuilder productNameBuilder = new StringBuilder();
+    for (int i = 2; i < args.length; i++) {
+      if (i > 2) {
+        productNameBuilder.append(' ');
+      }
+      productNameBuilder.append(args[i]);
+    }
+    String productName = productNameBuilder.toString().trim();
+    if (productName.isEmpty()) {
+      send(sender, "&cProduct name cannot be blank.");
+      return;
+    }
+
+    AnalyseClient client = plugin.getClient();
+    if (client == null) {
+      send(sender, "&cNo Analyse client available. Make sure a default server is configured.");
+      return;
+    }
+
+    PurchaseRequest request;
+    try {
+      request = new PurchaseRequest(playerUuid, purchaseValue, productName);
+    } catch (IllegalArgumentException e) {
+      send(sender, "&c" + e.getMessage());
+      return;
+    }
+
+    client.trackPurchase(request, new AnalyseCallback<>() {
+      @Override
+      public void onSuccess(PurchaseResponse response) {
+        send(sender, "&a✓ Purchase recorded for &f" + playerUuid);
+        send(sender, "  &7Product: &f" + productName);
+        send(sender, "  &7Value: &f" + purchaseValue);
+        if (response.getTransactionId() != null) {
+          send(sender, "  &7Transaction: &f" + response.getTransactionId());
+        }
+        if (response.isFirstPurchase()) {
+          send(sender, "  &7First purchase for this player.");
+        }
+      }
+
+      @Override
+      public void onError(AnalyseException exception) {
+        send(sender, "&c✗ Failed to record purchase: " + exception.getMessage());
       }
     });
   }
@@ -483,6 +571,7 @@ public class AnalyseCommand extends BaseCommand {
     message.append(" #5dade2┃ &f/analyse info <player> &7- View player analytics&r\n");
     message.append(" #5dade2┃ &f/analyse debug &7- Toggle debug mode&r\n");
     message.append(" #5dade2┃ &f/analyse event <name> &7- Send custom event&r\n");
+    message.append(" #5dade2┃ &f/analyse purchase <uuid> <value> <product> &7- Record purchase&r\n");
     message.append(" #5dade2┃ &f/analyse addons &7- List loaded addons&r\n");
     message.append(" #5dade2┃ &f/analyse addons reload [id] &7- Reload addons&r\n");
     message.append(" #5dade2┃ &f/analyse help &7- Show this help&r\n");
