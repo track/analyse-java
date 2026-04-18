@@ -1,10 +1,5 @@
 # Analyse
 
-[![CI](https://github.com/Analyse-net/analyse-java/actions/workflows/ci.yml/badge.svg)](https://github.com/Analyse-net/analyse-java/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Analyse-net/analyse-java?sort=semver)](https://github.com/Analyse-net/analyse-java/releases/latest)
-[![Java 21](https://img.shields.io/badge/java-21-f89820?logo=openjdk&logoColor=white)](https://adoptium.net/)
-[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
-
 The source repository for the [Analyse](https://analyse.net) plugins and developer SDK &mdash; the analytics platform purpose-built for Minecraft and Hytale servers.
 
 Analyse tells you **who** plays on your server, **where** they came from, and **what** keeps them coming back. Install the plugin, paste your API key, and start the server: sessions, retention, revenue, and everything in between show up in your dashboard automatically.
