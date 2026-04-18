@@ -1,0 +1,424 @@
+---
+alwaysApply: true
+---
+# Java Code Style Rules
+
+## If Statements
+
+Always use braces for if statements, even single-line returns:
+
+```java
+// ✅ Good
+if (player == null) {
+  return;
+}
+
+// ❌ Bad
+if (player == null) return;
+```
+
+## Spacing Rules
+
+### After If Blocks
+Add an empty line after an if block before the next statement:
+
+```java
+// ✅ Good
+if (player == null) {
+  return;
+}
+
+doSomething();
+
+// ❌ Bad
+if (player == null) {
+  return;
+}
+doSomething();
+```
+
+### Variables Before If Checks
+Do NOT add an empty line between a variable declaration and its related if check:
+
+```java
+// ✅ Good
+Player player = event.getPlayer();
+if (player == null) {
+  return;
+}
+
+// ❌ Bad
+Player player = event.getPlayer();
+
+if (player == null) {
+  return;
+}
+```
+
+### Combined Example
+
+```java
+public void onEvent(SomeEvent event) {
+  Player player = event.getPlayer();
+  if (player == null) {
+    return;
+  }
+
+  Location location = player.getLocation();
+  if (location == null) {
+    return;
+  }
+
+  doSomething(player, location);
+}
+```
+
+## Variable Extraction
+
+Extract method calls into variables before using them in method calls:
+
+```java
+// ✅ Good
+Player player = event.getPlayer();
+Location location = event.getRightClicked().getLocation();
+if (checkPermission(player, location, Permission.BUILD)) {
+  return;
+}
+
+// ❌ Bad
+if (checkPermission(event.getPlayer(), event.getRightClicked().getLocation(), Permission.BUILD)) {
+  return;
+}
+```
+
+## Javadoc
+
+### When to Use
+- Add javadoc to ALL methods (public, private, protected)
+- Do NOT add javadoc to event handlers/listeners (methods with @EventHandler)
+- Include @param for each parameter
+- Include @return if method returns something
+
+```java
+// ✅ Good - Javadoc on private method
+/**
+ * Check if a player has permission to perform an action at a location
+ *
+ * @param player The player performing the action
+ * @param location The location of the action
+ * @param permission The permission to check
+ * @return true if the player has permission, false otherwise
+ */
+private boolean checkPermission(Player player, Location location, Permission permission) {
+  // ...
+}
+
+// ✅ Good - Javadoc on public method
+/**
+ * Save all currently loaded team worlds
+ */
+public void saveAllWorlds() {
+  // ...
+}
+
+// ✅ Good - No javadoc on listener
+@EventHandler
+public void onBlockBreak(BlockBreakEvent event) {
+  // ...
+}
+
+// ❌ Bad - Javadoc on listener
+/**
+ * Handles block break events
+ */
+@EventHandler
+public void onBlockBreak(BlockBreakEvent event) {
+  // ...
+}
+```
+
+## Inline Comments
+
+Add inline comments to explain what code blocks do. Comments help other developers understand the logic:
+
+### When to Use
+- Before code blocks that perform a specific action
+- Before conditional logic that isn't immediately obvious
+- Before loops explaining what they iterate over
+- Do NOT comment obvious one-liners
+
+```java
+/**
+ * Check for inactive worlds and queue them for unload
+ */
+private void checkInactiveWorlds() {
+  Instant now = Instant.now();
+  Duration threshold = Duration.ofMinutes(Config.WORLD_INACTIVITY_THRESHOLD_MINUTES.toInt());
+
+  for (World world : Bukkit.getWorlds()) {
+    // Skip non-team worlds
+    if (!isTeamWorld(world)) {
+      continue;
+    }
+
+    String worldName = world.getName();
+    if (world.getPlayers().isEmpty()) {
+      // World is empty, check if we should start tracking or unload
+      Instant emptyTimestamp = emptyWorldTimestamps.get(worldName);
+      if (emptyTimestamp == null) {
+        // Start tracking this world as empty
+        emptyWorldTimestamps.put(worldName, now);
+      } else if (Duration.between(emptyTimestamp, now).compareTo(threshold) >= 0) {
+        // World has been empty long enough, queue for unload
+        queueWorldUnload(worldName);
+        emptyWorldTimestamps.remove(worldName);
+      }
+    } else {
+      // World has players, remove from empty tracking
+      emptyWorldTimestamps.remove(worldName);
+    }
+  }
+}
+
+/**
+ * Toggle a permission for the current role
+ *
+ * @param permission The permission to toggle
+ */
+private void togglePermission(TeamPermission permission) {
+  // Get a mutable copy of current permissions for this role
+  List<TeamPermission> currentPermissions = new ArrayList<>(
+    team.getRolePermissions().getOrDefault(role, new ArrayList<>())
+  );
+
+  // Toggle the permission (add if missing, remove if present)
+  if (currentPermissions.contains(permission)) {
+    currentPermissions.remove(permission);
+  } else {
+    currentPermissions.add(permission);
+  }
+
+  // Save the updated permissions
+  team.getRolePermissions().put(role, currentPermissions);
+}
+```
+
+## Comment Banners
+
+Do NOT use comment banners/separators:
+
+```java
+// ❌ Bad
+// ==================== BUILD PERMISSION ====================
+
+// ❌ Bad
+// ---------- Getters ----------
+
+// ❌ Bad
+/* ===== SECTION ===== */
+```
+
+## Logger Messages
+
+Use `String.format()` for logger messages with variables:
+
+```java
+// ✅ Good
+plugin.getLogger().info(String.format("Loaded world %s for team %s", worldName, teamName));
+
+// ❌ Bad
+plugin.getLogger().info("Loaded world " + worldName + " for team " + teamName);
+```
+
+## Singleton getInstance() Pattern
+
+Avoid calling `ClassName.getInstance()` repeatedly throughout a class. If you need the instance multiple times, pass it through the constructor or store it as a field.
+
+### When getInstance() is OK
+- Single use in a class (one-off access)
+- In static utility methods
+
+```java
+// ✅ OK - Single field initialization
+public class MyCommand {
+  private final MyPlugin plugin = MyPlugin.getInstance();
+}
+```
+
+### When to Use Constructor Injection
+
+```java
+// ❌ Bad - Multiple getInstance() calls
+public class SomeManager {
+  
+  public void doSomething() {
+    MyPlugin.getInstance().getLogger().info("Starting...");
+    MyPlugin.getInstance().getOtherManager().process();
+  }
+  
+  public void doAnotherThing() {
+    MyPlugin.getInstance().getLogger().info("Done!");
+  }
+}
+
+// ✅ Good - Pass through constructor
+public class SomeManager {
+  
+  private final MyPlugin plugin;
+  
+  public SomeManager(MyPlugin plugin) {
+    this.plugin = plugin;
+  }
+  
+  public void doSomething() {
+    plugin.getLogger().info("Starting...");
+    plugin.getOtherManager().process();
+  }
+  
+  public void doAnotherThing() {
+    plugin.getLogger().info("Done!");
+  }
+}
+```
+
+### For Listeners
+
+```java
+// ❌ Bad - getInstance() in constructor and methods
+public class MyListener implements Listener {
+  
+  private final SomeManager manager;
+  
+  public MyListener() {
+    this.manager = MyPlugin.getInstance().getSomeManager();
+  }
+  
+  @EventHandler
+  public void onEvent(SomeEvent event) {
+    MyPlugin.getInstance().getLogger().info("Event fired!");
+  }
+}
+
+// ✅ Good - Store plugin reference
+public class MyListener implements Listener {
+  
+  private final MyPlugin plugin;
+  private final SomeManager manager;
+  
+  public MyListener(MyPlugin plugin) {
+    this.plugin = plugin;
+    this.manager = plugin.getSomeManager();
+  }
+  
+  @EventHandler
+  public void onEvent(SomeEvent event) {
+    plugin.getLogger().info("Event fired!");
+  }
+}
+```
+
+### Rule of Thumb
+- 1 call to `getInstance()` → OK as field initializer
+- 2+ calls to `getInstance()` → Pass through constructor
+
+## Custom Events
+
+Custom events follow the Bukkit event pattern with a static `HandlerList`.
+
+### Base Event Class (Optional)
+
+If you have related events, create a base class:
+
+```java
+@Getter
+public abstract class MyBaseEvent extends Event {
+
+  private final MyData data;
+
+  public MyBaseEvent(MyData data) {
+    this.data = data;
+  }
+
+  public MyBaseEvent(MyData data, boolean async) {
+    super(async);
+    this.data = data;
+  }
+}
+```
+
+### Concrete Event Class
+
+```java
+/**
+ * Called when something happens
+ */
+@Getter
+public class MyActionEvent extends MyBaseEvent {
+
+  private static final HandlerList HANDLERS = new HandlerList();
+
+  private final UUID actorId;
+
+  public MyActionEvent(MyData data, UUID actorId) {
+    super(data);
+    this.actorId = actorId;
+  }
+
+  @Override
+  public @NotNull HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
+  }
+}
+```
+
+### Cancellable Event
+
+```java
+/**
+ * Event fired when a player does something.
+ * Cancelling this event will prevent the action.
+ */
+@Getter
+public class MyCancellableEvent extends Event implements Cancellable {
+
+  private static final HandlerList HANDLERS = new HandlerList();
+
+  private final Player player;
+
+  @Setter
+  private List<ItemStack> rewards;
+
+  @Setter
+  private boolean cancelled = false;
+
+  public MyCancellableEvent(Player player, List<ItemStack> rewards) {
+    this.player = player;
+    this.rewards = rewards;
+  }
+
+  @Override
+  public HandlerList getHandlers() {
+    return HANDLERS;
+  }
+
+  public static HandlerList getHandlerList() {
+    return HANDLERS;
+  }
+}
+```
+
+### Event Pattern:
+- Always include class-level javadoc describing when the event is fired
+- Use `@Getter` on the class, `@Setter` only on modifiable fields
+- Static `HANDLERS` field with `getHandlers()` and `getHandlerList()` methods
+- Fire events using `Bukkit.getPluginManager().callEvent(new MyEvent(...))`
+
+## Lombok Usage
+
+- Use `@Getter` from Lombok for getters
+- Never use `@Setter` on classes - write setters manually when needed
+- `@Setter` on individual fields is OK for event properties that should be modifiable

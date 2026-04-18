@@ -1,0 +1,56 @@
+name: Analyse
+version: ${version}
+main: net.analyse.spigot.AnalysePlugin
+description: Analyse tracking plugin
+author: VertCode Development
+
+permissions:
+  analyse.*:
+    description: Grants every Analyse command
+    default: op
+    children:
+      analyse.status: true
+      analyse.reload: true
+      analyse.debug: true
+      analyse.event: true
+      analyse.info: true
+      analyse.help: true
+      analyse.addons.*: true
+  analyse.status:
+    description: View plugin status
+    default: op
+  analyse.reload:
+    description: Reload the plugin configuration
+    default: op
+  analyse.debug:
+    description: Toggle debug mode
+    default: op
+  analyse.event:
+    description: Send custom events from commands
+    default: op
+  analyse.info:
+    description: View server or player analytics
+    default: op
+  analyse.help:
+    description: Show the command help menu
+    default: op
+  analyse.addons.*:
+    description: Manage every Analyse addon
+    default: op
+    children:
+      analyse.addons: true
+      analyse.addons.reload: true
+      analyse.addons.enable: true
+      analyse.addons.disable: true
+  analyse.addons:
+    description: List loaded addons
+    default: op
+  analyse.addons.reload:
+    description: Reload one or every addon
+    default: op
+  analyse.addons.enable:
+    description: Enable a disabled addon
+    default: op
+  analyse.addons.disable:
+    description: Disable a running addon
+    default: op

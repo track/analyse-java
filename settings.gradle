@@ -1,0 +1,8 @@
+rootProject.name = 'analyse'
+
+include 'modules:sdk'
+include 'modules:api'
+include 'modules:spigot'
+include 'modules:velocity'
+include 'modules:bungeecord'
+include 'modules:hytale'

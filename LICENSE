@@ -1,0 +1,99 @@
+Analyse Proprietary License
+Copyright (c) VertCode Development E.E. All rights reserved.
+
+This software and its source code (the "Software") are the exclusive property
+of VertCode Development E.E. ("the Company") and are protected by copyright
+law and international treaties.
+
+The Software is made available publicly for the purpose of transparency,
+reference, and to allow server operators to verify the behavior of the
+Analyse plugins and SDK they install on their own infrastructure.
+
+Publication of this source code does NOT constitute a grant of any rights
+beyond those expressly stated below.
+
+
+1. Permitted Use
+
+   You are permitted to:
+
+   a. View, read, and study the source code.
+   b. Clone or fork this repository for the sole purpose of personal study,
+      reviewing security properties, or submitting contributions back to the
+      Company via pull request.
+   c. Install and run official, unmodified binary releases distributed by
+      the Company from https://analyse.net and its official channels, subject
+      to the Analyse Terms of Service.
+
+
+2. Restrictions
+
+   Except with the prior, explicit, written permission of the Company, you
+   may NOT:
+
+   a. Copy, reproduce, or redistribute the Software, in whole or in part,
+      in source or binary form.
+   b. Modify, adapt, translate, or create derivative works based on the
+      Software.
+   c. Publish, sublicense, sell, rent, lease, or otherwise commercially
+      exploit the Software.
+   d. Use the Software, or any portion of it, to build a competing product
+      or service.
+   e. Remove, obscure, or alter any proprietary notices (including
+      copyright, trademark, or license notices) contained in the Software.
+   f. Distribute the Software on any package repository, mirror, or
+      download site other than those operated by the Company.
+
+   The "analyse-api" artifact published to the Company's Maven repository
+   may be consumed as a `compileOnly` / `provided` dependency in your own
+   plugin projects. Doing so does NOT grant you any rights to the source
+   code of the implementation modules beyond those described in Section 1.
+
+
+3. Contributions
+
+   If you submit a pull request, patch, issue reproduction, or any other
+   contribution to this repository, you agree that the Company may use,
+   modify, relicense, and distribute your contribution under the terms of
+   this license (or any other license of the Company's choosing), without
+   compensation and without further notice.
+
+
+4. Trademarks
+
+   "Analyse", "analyse.net", "VertCode", and "VertCode Development" are
+   trademarks of VertCode Development E.E. This license does not grant you
+   any right to use these trademarks except as strictly required to
+   accurately describe the Software in good faith.
+
+
+5. No Warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+
+6. Limitation of Liability
+
+   IN NO EVENT SHALL THE COMPANY BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
+   FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+
+7. Termination
+
+   Any use of the Software outside of the rights granted in Section 1
+   automatically terminates your rights under this license. Upon termination,
+   you must destroy all copies of the Software in your possession.
+
+
+8. Governing Law
+
+   This license is governed by the laws of the Hellenic Republic (Greece),
+   without regard to its conflict of law provisions.
+
+
+For licensing inquiries, commercial partnerships, or permission requests,
+contact: legal@analyse.net
