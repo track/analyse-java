@@ -2,11 +2,17 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [main]
+    paths:
+      - gradle.properties
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -16,24 +22,50 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from gradle.properties
+        id: version
+        run: |
+          VERSION=$(grep '^version=' gradle.properties | cut -d '=' -f2 | tr -d '[:space:]')
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not read version from gradle.properties"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $VERSION"
+
+      - name: Check whether this version was already released
+        id: tag_check
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if git rev-parse --verify --quiet "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists. Nothing to release."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tag $TAG does not exist yet. Proceeding with release."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up JDK 21
+        if: steps.tag_check.outputs.exists == 'false'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Set up Gradle
+        if: steps.tag_check.outputs.exists == 'false'
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Derive version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
       - name: Build
+        if: steps.tag_check.outputs.exists == 'false'
         run: ./gradlew build --no-daemon
 
       - name: Bundle jars
+        if: steps.tag_check.outputs.exists == 'false'
         run: |
           mkdir -p dist
           cp modules/spigot/build/libs/analyse-spigot-*.jar dist/
@@ -43,7 +75,7 @@ jobs:
           cd dist && zip -j "analyse-${{ steps.version.outputs.version }}.zip" *.jar
 
       - name: Publish API to Nexus
-        if: env.NEXUS_USER != ''
+        if: steps.tag_check.outputs.exists == 'false' && env.NEXUS_USER != ''
         env:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
@@ -51,9 +83,17 @@ jobs:
           NEXUS_SNAPSHOTS_URL: ${{ secrets.NEXUS_SNAPSHOTS_URL }}
         run: ./gradlew publishApi --no-daemon
 
+      - name: Create tag
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          git tag "${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+
       - name: Create GitHub Release
+        if: steps.tag_check.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
           name: Analyse ${{ steps.version.outputs.version }}
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
