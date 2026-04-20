@@ -18,10 +18,10 @@ dependencies {
     compileOnly "com.hypixel.hytale:Server:${project.property('hytaleServerVersion')}"
 
     // MiniMessage for text formatting
-    implementation 'net.kyori:adventure-api:4.17.0'
-    implementation 'net.kyori:adventure-text-minimessage:4.17.0'
-    implementation 'net.kyori:adventure-text-serializer-plain:4.17.0'
-    implementation 'net.kyori:adventure-text-serializer-legacy:4.17.0'
+    implementation 'net.kyori:adventure-api:5.0.1'
+    implementation 'net.kyori:adventure-text-minimessage:5.0.1'
+    implementation 'net.kyori:adventure-text-serializer-plain:5.0.1'
+    implementation 'net.kyori:adventure-text-serializer-legacy:5.0.1'
 }
 
 tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
