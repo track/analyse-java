@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.0] &mdash; 2026-04-28
+
+### Removed
+
+- Removed all built-in A/B test variant actions from all platform plugins and the SDK action enum.
+
 ## [1.1.0] &mdash; 2026-04-19
 
 ### Added

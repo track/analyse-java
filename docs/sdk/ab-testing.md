@@ -104,14 +104,7 @@ Analyse.trackEvent("tutorial_completed")
 
 ## Variant actions
 
-When a test triggers, it can execute these actions for the assigned variant:
-
-| Action | What it does |
-| --- | --- |
-| `SEND_MESSAGE` | Sends a colored message to the player. |
-| `RUN_COMMAND` | Runs a command as console or as the player. |
-
-Variant actions are configured in the Analyse dashboard, not in code.
+Analyse no longer ships built-in A/B test variant actions. Use `getVariant` in your own plugin logic when a variant should change behavior, and use `trackConversion` when the player completes the conversion event.
 
 ## Tips
 

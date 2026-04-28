@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Manages A/B tests for the Velocity plugin.
- * Supports SEND_MESSAGE and RUN_COMMAND actions on proxies.
+ * Does not execute built-in variant actions.
  */
 public class ABTestManager implements net.analyse.api.manager.ABTestManager {
 

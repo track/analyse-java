@@ -7,17 +7,9 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 /**
  * Base class for BungeeCord-specific A/B test actions.
- * Note: Only SEND_MESSAGE and RUN_COMMAND are supported on proxies.
+ * Analyse does not currently ship any built-in BungeeCord actions.
  */
 public abstract class BungeeAction implements Action<ProxiedPlayer> {
-
-  protected final AnalyseBungee plugin;
-  protected final ActionData data;
-
-  protected BungeeAction(AnalyseBungee plugin, ActionData data) {
-    this.plugin = plugin;
-    this.data = data;
-  }
 
   /**
    * Create a BungeeAction from ActionData
@@ -27,42 +19,6 @@ public abstract class BungeeAction implements Action<ProxiedPlayer> {
    * @return The appropriate BungeeAction, or null if type is unsupported
    */
   public static BungeeAction create(AnalyseBungee plugin, ActionData data) {
-    if (data == null || data.getType() == null) {
-      return null;
-    }
-
-    switch (data.getType()) {
-      case SEND_MESSAGE:
-        return new SendMessageAction(plugin, data);
-      case RUN_COMMAND:
-        return new RunCommandAction(plugin, data);
-      default:
-        return null;
-    }
-  }
-
-  /**
-   * Replace common placeholders in text
-   *
-   * @param text   The text with placeholders
-   * @param player The player
-   * @return Text with placeholders replaced
-   */
-  protected String replacePlaceholders(String text, ProxiedPlayer player) {
-    return text
-        .replace("%player%", player.getName())
-        .replace("%uuid%", player.getUniqueId().toString());
-  }
-
-  /**
-   * Log a debug message if debug mode is enabled
-   *
-   * @param message The message format
-   * @param args    Format arguments
-   */
-  protected void debug(String message, Object... args) {
-    if (plugin.isDebugEnabled()) {
-      plugin.logInfo(String.format("[DEBUG] " + message, args));
-    }
+    return null;
   }
 }

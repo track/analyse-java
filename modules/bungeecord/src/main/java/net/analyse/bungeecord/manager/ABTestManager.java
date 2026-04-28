@@ -6,7 +6,6 @@ import net.analyse.bungeecord.AnalyseBungee;
 import net.analyse.bungeecord.object.action.BungeeAction;
 import net.analyse.sdk.AnalyseCallback;
 import net.analyse.sdk.AnalyseClient;
-import net.analyse.sdk.object.abtest.Variant;
 import net.analyse.sdk.object.action.ActionData;
 import net.analyse.sdk.request.ConversionRequest;
 import net.analyse.sdk.response.ABTestsResponse;
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Manages A/B tests for the BungeeCord plugin.
- * Supports SEND_MESSAGE and RUN_COMMAND actions on proxies.
+ * Does not execute built-in variant actions.
  */
 public class ABTestManager implements net.analyse.api.manager.ABTestManager {
 
