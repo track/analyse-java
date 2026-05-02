@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.1] &mdash; 2026-05-02
+
+### Changed
+
+- Event tracking requests now include the configured instance ID across Spigot/Paper, Velocity, BungeeCord, and Hytale.
+- Updated SDK README repository links.
+
+### Fixed
+
+- Ignored IDE-generated `bin/` output so compiled class files are not picked up as commit candidates.
+
 ## [1.2.0] &mdash; 2026-04-28
 
 ### Removed
