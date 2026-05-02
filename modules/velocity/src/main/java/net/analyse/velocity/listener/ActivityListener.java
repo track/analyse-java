@@ -94,7 +94,8 @@ public class ActivityListener {
     }
 
     AnalyseClient client = clientOpt.get();
-    EventRequest request = new EventRequest(eventName, playerUuid, playerUsername, new HashMap<>(data), null);
+    String instanceId = plugin.getPluginConfig().getInstanceId();
+    EventRequest request = new EventRequest(eventName, playerUuid, playerUsername, new HashMap<>(data), null, instanceId);
 
     client.trackEvent(request, new AnalyseCallback<>() {
       @Override

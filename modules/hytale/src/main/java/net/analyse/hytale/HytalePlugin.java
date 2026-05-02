@@ -182,7 +182,8 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
       event.getPlayerUuid(),
       event.getPlayerUsername(),
       event.getData(),
-      event.getValue()
+      event.getValue(),
+      pluginConfig.getInstanceId()
     );
 
     client.trackEvent(

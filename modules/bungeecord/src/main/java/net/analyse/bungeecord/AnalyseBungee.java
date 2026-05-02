@@ -140,7 +140,8 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
         event.getPlayerUuid(),
         event.getPlayerUsername(),
         event.getData(),
-        event.getValue()
+        event.getValue(),
+        pluginConfig.getInstanceId()
     );
 
     client.trackEvent(request, new AnalyseCallback<EventResponse>() {

@@ -50,7 +50,7 @@ The SDK ships on the public Analyse Maven repository. Add the repo and the depen
 
 ```groovy
 repositories {
-    maven { url 'https://repo.analyse.net/releases' }
+    maven { url 'https://maven.analyse.net/maven-releases' }
 }
 ```
 
@@ -58,7 +58,7 @@ repositories {
 
 ```kotlin
 repositories {
-    maven("https://repo.analyse.net/releases")
+    maven("https://maven.analyse.net/maven-releases")
 }
 ```
 
@@ -68,7 +68,7 @@ repositories {
 <repositories>
   <repository>
     <id>analyse</id>
-    <url>https://repo.analyse.net/releases</url>
+    <url>https://maven.analyse.net/maven-releases</url>
   </repository>
 </repositories>
 ```
