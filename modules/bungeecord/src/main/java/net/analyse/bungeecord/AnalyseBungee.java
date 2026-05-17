@@ -59,6 +59,10 @@ public class AnalyseBungee extends Plugin implements AnalysePlatform {
       return;
     }
 
+    if (pluginConfig.hasInvalidSendMode()) {
+      getLogger().warning("Invalid sendMode in config.json, falling back to SINGLE");
+    }
+
     // Initialize session manager
     sessionManager = new SessionManager();
 

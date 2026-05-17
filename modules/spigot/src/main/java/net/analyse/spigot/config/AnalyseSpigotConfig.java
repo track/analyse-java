@@ -1,9 +1,15 @@
 package net.analyse.spigot.config;
 
 import lombok.Getter;
+import net.analyse.sdk.config.BatchConfig;
+import net.analyse.sdk.config.SendMode;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +38,8 @@ public class AnalyseSpigotConfig {
   private String apiKey;
   private String bedrockPrefix;
   private String instanceId;
+  private SendMode sendMode;
+  private BatchConfig batchConfig;
   private Map<String, Boolean> events;
 
   /**
@@ -42,6 +50,8 @@ public class AnalyseSpigotConfig {
   public AnalyseSpigotConfig(JavaPlugin plugin) {
     this.plugin = plugin;
     plugin.saveDefaultConfig();
+    migrateConfigFile();
+    plugin.reloadConfig();
     loadValues();
   }
 
@@ -56,10 +66,37 @@ public class AnalyseSpigotConfig {
     this.apiKey = config.getString("api-key", "");
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");
+    boolean modified = false;
+    if (!config.contains("send-mode")) {
+      config.set("send-mode", "SINGLE");
+      modified = true;
+    }
+    if (!config.contains("batch.size")) {
+      config.set("batch.size", BatchConfig.DEFAULT_SIZE);
+      modified = true;
+    }
+    if (!config.contains("batch.flush-interval-seconds")) {
+      config.set("batch.flush-interval-seconds", BatchConfig.DEFAULT_FLUSH_INTERVAL_SECONDS);
+      modified = true;
+    }
+    if (!config.contains("batch.max-queue-size")) {
+      config.set("batch.max-queue-size", BatchConfig.DEFAULT_MAX_QUEUE_SIZE);
+      modified = true;
+    }
+    if (!config.contains("batch.max-retries")) {
+      config.set("batch.max-retries", BatchConfig.DEFAULT_MAX_RETRIES);
+      modified = true;
+    }
+    this.sendMode = parseSendMode(config.getString("send-mode", "SINGLE"));
+    this.batchConfig = new BatchConfig(
+        config.getInt("batch.size", BatchConfig.DEFAULT_SIZE),
+        config.getInt("batch.flush-interval-seconds", BatchConfig.DEFAULT_FLUSH_INTERVAL_SECONDS),
+        config.getInt("batch.max-queue-size", BatchConfig.DEFAULT_MAX_QUEUE_SIZE),
+        config.getInt("batch.max-retries", BatchConfig.DEFAULT_MAX_RETRIES)
+    );
 
     // Load event toggles, writing missing defaults to the config file
     this.events = new HashMap<>(DEFAULT_EVENTS);
-    boolean modified = false;
     for (Map.Entry<String, Boolean> entry : DEFAULT_EVENTS.entrySet()) {
       String path = "events." + entry.getKey();
       if (config.contains(path)) {
@@ -78,6 +115,8 @@ public class AnalyseSpigotConfig {
    * Reload configuration from the config file
    */
   public void reload() {
+    migrateConfigFile();
+    plugin.reloadConfig();
     loadValues();
   }
 
@@ -121,5 +160,69 @@ public class AnalyseSpigotConfig {
    */
   public boolean isEventEnabled(String key) {
     return events.getOrDefault(key, false);
+  }
+
+  private SendMode parseSendMode(String configuredValue) {
+    SendMode mode = SendMode.fromConfig(configuredValue);
+    if (configuredValue != null && !configuredValue.trim().isEmpty()
+        && !mode.name().equalsIgnoreCase(configuredValue.trim())) {
+      plugin.getLogger().warning(String.format("Invalid send-mode '%s', falling back to SINGLE", configuredValue));
+    }
+    return mode;
+  }
+
+  /**
+   * Append new documented config sections to older config.yml files.
+   */
+  private void migrateConfigFile() {
+    File configFile = new File(plugin.getDataFolder(), "config.yml");
+    if (!configFile.exists()) {
+      return;
+    }
+
+    try {
+      String content = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
+      boolean hasSendMode = content.contains("send-mode:");
+      boolean hasBatch = content.contains("batch:");
+      if (hasSendMode && hasBatch) {
+        return;
+      }
+
+      StringBuilder block = new StringBuilder();
+      if (!content.endsWith("\n")) {
+        block.append("\n");
+      }
+      block.append("\n");
+      if (!hasSendMode) {
+        block.append("# Controls how Analyse sends joins, leaves, and custom events to the API.\n");
+        block.append("# SINGLE sends each item immediately using the existing individual endpoints.\n");
+        block.append("# BATCH queues items in memory and sends them together using /v1/plugin/batch.\n");
+        block.append("# BATCH reduces request volume during spikes, but queued items can be lost if the server is killed before flush.\n");
+        block.append("send-mode: \"SINGLE\"\n");
+        block.append("\n");
+      }
+      if (!hasBatch) {
+        block.append("# Batch sending settings. Only used when send-mode is BATCH.\n");
+        block.append("batch:\n");
+        block.append("  # Number of queued items that triggers an immediate flush.\n");
+        block.append("  # Recommended: 100-250. Maximum API batch size is 1000.\n");
+        block.append("  size: 200\n");
+        block.append("\n");
+        block.append("  # How often queued items are flushed, in seconds.\n");
+        block.append("  # Recommended: 2-5 seconds.\n");
+        block.append("  flush-interval-seconds: 3\n");
+        block.append("\n");
+        block.append("  # Maximum queued items kept in memory before new items are rejected.\n");
+        block.append("  max-queue-size: 10000\n");
+        block.append("\n");
+        block.append("  # Number of retry attempts for temporary HTTP/network failures.\n");
+        block.append("  max-retries: 3\n");
+      }
+
+      Files.write(configFile.toPath(), block.toString().getBytes(StandardCharsets.UTF_8),
+          java.nio.file.StandardOpenOption.APPEND);
+    } catch (IOException e) {
+      plugin.getLogger().warning("Failed to migrate Analyse config.yml with batch settings: " + e.getMessage());
+    }
   }
 }

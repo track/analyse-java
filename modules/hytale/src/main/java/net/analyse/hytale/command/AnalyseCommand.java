@@ -143,6 +143,14 @@ public class AnalyseCommand extends AbstractCommand {
     }
     message.append(" #5dade2┃ &fAPI: &7api.analyse.net&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
+    message.append(" #5dade2┃ &fSend Mode: &7").append(plugin.getPluginConfig().getSendMode()).append("&r\n");
+    if (plugin.getClient() != null && plugin.getClient().isBatchMode()) {
+      message.append(" #5dade2┃ &fBatch Queue: &7")
+          .append(plugin.getClient().getQueuedBatchItemCount())
+          .append("/")
+          .append(plugin.getPluginConfig().getBatchConfig().getMaxQueueSize())
+          .append("&r\n");
+    }
     message.append(" #5dade2┃ &fDebug: ").append(debugEnabled ? "&aEnabled" : "&7Disabled").append("&r\n");
     send(sender, message.toString());
   }

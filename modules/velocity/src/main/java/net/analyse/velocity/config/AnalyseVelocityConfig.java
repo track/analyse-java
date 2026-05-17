@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
+import net.analyse.sdk.config.BatchConfig;
+import net.analyse.sdk.config.SendMode;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -31,6 +33,8 @@ public class AnalyseVelocityConfig {
   private boolean development = false;
   private String bedrockPrefix = ".";
   private String instanceId = "default";
+  private String sendMode = "SINGLE";
+  private BatchSettings batch = new BatchSettings();
   private String defaultServer = null;
   private Map<String, ServerConfig> servers = new HashMap<>();
   private Map<String, Boolean> events = new HashMap<>(DEFAULT_EVENTS);
@@ -48,6 +52,17 @@ public class AnalyseVelocityConfig {
     public ServerConfig(String apiKey) {
       this.apiKey = apiKey;
     }
+  }
+
+  /**
+   * Batch delivery configuration.
+   */
+  @Getter
+  public static class BatchSettings {
+    private int size = BatchConfig.DEFAULT_SIZE;
+    private int flushIntervalSeconds = BatchConfig.DEFAULT_FLUSH_INTERVAL_SECONDS;
+    private int maxQueueSize = BatchConfig.DEFAULT_MAX_QUEUE_SIZE;
+    private int maxRetries = BatchConfig.DEFAULT_MAX_RETRIES;
   }
 
   /**
@@ -82,7 +97,7 @@ public class AnalyseVelocityConfig {
       config = gson.fromJson(reader, AnalyseVelocityConfig.class);
     }
 
-    if (config.fillMissingEventDefaults()) {
+    if (config.fillMissingDefaults()) {
       try (Writer writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8)) {
         gson.toJson(config, writer);
       }
@@ -101,6 +116,8 @@ public class AnalyseVelocityConfig {
     config.debug = false;
     config.bedrockPrefix = ".";
     config.instanceId = "default";
+    config.sendMode = "SINGLE";
+    config.batch = new BatchSettings();
     config.servers.put("lobby", new ServerConfig("anl_your_lobby_key_here"));
     config.servers.put("survival", new ServerConfig("anl_your_survival_key_here"));
     config.events = new HashMap<>(DEFAULT_EVENTS);
@@ -169,6 +186,19 @@ public class AnalyseVelocityConfig {
     return modified;
   }
 
+  private boolean fillMissingDefaults() {
+    boolean modified = fillMissingEventDefaults();
+    if (sendMode == null || sendMode.isBlank()) {
+      sendMode = "SINGLE";
+      modified = true;
+    }
+    if (batch == null) {
+      batch = new BatchSettings();
+      modified = true;
+    }
+    return modified;
+  }
+
   /**
    * Check if a built-in event type is enabled
    *
@@ -181,5 +211,24 @@ public class AnalyseVelocityConfig {
     }
 
     return events.getOrDefault(key, false);
+  }
+
+  public SendMode getSendMode() {
+    return SendMode.fromConfig(sendMode);
+  }
+
+  public boolean hasInvalidSendMode() {
+    return sendMode != null && !sendMode.trim().isEmpty()
+        && !getSendMode().name().equalsIgnoreCase(sendMode.trim());
+  }
+
+  public BatchConfig getBatchConfig() {
+    BatchSettings settings = batch != null ? batch : new BatchSettings();
+    return new BatchConfig(
+        settings.getSize(),
+        settings.getFlushIntervalSeconds(),
+        settings.getMaxQueueSize(),
+        settings.getMaxRetries()
+    );
   }
 }

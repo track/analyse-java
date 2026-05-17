@@ -66,7 +66,8 @@ public class PlayerListener {
     plugin.debug("Created session for %s (hostname: %s, ip: %s)", playerName, hostname, ip);
 
     // Send join event to the API
-    JoinRequest request = new JoinRequest(playerUuid, playerName, hostname, ip, false);
+    JoinRequest request = new JoinRequest(playerUuid, playerName, hostname, ip, false, null,
+        plugin.getPluginConfig().getInstanceId());
     client.join(request, new AnalyseCallback<>() {
       @Override
       public void onSuccess(JoinResponse response) {
@@ -98,12 +99,16 @@ public class PlayerListener {
     }
 
     PlayerSession session = sessionOpt.get();
-    if (!session.hasActiveSession()) {
+    if (!session.hasActiveSession() && !client.isBatchMode()) {
       return;
     }
 
     // Send leave event to the API
-    LeaveRequest request = new LeaveRequest(session.getSessionId());
+    LeaveRequest request = client.isBatchMode()
+        ? (session.hasActiveSession()
+            ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
+            : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId()))
+        : new LeaveRequest(session.getSessionId());
 
     client.leave(
       request,

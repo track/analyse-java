@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import lombok.Getter;
+import net.analyse.sdk.config.BatchConfig;
+import net.analyse.sdk.config.SendMode;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -23,6 +25,19 @@ public class AnalyseHytaleConfig {
   private boolean development;
   private String apiKey;
   private String instanceId;
+  private String sendMode;
+  private BatchSettings batch;
+
+  /**
+   * Batch delivery configuration.
+   */
+  @Getter
+  public static class BatchSettings {
+    private int size = BatchConfig.DEFAULT_SIZE;
+    private int flushIntervalSeconds = BatchConfig.DEFAULT_FLUSH_INTERVAL_SECONDS;
+    private int maxQueueSize = BatchConfig.DEFAULT_MAX_QUEUE_SIZE;
+    private int maxRetries = BatchConfig.DEFAULT_MAX_RETRIES;
+  }
 
   /**
    * Load or create the configuration file
@@ -42,7 +57,11 @@ public class AnalyseHytaleConfig {
 
     // Load existing config
     try (Reader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-      return GSON.fromJson(reader, AnalyseHytaleConfig.class);
+      AnalyseHytaleConfig config = GSON.fromJson(reader, AnalyseHytaleConfig.class);
+      if (config.fillMissingDefaults()) {
+        config.save(configPath);
+      }
+      return config;
     } catch (IOException e) {
       plugin.getLogger().atWarning().log("Failed to load config.json, using defaults: %s", e.getMessage());
       return createDefault();
@@ -60,6 +79,8 @@ public class AnalyseHytaleConfig {
     config.development = false;
     config.apiKey = "";
     config.instanceId = "default";
+    config.sendMode = "SINGLE";
+    config.batch = new BatchSettings();
     return config;
   }
 
@@ -93,5 +114,41 @@ public class AnalyseHytaleConfig {
    */
   public void setDebug(boolean debug) {
     this.debug = debug;
+  }
+
+  private boolean fillMissingDefaults() {
+    boolean modified = false;
+    if (sendMode == null || sendMode.isBlank()) {
+      sendMode = "SINGLE";
+      modified = true;
+    }
+    if (batch == null) {
+      batch = new BatchSettings();
+      modified = true;
+    }
+    if (instanceId == null || instanceId.isBlank()) {
+      instanceId = "default";
+      modified = true;
+    }
+    return modified;
+  }
+
+  public SendMode getSendMode() {
+    return SendMode.fromConfig(sendMode);
+  }
+
+  public boolean hasInvalidSendMode() {
+    return sendMode != null && !sendMode.isBlank()
+        && !getSendMode().name().equalsIgnoreCase(sendMode.trim());
+  }
+
+  public BatchConfig getBatchConfig() {
+    BatchSettings settings = batch != null ? batch : new BatchSettings();
+    return new BatchConfig(
+        settings.getSize(),
+        settings.getFlushIntervalSeconds(),
+        settings.getMaxQueueSize(),
+        settings.getMaxRetries()
+    );
   }
 }

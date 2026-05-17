@@ -84,6 +84,10 @@ public class AnalyseVelocity implements AnalysePlatform {
       return;
     }
 
+    if (pluginConfig.hasInvalidSendMode()) {
+      logger.warn("Invalid sendMode in config.json, falling back to SINGLE");
+    }
+
     // Initialize session manager
     sessionManager = new SessionManager();
 
@@ -247,6 +251,9 @@ public class AnalyseVelocity implements AnalysePlatform {
     if (!loadConfig()) {
       logger.error("Failed to reload configuration!");
       return;
+    }
+    if (pluginConfig.hasInvalidSendMode()) {
+      logger.warn("Invalid sendMode in config.json, falling back to SINGLE");
     }
 
     // Reinitialize player listener clients

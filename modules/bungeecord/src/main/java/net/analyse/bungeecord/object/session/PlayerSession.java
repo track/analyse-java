@@ -43,6 +43,15 @@ public class PlayerSession implements net.analyse.api.session.PlayerSession {
   }
 
   /**
+   * Update the current server before a session ID is available.
+   *
+   * @param serverName The name of the current server
+   */
+  public void setCurrentServer(String serverName) {
+    this.currentServer = serverName;
+  }
+
+  /**
    * Clear the session data when the player leaves a server
    */
   public void clearSession() {

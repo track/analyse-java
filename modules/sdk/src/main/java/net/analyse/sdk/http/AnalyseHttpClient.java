@@ -162,6 +162,54 @@ public class AnalyseHttpClient {
   }
 
   /**
+   * Make a synchronous POST request to the API.
+   *
+   * @param endpoint      The API endpoint
+   * @param requestBody   The request body object
+   * @param responseClass The class to deserialize the response into
+   * @param <T>           The response type
+   * @return The parsed response
+   * @throws AnalyseException If the request fails
+   */
+  public <T> T postSync(String endpoint, Object requestBody, Class<T> responseClass) throws AnalyseException {
+    String url = config.getApiUrl() + endpoint;
+    String json = gson.toJson(requestBody);
+    String apiKey = config.getApiKey();
+
+    if (apiKey == null || apiKey.trim().isEmpty()) {
+      throw new AnalyseException(401, "API key is not configured");
+    }
+
+    Request request = new Request.Builder()
+        .url(url)
+        .addHeader("X-Api-Key", apiKey)
+        .addHeader("Content-Type", "application/json")
+        .addHeader("Accept", "application/json")
+        .post(RequestBody.create(json, JSON))
+        .build();
+
+    try (Response response = httpClient.newCall(request).execute();
+        ResponseBody body = response.body()) {
+      if (!response.isSuccessful()) {
+        String errorMessage = body != null ? body.string() : "Unknown error";
+        throw new AnalyseException(response.code(), errorMessage);
+      }
+
+      if (body == null) {
+        throw new AnalyseException(500, "Empty response body");
+      }
+
+      return gson.fromJson(body.string(), responseClass);
+    } catch (IOException e) {
+      throw new AnalyseException("Network error: " + e.getMessage(), e);
+    } catch (AnalyseException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new AnalyseException("Failed to parse response: " + e.getMessage(), e);
+    }
+  }
+
+  /**
    * Shutdown the HTTP client and release resources
    */
   public void shutdown() {
@@ -169,4 +217,3 @@ public class AnalyseHttpClient {
     httpClient.connectionPool().evictAll();
   }
 }
-

@@ -1,5 +1,13 @@
 {
   "debug": false,
+  "development": false,
   "apiKey": "",
-  "instanceId": "default"
+  "instanceId": "default",
+  "sendMode": "SINGLE",
+  "batch": {
+    "size": 200,
+    "flushIntervalSeconds": 3,
+    "maxQueueSize": 10000,
+    "maxRetries": 3
+  }
 }

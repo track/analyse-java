@@ -71,6 +71,10 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
     pluginConfig = AnalyseHytaleConfig.load(this);
 
     // Validate configuration
+    if (pluginConfig.hasInvalidSendMode()) {
+      getLogger().atWarning().log("Invalid sendMode in config.json, falling back to SINGLE");
+    }
+
     if (!pluginConfig.isValid()) {
       getLogger()
         .atWarning()
@@ -115,7 +119,9 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
     // Initialize SDK client
     AnalyseConfig sdkConfig = new AnalyseConfig(
       pluginConfig.getApiKey(),
-      pluginConfig.isDevelopment()
+      pluginConfig.isDevelopment(),
+      pluginConfig.getSendMode(),
+      pluginConfig.getBatchConfig()
     );
     client = new AnalyseClient(sdkConfig);
 
@@ -262,7 +268,9 @@ public class HytalePlugin extends JavaPlugin implements AnalysePlatform {
         username,
         hostname,
         ip,
-        false
+        false,
+        null,
+        pluginConfig.getInstanceId()
       );
 
       client.join(

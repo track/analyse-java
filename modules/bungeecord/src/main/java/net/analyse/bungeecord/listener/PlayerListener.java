@@ -52,7 +52,12 @@ public class PlayerListener implements Listener {
       String apiKey = serverConfig.getApiKey();
       if (apiKey != null && !apiKey.trim().isEmpty() && !apiKey.startsWith("anl_your_")) {
         boolean development = plugin.getPluginConfig().isDevelopment();
-        AnalyseConfig config = new AnalyseConfig(apiKey, development);
+        AnalyseConfig config = new AnalyseConfig(
+            apiKey,
+            development,
+            plugin.getPluginConfig().getSendMode(),
+            plugin.getPluginConfig().getBatchConfig()
+        );
         serverClients.put(serverName, new AnalyseClient(config));
         logger.info(String.format("Initialized analytics client for server: %s", serverName));
       }
@@ -174,6 +179,9 @@ public class PlayerListener implements Listener {
     }
 
     AnalyseClient client = clientOpt.get();
+    if (client.isBatchMode()) {
+      session.setCurrentServer(serverName);
+    }
 
     // Check if player is a Bedrock player
     boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
@@ -182,7 +190,7 @@ public class PlayerListener implements Listener {
     String playerVersion = ProtocolVersionUtil.toVersionString(protocolVersion);
 
     JoinRequest request = new JoinRequest(uuid, username, session.getHostname(), session.getIp(),
-        isBedrock, playerVersion);
+        isBedrock, playerVersion, plugin.getPluginConfig().getInstanceId());
 
     client.join(request, new AnalyseCallback<JoinResponse>() {
       @Override
@@ -204,7 +212,7 @@ public class PlayerListener implements Listener {
    * Send a leave event to the API
    */
   private void sendLeaveEvent(UUID uuid, String username, PlayerSession session, String serverName) {
-    if (!session.hasActiveSession()) {
+    if (!session.hasActiveSession() && !isBatchLeaveFallbackAvailable(serverName)) {
       return;
     }
 
@@ -214,7 +222,11 @@ public class PlayerListener implements Listener {
     }
 
     AnalyseClient client = clientOpt.get();
-    LeaveRequest request = new LeaveRequest(session.getSessionId());
+    LeaveRequest request = client.isBatchMode()
+        ? (session.hasActiveSession()
+            ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
+            : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId()))
+        : new LeaveRequest(session.getSessionId());
 
     client.leave(request, new AnalyseCallback<LeaveResponse>() {
       @Override
@@ -231,6 +243,11 @@ public class PlayerListener implements Listener {
     });
 
     session.clearSession();
+  }
+
+  private boolean isBatchLeaveFallbackAvailable(String serverName) {
+    Optional<AnalyseClient> clientOpt = getClientForServer(serverName);
+    return clientOpt.isPresent() && clientOpt.get().isBatchMode();
   }
 
   /**

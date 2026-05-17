@@ -52,6 +52,12 @@ Analyse.trackEvent("quest_completed")
 
 Everything you need is documented in [`docs/sdk/`](docs/sdk/README.md).
 
+## Sending mode
+
+By default, Analyse sends joins, leaves, and custom events immediately with `send-mode: "SINGLE"` / `"sendMode": "SINGLE"`.
+Servers that see traffic spikes can opt into `"BATCH"` mode to queue analytics in memory and flush them through `/v1/plugin/batch` every few seconds or when the queue reaches the configured batch size.
+The recommended batch size is `100-250`; the generated default is `200`.
+
 ## Supported platforms
 
 | Platform | Role | Minimum version |

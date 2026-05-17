@@ -119,7 +119,12 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     shutdownAnalyse();
 
     // Initialize SDK client
-    AnalyseConfig sdkConfig = new AnalyseConfig(pluginConfig.getApiKey(), pluginConfig.isDevelopment());
+    AnalyseConfig sdkConfig = new AnalyseConfig(
+        pluginConfig.getApiKey(),
+        pluginConfig.isDevelopment(),
+        pluginConfig.getSendMode(),
+        pluginConfig.getBatchConfig()
+    );
     client = new AnalyseClient(sdkConfig);
 
     // Update the player listener with the new client
@@ -327,7 +332,8 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
       boolean isBedrock = pluginConfig.isBedrock(username);
 
       // Send join event to the API
-      JoinRequest request = new JoinRequest(uuid, username, hostname, ip, isBedrock);
+      JoinRequest request = new JoinRequest(uuid, username, hostname, ip, isBedrock, null,
+          pluginConfig.getInstanceId());
 
       client.join(request, new AnalyseCallback<JoinResponse>() {
         @Override

@@ -13,6 +13,8 @@ public class AnalyseConfig {
 
   private final String apiUrl;
   private final String apiKey;
+  private final SendMode sendMode;
+  private final BatchConfig batchConfig;
 
   /**
    * Create a new configuration
@@ -30,11 +32,29 @@ public class AnalyseConfig {
    * @param development Whether to use the staging API
    */
   public AnalyseConfig(String apiKey, boolean development) {
+    this(apiKey, development, SendMode.SINGLE, new BatchConfig());
+  }
+
+  /**
+   * Create a new configuration with optional development mode and send mode
+   *
+   * @param apiKey The API key for authentication
+   * @param development Whether to use the staging API
+   * @param sendMode How analytics items should be sent
+   * @param batchConfig Batch delivery configuration
+   */
+  public AnalyseConfig(String apiKey, boolean development, SendMode sendMode, BatchConfig batchConfig) {
+    this(apiKey, development ? STAGING_API_URL : API_URL, sendMode, batchConfig);
+  }
+
+  AnalyseConfig(String apiKey, String apiUrl, SendMode sendMode, BatchConfig batchConfig) {
     if (apiKey == null || apiKey.trim().isEmpty()) {
       throw new IllegalArgumentException("API key cannot be null or blank");
     }
 
-    this.apiUrl = development ? STAGING_API_URL : API_URL;
+    this.apiUrl = (apiUrl == null || apiUrl.trim().isEmpty()) ? API_URL : apiUrl;
     this.apiKey = apiKey;
+    this.sendMode = sendMode != null ? sendMode : SendMode.SINGLE;
+    this.batchConfig = batchConfig != null ? batchConfig : new BatchConfig();
   }
 }

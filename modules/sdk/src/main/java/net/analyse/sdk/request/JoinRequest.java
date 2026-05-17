@@ -15,6 +15,7 @@ public class JoinRequest {
   private final String ip;
   private final boolean bedrock;
   private final String playerVersion;
+  private final String instanceId;
 
   /**
    * Create a new join request
@@ -41,6 +42,22 @@ public class JoinRequest {
    */
   public JoinRequest(UUID uuid, String username, String hostname, String ip, boolean isBedrock,
       String playerVersion) {
+    this(uuid, username, hostname, ip, isBedrock, playerVersion, null);
+  }
+
+  /**
+   * Create a new join request with optional client version and instance ID
+   *
+   * @param uuid          The player's Minecraft UUID
+   * @param username      The player's current username
+   * @param hostname      The hostname the player used to connect
+   * @param ip            The player's IP address (for geo lookup)
+   * @param isBedrock     Whether the player is connecting from Bedrock Edition
+   * @param playerVersion The client version string (e.g. "1.21.4"), or null
+   * @param instanceId    The instance identifier (optional, defaults to "default" if null/blank)
+   */
+  public JoinRequest(UUID uuid, String username, String hostname, String ip, boolean isBedrock,
+      String playerVersion, String instanceId) {
     if (uuid == null) {
       throw new IllegalArgumentException("UUID cannot be null");
     }
@@ -63,5 +80,6 @@ public class JoinRequest {
     this.ip = ip;
     this.bedrock = isBedrock;
     this.playerVersion = (playerVersion != null && !playerVersion.trim().isEmpty()) ? playerVersion : null;
+    this.instanceId = (instanceId == null || instanceId.trim().isEmpty()) ? "default" : instanceId;
   }
 }
