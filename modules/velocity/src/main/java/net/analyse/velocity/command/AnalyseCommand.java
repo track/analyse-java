@@ -217,6 +217,64 @@ public class AnalyseCommand extends BaseCommand {
     });
   }
 
+  @Subcommand("track")
+  @Description("Track an in-game shop purchase")
+  @CommandPermission("analyse.track")
+  @Syntax("<player> buy <item> <price>")
+  @CommandCompletion("@players")
+  public void onTrack(CommandSource sender, String[] args) {
+    if (args.length < 4 || !args[1].equalsIgnoreCase("buy")) {
+      send(sender, "&cUsage: /analyse track <player> buy <item> <price>");
+      return;
+    }
+
+    if (!Analyse.isAvailable()) {
+      send(sender, "&cAnalyse is not connected. Cannot track purchases.");
+      return;
+    }
+
+    String playerName = args[0];
+    String itemId = args[2];
+    if (!itemId.matches("^[a-z][a-z0-9_.-]*$")) {
+      send(sender, "&cInvalid item id. Use lowercase letters, numbers, underscores, dots, or hyphens.");
+      return;
+    }
+
+    double price;
+    try {
+      price = Double.parseDouble(args[3]);
+    } catch (NumberFormatException e) {
+      send(sender, "&cInvalid price. Must be a number.");
+      return;
+    }
+
+    if (price < 0 || !Double.isFinite(price)) {
+      send(sender, "&cPrice must be a non-negative number.");
+      return;
+    }
+
+    Player player = plugin.getServer().getPlayer(playerName).orElse(null);
+    if (player == null) {
+      send(sender, "&cPlayer '" + playerName + "' not found online.");
+      return;
+    }
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("item", itemId);
+
+    Analyse.trackEvent("ingame.buy")
+        .withPlayer(player.getUniqueId(), player.getUsername())
+        .withData(data)
+        .withValue(price)
+        .send(success -> {
+          if (Boolean.TRUE.equals(success)) {
+            send(sender, "&a✓ In-game purchase tracked for &f" + player.getUsername());
+          } else {
+            send(sender, "&c✗ Failed to track in-game purchase");
+          }
+        });
+  }
+
   @Subcommand("purchase")
   @Description("Record a purchase for a player")
   @CommandPermission("analyse.purchase")

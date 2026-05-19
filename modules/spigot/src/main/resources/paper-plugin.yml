@@ -15,6 +15,7 @@ permissions:
       analyse.reload: true
       analyse.debug: true
       analyse.event: true
+      analyse.track: true
       analyse.info: true
       analyse.purchase: true
       analyse.help: true
@@ -30,6 +31,9 @@ permissions:
     default: op
   analyse.event:
     description: Send custom events from commands
+    default: op
+  analyse.track:
+    description: Track in-game shop purchases
     default: op
   analyse.info:
     description: View server or player analytics

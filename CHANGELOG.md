@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.3] &mdash; 2026-05-19
+
+### Added
+
+- New `/analyse track <player> buy <item> <price>` subcommand on Spigot/Paper, Velocity, BungeeCord, and Hytale to track in-game shop purchases as `ingame.buy` events.
+- New `analyse.track` permission on Spigot/Paper (declared in `paper-plugin.yml`, included in `analyse.*`).
+
 ## [1.2.1] &mdash; 2026-05-02
 
 ### Changed

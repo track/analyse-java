@@ -24,6 +24,7 @@ import net.analyse.sdk.response.PlayerInfoResponse;
 import net.analyse.sdk.response.PurchaseResponse;
 import net.analyse.sdk.response.ServerInfoResponse;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import java.time.Duration;
@@ -247,6 +248,69 @@ public class AnalyseCommand extends BaseCommand {
         });
       }
     });
+  }
+
+  @Subcommand("track")
+  @Description("Track an in-game shop purchase")
+  @CommandPermission("analyse.track")
+  @Syntax("<player> buy <item> <price>")
+  @CommandCompletion("@players")
+  public void onTrack(CommandSender sender, String[] args) {
+    if (args.length < 4 || !args[1].equalsIgnoreCase("buy")) {
+      send(sender, "&cUsage: /analyse track <player> buy <item> <price>");
+      return;
+    }
+
+    if (!Analyse.isAvailable()) {
+      send(sender, "&cAnalyse is not connected. Cannot track purchases.");
+      return;
+    }
+
+    String playerName = args[0];
+    String itemId = args[2];
+    if (!itemId.matches("^[a-z][a-z0-9_.-]*$")) {
+      send(sender, "&cInvalid item id. Use lowercase letters, numbers, underscores, dots, or hyphens.");
+      return;
+    }
+
+    double price;
+    try {
+      price = Double.parseDouble(args[3]);
+    } catch (NumberFormatException e) {
+      send(sender, "&cInvalid price. Must be a number.");
+      return;
+    }
+
+    if (price < 0 || !Double.isFinite(price)) {
+      send(sender, "&cPrice must be a non-negative number.");
+      return;
+    }
+
+    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
+    UUID playerUuid = offlinePlayer.getUniqueId();
+    String resolvedName = offlinePlayer.getName() != null ? offlinePlayer.getName() : playerName;
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("item", itemId);
+
+    Analyse.trackEvent("ingame.buy")
+        .withPlayer(playerUuid, resolvedName)
+        .withData(data)
+        .withValue(price)
+        .send(success -> {
+          if (Boolean.TRUE.equals(success)) {
+            SchedulerUtil.runSync(plugin, () -> {
+              send(sender, "&a✓ In-game purchase tracked");
+              send(sender, "  &7Player: &f" + resolvedName);
+              send(sender, "  &7Item: &f" + itemId);
+              send(sender, "  &7Price: &f" + price);
+            });
+          } else {
+            SchedulerUtil.runSync(plugin, () -> {
+              send(sender, "&c✗ Failed to track in-game purchase");
+            });
+          }
+        });
   }
 
   @Subcommand("purchase")
@@ -617,6 +681,7 @@ public class AnalyseCommand extends BaseCommand {
     message.append(" #5dade2┃ &f/analyse reload &7- Reload configuration&r\n");
     message.append(" #5dade2┃ &f/analyse debug &7- Toggle debug mode&r\n");
     message.append(" #5dade2┃ &f/analyse event <name> &7- Send custom event&r\n");
+    message.append(" #5dade2┃ &f/analyse track <player> buy <item> <price> &7- Track in-game shop buy&r\n");
     message.append(" #5dade2┃ &f/analyse purchase <uuid> <value> <product> &7- Record purchase&r\n");
     message.append(" #5dade2┃ &f/analyse addons &7- List loaded addons&r\n");
     message.append(" #5dade2┃ &f/analyse addons reload [id] &7- Reload addons&r\n");

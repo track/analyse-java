@@ -77,6 +77,7 @@ public class AnalyseCommand extends AbstractCommand {
         case "info" -> onInfo(sender, subArgs);
         case "debug" -> onDebug(sender);
         case "event" -> onEvent(sender, subArgs);
+        case "track" -> onTrack(sender, subArgs);
         case "purchase" -> onPurchase(sender, subArgs);
         case "addons" -> onAddons(sender, subArgs);
         case "help" -> onHelp(sender);
@@ -247,6 +248,75 @@ public class AnalyseCommand extends AbstractCommand {
         send(sender, "&c✗ Failed to send event '&f" + eventName + "&c'");
       }
     });
+  }
+
+  /**
+   * Track an in-game shop purchase.
+   *
+   * @param sender The command sender
+   * @param args The command arguments
+   */
+  private void onTrack(CommandSender sender, String[] args) {
+    if (args.length < 4 || !args[1].equalsIgnoreCase("buy")) {
+      send(sender, "&cUsage: /analyse track <player> buy <item> <price>");
+      return;
+    }
+
+    if (!Analyse.isAvailable()) {
+      send(sender, "&cAnalyse is not connected. Cannot track purchases.");
+      return;
+    }
+
+    String playerName = args[0];
+    String itemId = args[2];
+    if (!itemId.matches("^[a-z][a-z0-9_.-]*$")) {
+      send(sender, "&cInvalid item id. Use lowercase letters, numbers, underscores, dots, or hyphens.");
+      return;
+    }
+
+    double price;
+    try {
+      price = Double.parseDouble(args[3]);
+    } catch (NumberFormatException e) {
+      send(sender, "&cInvalid price. Must be a number.");
+      return;
+    }
+
+    if (price < 0 || !Double.isFinite(price)) {
+      send(sender, "&cPrice must be a non-negative number.");
+      return;
+    }
+
+    PlayerRef player = null;
+    for (PlayerRef candidate : plugin.getUniverse().getPlayers()) {
+      if (candidate.getUsername().equalsIgnoreCase(playerName)) {
+        player = candidate;
+        break;
+      }
+    }
+
+    if (player == null) {
+      send(sender, "&cPlayer '" + playerName + "' is not online.");
+      return;
+    }
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("item", itemId);
+
+    UUID playerUuid = player.getUuid();
+    String playerUsername = player.getUsername();
+
+    Analyse.trackEvent("ingame.buy")
+        .withPlayer(playerUuid, playerUsername)
+        .withData(data)
+        .withValue(price)
+        .send(success -> {
+          if (Boolean.TRUE.equals(success)) {
+            send(sender, "&a✓ In-game purchase tracked for &f" + playerUsername);
+          } else {
+            send(sender, "&c✗ Failed to track in-game purchase");
+          }
+        });
   }
 
   /**
