@@ -222,10 +222,10 @@ public class AnalyseCommand extends BaseCommand {
   @Subcommand("track")
   @Description("Track an in-game shop purchase")
   @CommandPermission("analyse.track")
-  @Syntax("<player> buy <item> <price>")
+  @Syntax("<player> buy <item> <price> [currency]")
   public void onTrack(CommandSender sender, String[] args) {
     if (args.length < 4 || !args[1].equalsIgnoreCase("buy")) {
-      send(sender, "&cUsage: /analyse track <player> buy <item> <price>");
+      send(sender, "&cUsage: /analyse track <player> buy <item> <price> [currency]");
       return;
     }
 
@@ -254,6 +254,15 @@ public class AnalyseCommand extends BaseCommand {
       return;
     }
 
+    String currency = null;
+    if (args.length >= 5) {
+      currency = args[4];
+      if (!currency.matches("^[a-z][a-z0-9_.-]*$")) {
+        send(sender, "&cInvalid currency. Use lowercase letters, numbers, underscores, dots, or hyphens.");
+        return;
+      }
+    }
+
     ProxiedPlayer player = plugin.getProxy().getPlayer(playerName);
     if (player == null) {
       send(sender, "&cPlayer '" + playerName + "' not found online.");
@@ -262,6 +271,9 @@ public class AnalyseCommand extends BaseCommand {
 
     Map<String, Object> data = new HashMap<>();
     data.put("item", itemId);
+    if (currency != null) {
+      data.put("currency", currency);
+    }
 
     Analyse.trackEvent("ingame.buy")
         .withPlayer(player.getUniqueId(), player.getName())

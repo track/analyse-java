@@ -258,7 +258,7 @@ public class AnalyseCommand extends AbstractCommand {
    */
   private void onTrack(CommandSender sender, String[] args) {
     if (args.length < 4 || !args[1].equalsIgnoreCase("buy")) {
-      send(sender, "&cUsage: /analyse track <player> buy <item> <price>");
+      send(sender, "&cUsage: /analyse track <player> buy <item> <price> [currency]");
       return;
     }
 
@@ -287,6 +287,15 @@ public class AnalyseCommand extends AbstractCommand {
       return;
     }
 
+    String currency = null;
+    if (args.length >= 5) {
+      currency = args[4];
+      if (!currency.matches("^[a-z][a-z0-9_.-]*$")) {
+        send(sender, "&cInvalid currency. Use lowercase letters, numbers, underscores, dots, or hyphens.");
+        return;
+      }
+    }
+
     PlayerRef player = null;
     for (PlayerRef candidate : plugin.getUniverse().getPlayers()) {
       if (candidate.getUsername().equalsIgnoreCase(playerName)) {
@@ -300,11 +309,14 @@ public class AnalyseCommand extends AbstractCommand {
       return;
     }
 
-    Map<String, Object> data = new HashMap<>();
-    data.put("item", itemId);
-
     UUID playerUuid = player.getUuid();
     String playerUsername = player.getUsername();
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("item", itemId);
+    if (currency != null) {
+      data.put("currency", currency);
+    }
 
     Analyse.trackEvent("ingame.buy")
         .withPlayer(playerUuid, playerUsername)
@@ -693,6 +705,7 @@ public void onError(AnalyseException exception) {
     message.append(" #5dade2┃ &f/analyse info <player> &7- View player analytics&r\n");
     message.append(" #5dade2┃ &f/analyse debug &7- Toggle debug mode&r\n");
     message.append(" #5dade2┃ &f/analyse event <name> &7- Send custom event&r\n");
+    message.append(" #5dade2┃ &f/analyse track <player> buy <item> <price> [currency] &7- Track in-game shop buy&r\n");
     message.append(" #5dade2┃ &f/analyse purchase <uuid> <value> <product> &7- Record purchase&r\n");
     message.append(" #5dade2┃ &f/analyse addons &7- List loaded addons&r\n");
     message.append(" #5dade2┃ &f/analyse addons reload [id] &7- Reload addons&r\n");

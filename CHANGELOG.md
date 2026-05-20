@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.4] &mdash; 2026-05-20
+
+### Added
+
+- Optional `[currency]` argument on `/analyse track <player> buy <item> <price> [currency]` across Spigot/Paper, Velocity, BungeeCord, and Hytale. When provided, it is sent as a `currency` property on the `ingame.buy` event.
+
 ## [1.2.3] &mdash; 2026-05-19
 
 ### Added

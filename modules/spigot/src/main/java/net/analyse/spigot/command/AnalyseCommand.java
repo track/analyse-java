@@ -253,11 +253,11 @@ public class AnalyseCommand extends BaseCommand {
   @Subcommand("track")
   @Description("Track an in-game shop purchase")
   @CommandPermission("analyse.track")
-  @Syntax("<player> buy <item> <price>")
+  @Syntax("<player> buy <item> <price> [currency]")
   @CommandCompletion("@players")
   public void onTrack(CommandSender sender, String[] args) {
     if (args.length < 4 || !args[1].equalsIgnoreCase("buy")) {
-      send(sender, "&cUsage: /analyse track <player> buy <item> <price>");
+      send(sender, "&cUsage: /analyse track <player> buy <item> <price> [currency]");
       return;
     }
 
@@ -286,12 +286,26 @@ public class AnalyseCommand extends BaseCommand {
       return;
     }
 
+    final String currency;
+    if (args.length >= 5) {
+      currency = args[4];
+      if (!currency.matches("^[a-z][a-z0-9_.-]*$")) {
+        send(sender, "&cInvalid currency. Use lowercase letters, numbers, underscores, dots, or hyphens.");
+        return;
+      }
+    } else {
+      currency = null;
+    }
+
     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
     UUID playerUuid = offlinePlayer.getUniqueId();
     String resolvedName = offlinePlayer.getName() != null ? offlinePlayer.getName() : playerName;
 
     Map<String, Object> data = new HashMap<>();
     data.put("item", itemId);
+    if (currency != null) {
+      data.put("currency", currency);
+    }
 
     Analyse.trackEvent("ingame.buy")
         .withPlayer(playerUuid, resolvedName)
@@ -304,6 +318,9 @@ public class AnalyseCommand extends BaseCommand {
               send(sender, "  &7Player: &f" + resolvedName);
               send(sender, "  &7Item: &f" + itemId);
               send(sender, "  &7Price: &f" + price);
+              if (currency != null) {
+                send(sender, "  &7Currency: &f" + currency);
+              }
             });
           } else {
             SchedulerUtil.runSync(plugin, () -> {
@@ -681,7 +698,7 @@ public class AnalyseCommand extends BaseCommand {
     message.append(" #5dade2┃ &f/analyse reload &7- Reload configuration&r\n");
     message.append(" #5dade2┃ &f/analyse debug &7- Toggle debug mode&r\n");
     message.append(" #5dade2┃ &f/analyse event <name> &7- Send custom event&r\n");
-    message.append(" #5dade2┃ &f/analyse track <player> buy <item> <price> &7- Track in-game shop buy&r\n");
+    message.append(" #5dade2┃ &f/analyse track <player> buy <item> <price> [currency] &7- Track in-game shop buy&r\n");
     message.append(" #5dade2┃ &f/analyse purchase <uuid> <value> <product> &7- Record purchase&r\n");
     message.append(" #5dade2┃ &f/analyse addons &7- List loaded addons&r\n");
     message.append(" #5dade2┃ &f/analyse addons reload [id] &7- Reload addons&r\n");

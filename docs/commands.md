@@ -126,6 +126,35 @@ Records a purchase for a player in this project. Useful for scripting purchases 
 
 On success the command prints the transaction ID and indicates whether this is the player's first purchase in the project.
 
+### `track`
+
+Tracks an in-game shop purchase as an `ingame.buy` event. Useful for scripting shop plugins or external purchase flows.
+
+```
+/analyse track <player> buy <item> <price> [currency]
+```
+
+**Permission:** `analyse.track`
+
+**Arguments:**
+
+| Argument | What it is | Example |
+| --- | --- | --- |
+| `<player>` | The player who made the purchase | `Steve` |
+| `<item>` | Item or product id (lowercase letters, numbers, underscores, dots, or hyphens) | `vip_rank` |
+| `<price>` | Non-negative purchase price | `500` |
+| `[currency]` | Optional currency id, using the same format as `<item>` | `coins` |
+
+**Examples:**
+
+```bash
+# Simple in-game purchase
+/analyse track Steve buy vip_rank 500
+
+# Purchase with a currency
+/analyse track Steve buy diamond_sword 250 coins
+```
+
 ### `info`
 
 Looks up analytics for your server or a specific player.
@@ -197,6 +226,7 @@ Prints the help menu with every subcommand and its description.
 | `analyse.reload` | OP | `/analyse reload` *(Spigot/Paper only)* |
 | `analyse.debug` | OP | `/analyse debug` |
 | `analyse.event` | OP | `/analyse event ...` |
+| `analyse.track` | OP | `/analyse track ...` |
 | `analyse.info` | OP | `/analyse info ...` |
 | `analyse.purchase` | OP | `/analyse purchase ...` |
 | `analyse.addons` | OP | `/analyse addons` |
