@@ -3,8 +3,17 @@ plugins {
     id 'com.gradleup.shadow'
 }
 
+// Hytale Server 0.5.6+ ships Java 25 class files, so this module must be built
+// with a Java 25 toolchain. Gradle auto-provisions it via the foojay resolver
+// configured in settings.gradle, independent of the JDK running the build.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
-    options.release = 21
+    options.release = 25
 }
 
 repositories {

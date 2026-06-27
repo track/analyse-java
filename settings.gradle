@@ -1,3 +1,8 @@
+plugins {
+    // Lets Gradle auto-provision JDK toolchains (the Hytale module targets Java 25).
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
 rootProject.name = 'analyse'
 
 include 'modules:sdk'
