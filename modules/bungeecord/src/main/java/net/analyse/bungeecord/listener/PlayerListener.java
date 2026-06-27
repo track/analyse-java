@@ -184,7 +184,7 @@ public class PlayerListener implements Listener {
     }
 
     // Check if player is a Bedrock player
-    boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
+    boolean isBedrock = plugin.getPluginConfig().isBedrock(uuid, username);
 
     // Convert protocol to "1.x.y" for the API
     String playerVersion = ProtocolVersionUtil.toVersionString(protocolVersion);

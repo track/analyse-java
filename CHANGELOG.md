@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.5] &mdash; 2026-06-27
+
+### Added
+
+- New `bedrock-mode` config option (`NAME` or `UUID`) on Spigot/Paper, Velocity, and BungeeCord. `UUID` mode detects Floodgate Bedrock players by their `00000000-0000-0000-xxxx-xxxxxxxxxxxx` UUID instead of a username prefix, avoiding false positives for Java players whose name happens to start with the prefix. Defaults to `NAME` to preserve existing behaviour; `bedrock-prefix` still applies in `NAME` mode.
+
 ## [1.2.4] &mdash; 2026-05-20
 
 ### Added

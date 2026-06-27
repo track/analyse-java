@@ -2,7 +2,9 @@ package net.analyse.spigot.config;
 
 import lombok.Getter;
 import net.analyse.sdk.config.BatchConfig;
+import net.analyse.sdk.config.BedrockMode;
 import net.analyse.sdk.config.SendMode;
+import net.analyse.sdk.util.BedrockUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Configuration for the Paper plugin
@@ -36,6 +39,7 @@ public class AnalyseSpigotConfig {
   private boolean debug;
   private boolean development;
   private String apiKey;
+  private BedrockMode bedrockMode;
   private String bedrockPrefix;
   private String instanceId;
   private SendMode sendMode;
@@ -64,6 +68,7 @@ public class AnalyseSpigotConfig {
     this.debug = config.getBoolean("debug", false);
     this.development = config.getBoolean("development", false);
     this.apiKey = config.getString("api-key", "");
+    this.bedrockMode = BedrockMode.fromConfig(config.getString("bedrock-mode", "NAME"));
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");
     boolean modified = false;
@@ -130,17 +135,25 @@ public class AnalyseSpigotConfig {
   }
 
   /**
-   * Check if a username belongs to a Bedrock player
+   * Check if a player is connecting from Bedrock Edition.
    *
+   * <p>In NAME mode the username is matched against the configured prefix; in
+   * UUID mode the player's UUID is inspected for the Floodgate pattern.
+   *
+   * @param uuid     The player's UUID
    * @param username The player's username
-   * @return true if the username starts with the bedrock prefix
+   * @return true if the player is detected as a Bedrock player
    */
-  public boolean isBedrock(String username) {
+  public boolean isBedrock(UUID uuid, String username) {
+    if (bedrockMode == BedrockMode.UUID) {
+      return BedrockUtil.isBedrockUuid(uuid);
+    }
+
     if (bedrockPrefix == null || bedrockPrefix.isEmpty()) {
       return false;
     }
 
-    return username.startsWith(bedrockPrefix);
+    return username != null && username.startsWith(bedrockPrefix);
   }
 
   /**
@@ -184,7 +197,8 @@ public class AnalyseSpigotConfig {
       String content = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
       boolean hasSendMode = content.contains("send-mode:");
       boolean hasBatch = content.contains("batch:");
-      if (hasSendMode && hasBatch) {
+      boolean hasBedrockMode = content.contains("bedrock-mode:");
+      if (hasSendMode && hasBatch && hasBedrockMode) {
         return;
       }
 
@@ -193,6 +207,15 @@ public class AnalyseSpigotConfig {
         block.append("\n");
       }
       block.append("\n");
+      if (!hasBedrockMode) {
+        block.append("# How Bedrock (Floodgate/Geyser) players are detected.\n");
+        block.append("# NAME: match the username against bedrock-prefix.\n");
+        block.append("# UUID: detect by UUID - Floodgate gives Bedrock players a UUID of the form\n");
+        block.append("#       00000000-0000-0000-xxxx-xxxxxxxxxxxx. More reliable, as it won't flag\n");
+        block.append("#       Java players whose name happens to start with the prefix.\n");
+        block.append("bedrock-mode: \"NAME\"\n");
+        block.append("\n");
+      }
       if (!hasSendMode) {
         block.append("# Controls how Analyse sends joins, leaves, and custom events to the API.\n");
         block.append("# SINGLE sends each item immediately using the existing individual endpoints.\n");

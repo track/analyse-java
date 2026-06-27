@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import net.analyse.sdk.config.BatchConfig;
+import net.analyse.sdk.config.BedrockMode;
 import net.analyse.sdk.config.SendMode;
+import net.analyse.sdk.util.BedrockUtil;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -41,6 +43,7 @@ public class AnalyseBungeeConfig {
   @Setter
   private boolean debug = false;
   private boolean development = false;
+  private String bedrockMode = "NAME";
   private String bedrockPrefix = ".";
   private String instanceId = "default";
   private String sendMode = "SINGLE";
@@ -124,6 +127,7 @@ public class AnalyseBungeeConfig {
   private static AnalyseBungeeConfig createDefault() {
     AnalyseBungeeConfig config = new AnalyseBungeeConfig();
     config.debug = false;
+    config.bedrockMode = "NAME";
     config.bedrockPrefix = ".";
     config.instanceId = "default";
     config.sendMode = "SINGLE";
@@ -161,17 +165,34 @@ public class AnalyseBungeeConfig {
   }
 
   /**
-   * Check if a username belongs to a Bedrock player
+   * The configured Bedrock detection mode.
    *
-   * @param username The player's username
-   * @return true if the username starts with the bedrock prefix
+   * @return The parsed mode, or NAME if missing/invalid
    */
-  public boolean isBedrock(String username) {
+  public BedrockMode getBedrockMode() {
+    return BedrockMode.fromConfig(bedrockMode);
+  }
+
+  /**
+   * Check if a player is connecting from Bedrock Edition.
+   *
+   * <p>In NAME mode the username is matched against the configured prefix; in
+   * UUID mode the player's UUID is inspected for the Floodgate pattern.
+   *
+   * @param uuid     The player's UUID
+   * @param username The player's username
+   * @return true if the player is detected as a Bedrock player
+   */
+  public boolean isBedrock(java.util.UUID uuid, String username) {
+    if (getBedrockMode() == BedrockMode.UUID) {
+      return BedrockUtil.isBedrockUuid(uuid);
+    }
+
     if (bedrockPrefix == null || bedrockPrefix.isEmpty()) {
       return false;
     }
 
-    return username.startsWith(bedrockPrefix);
+    return username != null && username.startsWith(bedrockPrefix);
   }
 
   /**

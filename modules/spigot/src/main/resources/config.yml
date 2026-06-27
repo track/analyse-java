@@ -6,9 +6,17 @@ debug: false
 # Your server's API key from the Analyse dashboard
 api-key: "anl_your_api_key_here"
 
+# How Bedrock (Floodgate/Geyser) players are detected.
+# NAME: match the username against bedrock-prefix below.
+# UUID: detect by UUID - Floodgate gives Bedrock players a UUID of the form
+#       00000000-0000-0000-xxxx-xxxxxxxxxxxx. More reliable, as it won't flag
+#       Java players whose name happens to start with the prefix.
+bedrock-mode: "NAME"
+
 # Bedrock player username prefix (used by Floodgate/Geyser)
+# Only used when bedrock-mode is NAME.
 # Common values: "." or "_" or "*"
-# Leave empty to disable bedrock detection
+# Leave empty to disable name-based bedrock detection
 bedrock-prefix: "."
 
 # Instance ID for multi-instance setups (e.g. "survival-1", "survival-2")

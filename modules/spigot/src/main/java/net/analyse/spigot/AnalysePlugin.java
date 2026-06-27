@@ -329,7 +329,7 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
       debug("Created session for existing player %s (hostname: %s, ip: %s)", username, hostname, ip);
 
       // Check if player is a Bedrock player
-      boolean isBedrock = pluginConfig.isBedrock(username);
+      boolean isBedrock = pluginConfig.isBedrock(uuid, username);
 
       // Send join event to the API
       JoinRequest request = new JoinRequest(uuid, username, hostname, ip, isBedrock, null,

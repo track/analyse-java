@@ -102,7 +102,7 @@ public class PlayerListener implements Listener {
     // Only send to API if client is available
     if (client != null) {
       // Check if player is a Bedrock player
-      boolean isBedrock = plugin.getPluginConfig().isBedrock(username);
+      boolean isBedrock = plugin.getPluginConfig().isBedrock(uuid, username);
 
       // Convert protocol version to "1.x.y" string for the API (Java clients only; Bedrock may still send "1.?")
       int protocolVersion = getProtocolVersion(player);
