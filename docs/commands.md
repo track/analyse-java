@@ -29,7 +29,7 @@ Prints the current plugin status and connection health.
   Analyse v1.0.0
 ──────────────────────────────
   Status: Connected
-  API: api.games.analyse.net
+  API: api.analyse.net
   Players Tracked: 5
   Debug: Disabled
 ──────────────────────────────

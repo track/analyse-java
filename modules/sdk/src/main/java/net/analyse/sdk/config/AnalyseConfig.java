@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 public class AnalyseConfig {
 
-  private static final String API_URL = "https://api.games.analyse.net";
-  private static final String STAGING_API_URL = "https://api-staging.games.analyse.net";
+  private static final String API_URL = "https://api.analyse.net";
+  private static final String STAGING_API_URL = "https://api-staging.analyse.net";
 
   private final String apiUrl;
   private final String apiKey;

@@ -24,7 +24,7 @@ Analyse has one plugin per server software. Pick the one that matches your setup
 ## Requirements
 
 - **Java 21** or newer at runtime (the Spigot plugin still targets the 1.8 API for broad compatibility)
-- **Outbound HTTPS access** to `api.games.analyse.net`
+- **Outbound HTTPS access** to `api.analyse.net`
 
 ## Step 1: Create a Server in Analyse
 
@@ -89,7 +89,7 @@ A healthy server looks like this:
   Analyse v1.0.0
 ──────────────────────────────
   Status: Connected
-  API: api.games.analyse.net
+  API: api.analyse.net
   Players Tracked: 10
   Debug: Disabled
 ──────────────────────────────
@@ -98,7 +98,7 @@ A healthy server looks like this:
 If the status says **Disconnected**:
 
 - Double-check the API key in your config for trailing spaces or typos.
-- Make sure your server can reach `https://api.games.analyse.net` (some hosts block outgoing traffic by default).
+- Make sure your server can reach `https://api.analyse.net` (some hosts block outgoing traffic by default).
 - Enable debug mode (`/analyse debug`) and re-check the console for a clearer error.
 
 > [!WARNING]

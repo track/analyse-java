@@ -142,7 +142,7 @@ public class AnalyseCommand extends AbstractCommand {
     if (!connected && Analyse.getLastConnectionError() != null) {
       message.append(" #5dade2┃ &fError: &c").append(Analyse.getLastConnectionError()).append("&r\n");
     }
-    message.append(" #5dade2┃ &fAPI: &7api.games.analyse.net&r\n");
+    message.append(" #5dade2┃ &fAPI: &7api.analyse.net&r\n");
     message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
     if (plugin.getClient() != null) {
       message.append(" #5dade2┃ &fBatch Queue: &7")

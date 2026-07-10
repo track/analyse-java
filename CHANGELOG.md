@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.1] &mdash; 2026-07-10
+
+### Fixed
+
+- API URLs incorrectly pointed to `api.games.analyse.net` and `api-staging.games.analyse.net`; restored to `api.analyse.net` and `api-staging.analyse.net`.
+
 ## [1.3.0] &mdash; 2026-07-10
 
 ### Changed
