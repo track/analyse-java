@@ -11,7 +11,7 @@ dependencies {
     implementation project(':modules:api')
     implementation project(':modules:sdk')
     implementation "co.aikar:acf-bukkit:${project.property('acfVersion')}"
-    compileOnly 'org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:26.1.2-R0.1-SNAPSHOT'
 
     // Adventure platform adapter (auto-detects Paper native vs Spigot legacy)
     implementation 'net.kyori:adventure-api:4.17.0'
