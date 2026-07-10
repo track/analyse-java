@@ -13,7 +13,7 @@ Only the latest minor release of the Analyse plugins receives security updates. 
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, email us at **security@analyse.net** with:
+Instead, email us at **security@games.analyse.net** with:
 
 - A description of the issue and where you found it (file, class, endpoint, etc.).
 - The impact (what can an attacker do with this?).
@@ -29,7 +29,7 @@ Reports about the following are in scope:
 - The Analyse plugins in this repository (Spigot, BungeeCord, Velocity, Hytale).
 - The `analyse-api` SDK.
 
-The Analyse dashboard, API, and website are covered by a separate security policy at [analyse.net/security](https://analyse.net/security).
+The Analyse dashboard, API, and website are covered by a separate security policy at [games.analyse.net/security](https://games.analyse.net/security).
 
 ## Out of scope
 

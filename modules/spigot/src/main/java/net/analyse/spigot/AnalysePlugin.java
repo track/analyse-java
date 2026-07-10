@@ -122,7 +122,6 @@ public class AnalysePlugin extends JavaPlugin implements AnalysePlatform {
     AnalyseConfig sdkConfig = new AnalyseConfig(
         pluginConfig.getApiKey(),
         pluginConfig.isDevelopment(),
-        pluginConfig.getSendMode(),
         pluginConfig.getBatchConfig()
     );
     client = new AnalyseClient(sdkConfig);

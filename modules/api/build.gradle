@@ -63,7 +63,7 @@ publishing {
             pom {
                 name = 'Analyse API'
                 description = 'Public API for the Analyse analytics plugin'
-                url = 'https://analyse.net'
+                url = 'https://games.analyse.net'
 
                 licenses {
                     license {
@@ -75,7 +75,7 @@ publishing {
 
                 organization {
                     name = 'VertCode Development E.E.'
-                    url = 'https://analyse.net'
+                    url = 'https://games.analyse.net'
                 }
             }
         }

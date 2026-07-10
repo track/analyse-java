@@ -55,7 +55,6 @@ public class PlayerListener {
         AnalyseConfig config = new AnalyseConfig(
             apiKey,
             development,
-            plugin.getPluginConfig().getSendMode(),
             plugin.getPluginConfig().getBatchConfig()
         );
         serverClients.put(serverName, new AnalyseClient(config));
@@ -188,9 +187,7 @@ public class PlayerListener {
     }
 
     AnalyseClient client = clientOpt.get();
-    if (client.isBatchMode()) {
-      session.setCurrentServer(serverName);
-    }
+    session.setCurrentServer(serverName);
 
     // Check if player is a Bedrock player
     boolean isBedrock = plugin.getPluginConfig().isBedrock(uuid, username);
@@ -221,21 +218,15 @@ public class PlayerListener {
    * Send a leave event to the API
    */
   private void sendLeaveEvent(UUID uuid, String username, PlayerSession session, String serverName) {
-    if (!session.hasActiveSession() && !isBatchLeaveFallbackAvailable(serverName)) {
-      return;
-    }
-
     Optional<AnalyseClient> clientOpt = getClientForServer(serverName);
     if (clientOpt.isEmpty()) {
       return;
     }
 
     AnalyseClient client = clientOpt.get();
-    LeaveRequest request = client.isBatchMode()
-        ? (session.hasActiveSession()
-            ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
-            : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId()))
-        : new LeaveRequest(session.getSessionId());
+    LeaveRequest request = session.hasActiveSession()
+        ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
+        : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId());
 
     client.leave(request, new AnalyseCallback<>() {
       @Override
@@ -252,11 +243,6 @@ public class PlayerListener {
     });
 
     session.clearSession();
-  }
-
-  private boolean isBatchLeaveFallbackAvailable(String serverName) {
-    Optional<AnalyseClient> clientOpt = getClientForServer(serverName);
-    return clientOpt.isPresent() && clientOpt.get().isBatchMode();
   }
 
   /**

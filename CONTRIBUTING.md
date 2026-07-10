@@ -109,6 +109,6 @@ Please do NOT open a public issue for security vulnerabilities. See [SECURITY.md
 
 ## Questions
 
-For usage questions, use [GitHub Discussions](https://github.com/track/analyse-java/discussions) or the [Analyse Discord](https://analyse.net). Issues are for bugs and feature requests only.
+For usage questions, use [GitHub Discussions](https://github.com/track/analyse-java/discussions) or the [Analyse Discord](https://games.analyse.net). Issues are for bugs and feature requests only.
 
 Thanks again.

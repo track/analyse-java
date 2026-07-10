@@ -75,7 +75,7 @@ public class AnalyseCommand extends BaseCommand {
     message.append(" #5dade2┃ &7This server uses &fAnalyse &7to track\n");
     message.append(" #5dade2┃ &7player analytics and sessions.&r\n");
     message.append("&r\n");
-    message.append(" &7→ &fanalyse.net&r\n");
+    message.append(" &7→ &fgames.analyse.net&r\n");
     send(sender, message.toString());
   }
 
@@ -101,10 +101,9 @@ public class AnalyseCommand extends BaseCommand {
       if (!apiConnected && Analyse.getLastConnectionError() != null) {
         message.append(" #5dade2┃ &fError: &c").append(Analyse.getLastConnectionError()).append("&r\n");
       }
-      message.append(" #5dade2┃ &fAPI: &7api.analyse.net&r\n");
+      message.append(" #5dade2┃ &fAPI: &7api.games.analyse.net&r\n");
       message.append(" #5dade2┃ &fPlayers Tracked: &7").append(trackedPlayers).append("&r\n");
-      message.append(" #5dade2┃ &fSend Mode: &7").append(plugin.getPluginConfig().getSendMode()).append("&r\n");
-      if (plugin.getClient() != null && plugin.getClient().isBatchMode()) {
+      if (plugin.getClient() != null) {
         message.append(" #5dade2┃ &fBatch Queue: &7")
             .append(plugin.getClient().getQueuedBatchItemCount())
             .append("/")

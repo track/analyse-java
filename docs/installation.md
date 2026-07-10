@@ -5,7 +5,7 @@ Getting Analyse running on your server takes about five minutes. You download a 
 Before you start, make sure you have access to:
 
 - Your server files (or your host's control panel)
-- An [Analyse account](https://analyse.net/register)
+- An [Analyse account](https://games.analyse.net/register)
 
 ## Which plugin do I need
 
@@ -24,11 +24,11 @@ Analyse has one plugin per server software. Pick the one that matches your setup
 ## Requirements
 
 - **Java 21** or newer at runtime (the Spigot plugin still targets the 1.8 API for broad compatibility)
-- **Outbound HTTPS access** to `api.analyse.net`
+- **Outbound HTTPS access** to `api.games.analyse.net`
 
 ## Step 1: Create a Server in Analyse
 
-1. Log in at [analyse.net/dashboard](https://analyse.net/dashboard).
+1. Log in at [games.analyse.net/dashboard](https://games.analyse.net/dashboard).
 2. Click **New Server** and give it a short, clean name like `LifeSteal` or `Skyblock`.
 3. Pick the platform (Minecraft or Hytale).
 4. Open the new Server, go to **Settings &rarr; API**, create a key if there isn't one already, and copy it. API keys start with `anl_`.
@@ -39,7 +39,7 @@ Keep the tab open &mdash; you'll paste the key into your config in a minute.
 
 ### Spigot / Paper / Purpur / Folia
 
-1. Download `analyse-spigot-<version>.jar` from [analyse.net/downloads](https://analyse.net/downloads).
+1. Download `analyse-spigot-<version>.jar` from [games.analyse.net/downloads](https://games.analyse.net/downloads).
 2. Drop it into your server's `plugins/` folder.
 3. Start the server once so the config file generates, then stop it.
 4. Open `plugins/Analyse/config.yml`.
@@ -48,7 +48,7 @@ Keep the tab open &mdash; you'll paste the key into your config in a minute.
 
 ### BungeeCord
 
-1. Download `analyse-bungeecord-<version>.jar` from [analyse.net/downloads](https://analyse.net/downloads).
+1. Download `analyse-bungeecord-<version>.jar` from [games.analyse.net/downloads](https://games.analyse.net/downloads).
 2. Drop it into your proxy's `plugins/` folder.
 3. Start the proxy once, then stop it.
 4. Open `plugins/Analyse/config.yml`.
@@ -57,7 +57,7 @@ Keep the tab open &mdash; you'll paste the key into your config in a minute.
 
 ### Velocity
 
-1. Download `analyse-velocity-<version>.jar` from [analyse.net/downloads](https://analyse.net/downloads).
+1. Download `analyse-velocity-<version>.jar` from [games.analyse.net/downloads](https://games.analyse.net/downloads).
 2. Drop it into your proxy's `plugins/` folder.
 3. Start the proxy once, then stop it.
 4. Open `plugins/analyse/config.json`.
@@ -66,7 +66,7 @@ Keep the tab open &mdash; you'll paste the key into your config in a minute.
 
 ### Hytale
 
-1. Download `analyse-hytale-<version>.jar` from [analyse.net/downloads](https://analyse.net/downloads).
+1. Download `analyse-hytale-<version>.jar` from [games.analyse.net/downloads](https://games.analyse.net/downloads).
 2. Install it the same way you install any Hytale plugin on your server.
 3. Open the generated `config.json` in the Analyse data folder.
 4. Paste in your API key.
@@ -89,7 +89,7 @@ A healthy server looks like this:
   Analyse v1.0.0
 ──────────────────────────────
   Status: Connected
-  API: api.analyse.net
+  API: api.games.analyse.net
   Players Tracked: 10
   Debug: Disabled
 ──────────────────────────────
@@ -98,7 +98,7 @@ A healthy server looks like this:
 If the status says **Disconnected**:
 
 - Double-check the API key in your config for trailing spaces or typos.
-- Make sure your server can reach `https://api.analyse.net` (some hosts block outgoing traffic by default).
+- Make sure your server can reach `https://api.games.analyse.net` (some hosts block outgoing traffic by default).
 - Enable debug mode (`/analyse debug`) and re-check the console for a clearer error.
 
 > [!WARNING]

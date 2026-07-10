@@ -3,7 +3,6 @@
   "development": false,
   "apiKey": "",
   "instanceId": "default",
-  "sendMode": "SINGLE",
   "batch": {
     "size": 200,
     "flushIntervalSeconds": 3,

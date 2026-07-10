@@ -1,14 +1,11 @@
 package net.analyse.sdk.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashSet;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +25,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-class AnalyseClientSendModeTest {
+class AnalyseClientBatchTest {
 
   private MockWebServer server;
 
@@ -37,14 +34,6 @@ class AnalyseClientSendModeTest {
     if (server != null) {
       server.shutdown();
     }
-  }
-
-  @Test
-  void parsesSendModeFromConfig() {
-    assertEquals(SendMode.SINGLE, SendMode.fromConfig("SINGLE"));
-    assertEquals(SendMode.BATCH, SendMode.fromConfig("BATCH"));
-    assertEquals(SendMode.SINGLE, SendMode.fromConfig("invalid"));
-    assertEquals(SendMode.SINGLE, SendMode.fromConfig(null));
   }
 
   @Test
@@ -95,7 +84,7 @@ class AnalyseClientSendModeTest {
   }
 
   @Test
-  void batchModeSendsOneBatchAndMapsCallbacks() throws Exception {
+  void sendsOneBatchAndMapsCallbacks() throws Exception {
     server = new MockWebServer();
     server.enqueue(new MockResponse()
         .setResponseCode(200)
@@ -112,7 +101,6 @@ class AnalyseClientSendModeTest {
     AnalyseClient client = new AnalyseClient(new AnalyseConfig(
         "anl_test",
         baseUrl(),
-        SendMode.BATCH,
         new BatchConfig(3, 10, 100, 0)
     ));
 
@@ -141,7 +129,7 @@ class AnalyseClientSendModeTest {
   }
 
   @Test
-  void batchModeRetriesTemporaryFailures() throws Exception {
+  void retriesTemporaryFailures() throws Exception {
     server = new MockWebServer();
     server.enqueue(new MockResponse().setResponseCode(500).setBody("temporary"));
     server.enqueue(new MockResponse()
@@ -155,7 +143,6 @@ class AnalyseClientSendModeTest {
     AnalyseClient client = new AnalyseClient(new AnalyseConfig(
         "anl_test",
         baseUrl(),
-        SendMode.BATCH,
         new BatchConfig(1, 10, 100, 1)
     ));
 
@@ -170,7 +157,7 @@ class AnalyseClientSendModeTest {
   }
 
   @Test
-  void batchModeCallsCallbackWithErrorAfterFinalFailure() throws Exception {
+  void callsCallbackWithErrorAfterFinalFailure() throws Exception {
     server = new MockWebServer();
     server.enqueue(new MockResponse().setResponseCode(500).setBody("temporary"));
     server.start();
@@ -178,7 +165,6 @@ class AnalyseClientSendModeTest {
     AnalyseClient client = new AnalyseClient(new AnalyseConfig(
         "anl_test",
         baseUrl(),
-        SendMode.BATCH,
         new BatchConfig(1, 10, 100, 0)
     ));
 
@@ -189,54 +175,6 @@ class AnalyseClientSendModeTest {
     assertEquals(500, probe.error.getStatusCode());
 
     client.shutdown();
-  }
-
-  @Test
-  void singleModeUsesIndividualEndpoints() throws Exception {
-    server = new MockWebServer();
-    server.enqueue(json("{\"success\":true,\"sessionId\":\"session-1\"}"));
-    server.enqueue(json("{\"success\":true,\"duration\":5}"));
-    server.enqueue(json("{\"success\":true,\"eventId\":\"event-1\"}"));
-    server.start();
-
-    AnalyseClient client = new AnalyseClient(new AnalyseConfig(
-        "anl_test",
-        baseUrl(),
-        SendMode.SINGLE,
-        new BatchConfig()
-    ));
-
-    UUID uuid = UUID.randomUUID();
-    CallbackProbe<JoinResponse> joinProbe = new CallbackProbe<>();
-    CallbackProbe<LeaveResponse> leaveProbe = new CallbackProbe<>();
-    CallbackProbe<EventResponse> eventProbe = new CallbackProbe<>();
-
-    client.join(new JoinRequest(uuid, "Player", "play.example.com", "127.0.0.1", false), joinProbe);
-    client.leave(new LeaveRequest("session-1"), leaveProbe);
-    client.trackEvent(new EventRequest("plugin.test", uuid, "Player", Collections.emptyMap(), null, "default"),
-        eventProbe);
-
-    assertTrue(joinProbe.await());
-    assertTrue(leaveProbe.await());
-    assertTrue(eventProbe.await());
-
-    Set<String> paths = new HashSet<>();
-    paths.add(server.takeRequest(1, TimeUnit.SECONDS).getPath());
-    paths.add(server.takeRequest(1, TimeUnit.SECONDS).getPath());
-    paths.add(server.takeRequest(1, TimeUnit.SECONDS).getPath());
-    assertTrue(paths.contains("/v1/plugin/join"));
-    assertTrue(paths.contains("/v1/plugin/leave"));
-    assertTrue(paths.contains("/v1/plugin/event"));
-    assertFalse(client.isBatchMode());
-
-    client.shutdown();
-  }
-
-  private MockResponse json(String body) {
-    return new MockResponse()
-        .setResponseCode(200)
-        .setHeader("Content-Type", "application/json")
-        .setBody(body);
   }
 
   private String baseUrl() {

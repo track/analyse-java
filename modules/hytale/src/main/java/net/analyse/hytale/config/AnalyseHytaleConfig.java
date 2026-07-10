@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import lombok.Getter;
 import net.analyse.sdk.config.BatchConfig;
-import net.analyse.sdk.config.SendMode;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -25,7 +24,6 @@ public class AnalyseHytaleConfig {
   private boolean development;
   private String apiKey;
   private String instanceId;
-  private String sendMode;
   private BatchSettings batch;
 
   /**
@@ -79,7 +77,6 @@ public class AnalyseHytaleConfig {
     config.development = false;
     config.apiKey = "";
     config.instanceId = "default";
-    config.sendMode = "SINGLE";
     config.batch = new BatchSettings();
     return config;
   }
@@ -118,10 +115,6 @@ public class AnalyseHytaleConfig {
 
   private boolean fillMissingDefaults() {
     boolean modified = false;
-    if (sendMode == null || sendMode.isBlank()) {
-      sendMode = "SINGLE";
-      modified = true;
-    }
     if (batch == null) {
       batch = new BatchSettings();
       modified = true;
@@ -131,15 +124,6 @@ public class AnalyseHytaleConfig {
       modified = true;
     }
     return modified;
-  }
-
-  public SendMode getSendMode() {
-    return SendMode.fromConfig(sendMode);
-  }
-
-  public boolean hasInvalidSendMode() {
-    return sendMode != null && !sendMode.isBlank()
-        && !getSendMode().name().equalsIgnoreCase(sendMode.trim());
   }
 
   public BatchConfig getBatchConfig() {

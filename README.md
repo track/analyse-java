@@ -1,6 +1,6 @@
 # Analyse
 
-The source repository for the [Analyse](https://analyse.net) plugins and developer SDK &mdash; the analytics platform purpose-built for Minecraft and Hytale servers.
+The source repository for the [Analyse](https://games.analyse.net) plugins and developer SDK &mdash; the analytics platform purpose-built for Minecraft and Hytale servers.
 
 Analyse tells you **who** plays on your server, **where** they came from, and **what** keeps them coming back. Install the plugin, paste your API key, and start the server: sessions, retention, revenue, and everything in between show up in your dashboard automatically.
 
@@ -17,9 +17,9 @@ This repository is the home of:
 
 The shortest path from zero to data:
 
-1. Sign up at [analyse.net](https://analyse.net) and create a Server.
+1. Sign up at [games.analyse.net](https://games.analyse.net) and create a Server.
 2. Copy your API key from the dashboard (it starts with `anl_`).
-3. Download the plugin for your server software from the [releases page](https://analyse.net/downloads).
+3. Download the plugin for your server software from the [releases page](https://games.analyse.net/downloads).
 4. Drop the jar in your `plugins/` folder and start your server once so the config generates.
 5. Paste your API key into `plugins/Analyse/config.yml` (or `plugins/analyse/config.json` on Velocity).
 6. Restart. Join your server. You should see the session in the dashboard within a few seconds.
@@ -52,10 +52,9 @@ Analyse.trackEvent("quest_completed")
 
 Everything you need is documented in [`docs/sdk/`](docs/sdk/README.md).
 
-## Sending mode
+## Batch sending
 
-By default, Analyse sends joins, leaves, and custom events immediately with `send-mode: "SINGLE"` / `"sendMode": "SINGLE"`.
-Servers that see traffic spikes can opt into `"BATCH"` mode to queue analytics in memory and flush them through `/v1/plugin/batch` every few seconds or when the queue reaches the configured batch size.
+Analyse queues joins, leaves, and custom events in memory and flushes them through `/v1/plugin/batch` every few seconds or when the queue reaches the configured batch size.
 The recommended batch size is `100-250`; the generated default is `200`.
 
 ## Supported platforms
@@ -86,9 +85,9 @@ The `release.sh` script builds all four and bundles them into a single zip.
 
 ## Support
 
-- Website: [analyse.net](https://analyse.net)
-- Dashboard: [analyse.net/dashboard](https://analyse.net/dashboard)
-- Documentation: [analyse.net/docs](https://analyse.net/docs)
+- Website: [games.analyse.net](https://games.analyse.net)
+- Dashboard: [games.analyse.net/dashboard](https://games.analyse.net/dashboard)
+- Documentation: [games.analyse.net/docs](https://games.analyse.net/docs)
 
 ## License
 

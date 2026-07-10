@@ -3,7 +3,6 @@ package net.analyse.spigot.config;
 import lombok.Getter;
 import net.analyse.sdk.config.BatchConfig;
 import net.analyse.sdk.config.BedrockMode;
-import net.analyse.sdk.config.SendMode;
 import net.analyse.sdk.util.BedrockUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -42,7 +41,6 @@ public class AnalyseSpigotConfig {
   private BedrockMode bedrockMode;
   private String bedrockPrefix;
   private String instanceId;
-  private SendMode sendMode;
   private BatchConfig batchConfig;
   private Map<String, Boolean> events;
 
@@ -72,10 +70,6 @@ public class AnalyseSpigotConfig {
     this.bedrockPrefix = config.getString("bedrock-prefix", ".");
     this.instanceId = config.getString("instance-id", "default");
     boolean modified = false;
-    if (!config.contains("send-mode")) {
-      config.set("send-mode", "SINGLE");
-      modified = true;
-    }
     if (!config.contains("batch.size")) {
       config.set("batch.size", BatchConfig.DEFAULT_SIZE);
       modified = true;
@@ -92,7 +86,6 @@ public class AnalyseSpigotConfig {
       config.set("batch.max-retries", BatchConfig.DEFAULT_MAX_RETRIES);
       modified = true;
     }
-    this.sendMode = parseSendMode(config.getString("send-mode", "SINGLE"));
     this.batchConfig = new BatchConfig(
         config.getInt("batch.size", BatchConfig.DEFAULT_SIZE),
         config.getInt("batch.flush-interval-seconds", BatchConfig.DEFAULT_FLUSH_INTERVAL_SECONDS),
@@ -175,15 +168,6 @@ public class AnalyseSpigotConfig {
     return events.getOrDefault(key, false);
   }
 
-  private SendMode parseSendMode(String configuredValue) {
-    SendMode mode = SendMode.fromConfig(configuredValue);
-    if (configuredValue != null && !configuredValue.trim().isEmpty()
-        && !mode.name().equalsIgnoreCase(configuredValue.trim())) {
-      plugin.getLogger().warning(String.format("Invalid send-mode '%s', falling back to SINGLE", configuredValue));
-    }
-    return mode;
-  }
-
   /**
    * Append new documented config sections to older config.yml files.
    */
@@ -195,10 +179,9 @@ public class AnalyseSpigotConfig {
 
     try {
       String content = new String(Files.readAllBytes(configFile.toPath()), StandardCharsets.UTF_8);
-      boolean hasSendMode = content.contains("send-mode:");
       boolean hasBatch = content.contains("batch:");
       boolean hasBedrockMode = content.contains("bedrock-mode:");
-      if (hasSendMode && hasBatch && hasBedrockMode) {
+      if (hasBatch && hasBedrockMode) {
         return;
       }
 
@@ -216,16 +199,9 @@ public class AnalyseSpigotConfig {
         block.append("bedrock-mode: \"NAME\"\n");
         block.append("\n");
       }
-      if (!hasSendMode) {
-        block.append("# Controls how Analyse sends joins, leaves, and custom events to the API.\n");
-        block.append("# SINGLE sends each item immediately using the existing individual endpoints.\n");
-        block.append("# BATCH queues items in memory and sends them together using /v1/plugin/batch.\n");
-        block.append("# BATCH reduces request volume during spikes, but queued items can be lost if the server is killed before flush.\n");
-        block.append("send-mode: \"SINGLE\"\n");
-        block.append("\n");
-      }
       if (!hasBatch) {
-        block.append("# Batch sending settings. Only used when send-mode is BATCH.\n");
+        block.append("# Batch sending settings. Joins, leaves, and custom events are queued in memory\n");
+        block.append("# and sent together using /v1/plugin/batch.\n");
         block.append("batch:\n");
         block.append("  # Number of queued items that triggers an immediate flush.\n");
         block.append("  # Recommended: 100-250. Maximum API batch size is 1000.\n");

@@ -4,7 +4,7 @@
   "Version": "${version}",
   "Description": "Analytics plugin for Hytale servers",
   "Authors": [{"Name": "VertCode Development"}],
-  "Website": "https://analyse.net",
+  "Website": "https://games.analyse.net",
   "ServerVersion": "*",
   "Dependencies": {},
   "OptionalDependencies": {},

@@ -2,7 +2,7 @@
 
 Welcome to the Analyse plugin documentation. These pages cover everything you need to install, configure, and extend the Analyse plugin on your server.
 
-If you're looking for the product-side docs (dashboards, features, billing, campaigns, and so on), head to [analyse.net/docs](https://analyse.net/docs). This repository only documents the plugin and the SDK.
+If you're looking for the product-side docs (dashboards, features, billing, campaigns, and so on), head to [games.analyse.net/docs](https://games.analyse.net/docs). This repository only documents the plugin and the SDK.
 
 ## Plugin
 
@@ -27,7 +27,7 @@ The Analyse SDK (`analyse-api`) lets your own plugins talk to Analyse. Use it to
 
 ## Quick links
 
-- [analyse.net](https://analyse.net)
-- [Dashboard](https://analyse.net/dashboard)
-- [Downloads](https://analyse.net/downloads)
-- [Product docs](https://analyse.net/docs)
+- [games.analyse.net](https://games.analyse.net)
+- [Dashboard](https://games.analyse.net/dashboard)
+- [Downloads](https://games.analyse.net/downloads)
+- [Product docs](https://games.analyse.net/docs)

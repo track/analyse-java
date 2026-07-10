@@ -50,7 +50,7 @@ The SDK ships on the public Analyse Maven repository. Add the repo and the depen
 
 ```groovy
 repositories {
-    maven { url 'https://maven.analyse.net/maven-releases' }
+    maven { url 'https://maven.games.analyse.net/maven-releases' }
 }
 ```
 
@@ -58,7 +58,7 @@ repositories {
 
 ```kotlin
 repositories {
-    maven("https://maven.analyse.net/maven-releases")
+    maven("https://maven.games.analyse.net/maven-releases")
 }
 ```
 
@@ -68,14 +68,14 @@ repositories {
 <repositories>
   <repository>
     <id>analyse</id>
-    <url>https://maven.analyse.net/maven-releases</url>
+    <url>https://maven.games.analyse.net/maven-releases</url>
   </repository>
 </repositories>
 ```
 
 ### Dependency
 
-Replace `LATEST_VERSION` with the latest release shown on [analyse.net/downloads](https://analyse.net/downloads).
+Replace `LATEST_VERSION` with the latest release shown on [games.analyse.net/downloads](https://games.analyse.net/downloads).
 
 **Gradle (Groovy DSL)**
 

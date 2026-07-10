@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.0] &mdash; 2026-07-10
+
+### Changed
+
+- **BREAKING:** Individual event sending has been removed; joins, leaves, and custom events are now always queued and sent through `/v1/plugin/batch`. The `send-mode` / `sendMode` config option is gone (a leftover key in existing configs is ignored), and the `SendMode` enum, `AnalyseClient#isBatchMode()`, and the `AnalyseConfig` constructor taking a `SendMode` have been removed from the SDK. Batch settings (`batch.size`, `batch.flush-interval-seconds`, `batch.max-queue-size`, `batch.max-retries`) are unchanged.
+- All API and website references moved from `analyse.net` to `games.analyse.net` (API is now `api.games.analyse.net`, staging `api-staging.games.analyse.net`).
+
 ## [1.2.5] &mdash; 2026-06-27
 
 ### Added

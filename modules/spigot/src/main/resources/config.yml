@@ -23,13 +23,8 @@ bedrock-prefix: "."
 # Used to identify this specific server instance in heartbeats
 instance-id: "default"
 
-# Controls how Analyse sends joins, leaves, and custom events to the API.
-# SINGLE sends each item immediately using the existing individual endpoints.
-# BATCH queues items in memory and sends them together using /v1/plugin/batch.
-# BATCH reduces request volume during spikes, but queued items can be lost if the server is killed before flush.
-send-mode: "SINGLE"
-
-# Batch sending settings. Only used when send-mode is BATCH.
+# Batch sending settings. Joins, leaves, and custom events are queued in memory
+# and sent together using /v1/plugin/batch.
 batch:
   # Number of queued items that triggers an immediate flush.
   # Recommended: 100-250. Maximum API batch size is 1000.

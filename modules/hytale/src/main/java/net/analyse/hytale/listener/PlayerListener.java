@@ -99,16 +99,11 @@ public class PlayerListener {
     }
 
     PlayerSession session = sessionOpt.get();
-    if (!session.hasActiveSession() && !client.isBatchMode()) {
-      return;
-    }
 
     // Send leave event to the API
-    LeaveRequest request = client.isBatchMode()
-        ? (session.hasActiveSession()
-            ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
-            : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId()))
-        : new LeaveRequest(session.getSessionId());
+    LeaveRequest request = session.hasActiveSession()
+        ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
+        : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId());
 
     client.leave(
       request,

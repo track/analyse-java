@@ -1,7 +1,6 @@
 package net.analyse.sdk;
 
 import net.analyse.sdk.config.AnalyseConfig;
-import net.analyse.sdk.config.SendMode;
 import net.analyse.sdk.batch.BatchDispatcher;
 import net.analyse.sdk.http.AnalyseHttpClient;
 import net.analyse.sdk.request.ConversionRequest;
@@ -27,10 +26,7 @@ import net.analyse.sdk.response.VersionResponse;
  */
 public class AnalyseClient {
 
-  private static final String ENDPOINT_JOIN = "/v1/plugin/join";
-  private static final String ENDPOINT_LEAVE = "/v1/plugin/leave";
   private static final String ENDPOINT_HEARTBEAT = "/v1/plugin/heartbeat";
-  private static final String ENDPOINT_EVENT = "/v1/plugin/event";
   private static final String ENDPOINT_BATCH = "/v1/plugin/batch";
   private static final String ENDPOINT_AB_TESTS = "/v1/plugin/ab-tests";
   private static final String ENDPOINT_CONVERSION = "/v1/plugin/conversion";
@@ -40,7 +36,6 @@ public class AnalyseClient {
   private static final String ENDPOINT_PURCHASE = "/v1/plugin/purchase";
 
   private final AnalyseHttpClient httpClient;
-  private final AnalyseConfig config;
   private final BatchDispatcher batchDispatcher;
 
   /**
@@ -49,11 +44,8 @@ public class AnalyseClient {
    * @param config The SDK configuration
    */
   public AnalyseClient(AnalyseConfig config) {
-    this.config = config;
     this.httpClient = new AnalyseHttpClient(config);
-    this.batchDispatcher = config.getSendMode() == SendMode.BATCH
-        ? new BatchDispatcher(httpClient, config.getBatchConfig(), ENDPOINT_BATCH)
-        : null;
+    this.batchDispatcher = new BatchDispatcher(httpClient, config.getBatchConfig(), ENDPOINT_BATCH);
   }
 
   /**
@@ -63,12 +55,7 @@ public class AnalyseClient {
    * @param callback The callback to invoke on success or failure
    */
   public void join(JoinRequest request, AnalyseCallback<JoinResponse> callback) {
-    if (isBatchMode()) {
-      batchDispatcher.enqueueJoin(request, callback);
-      return;
-    }
-
-    httpClient.post(ENDPOINT_JOIN, request, JoinResponse.class, callback);
+    batchDispatcher.enqueueJoin(request, callback);
   }
 
   /**
@@ -78,12 +65,7 @@ public class AnalyseClient {
    * @param callback The callback to invoke on success or failure
    */
   public void leave(LeaveRequest request, AnalyseCallback<LeaveResponse> callback) {
-    if (isBatchMode()) {
-      batchDispatcher.enqueueLeave(request, callback);
-      return;
-    }
-
-    httpClient.post(ENDPOINT_LEAVE, request, LeaveResponse.class, callback);
+    batchDispatcher.enqueueLeave(request, callback);
   }
 
   /**
@@ -103,12 +85,7 @@ public class AnalyseClient {
    * @param callback The callback to invoke on success or failure
    */
   public void trackEvent(EventRequest request, AnalyseCallback<EventResponse> callback) {
-    if (isBatchMode()) {
-      batchDispatcher.enqueueEvent(request, callback);
-      return;
-    }
-
-    httpClient.post(ENDPOINT_EVENT, request, EventResponse.class, callback);
+    batchDispatcher.enqueueEvent(request, callback);
   }
 
   /**
@@ -170,30 +147,19 @@ public class AnalyseClient {
   }
 
   /**
-   * Check whether this client sends analytics through the batch endpoint.
-   *
-   * @return true if batch mode is enabled
-   */
-  public boolean isBatchMode() {
-    return config.getSendMode() == SendMode.BATCH;
-  }
-
-  /**
-   * Flush queued batch analytics items, if batch mode is enabled.
+   * Flush queued batch analytics items.
    */
   public void flush() {
-    if (batchDispatcher != null) {
-      batchDispatcher.flush();
-    }
+    batchDispatcher.flush();
   }
 
   /**
    * Get the number of queued batch items.
    *
-   * @return queued item count, or 0 in single mode
+   * @return queued item count
    */
   public int getQueuedBatchItemCount() {
-    return batchDispatcher != null ? batchDispatcher.getQueuedItemCount() : 0;
+    return batchDispatcher.getQueuedItemCount();
   }
 
   /**
@@ -201,10 +167,8 @@ public class AnalyseClient {
    * Call this when the plugin is disabled.
    */
   public void shutdown() {
-    if (batchDispatcher != null) {
-      batchDispatcher.flush();
-      batchDispatcher.shutdown();
-    }
+    batchDispatcher.flush();
+    batchDispatcher.shutdown();
     httpClient.shutdown();
   }
 }

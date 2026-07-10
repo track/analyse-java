@@ -30,13 +30,8 @@ bedrock-prefix: "."
 # Used to identify this specific server instance in heartbeats
 instance-id: "default"
 
-# Controls how Analyse sends joins, leaves, and custom events to the API.
-# SINGLE sends each item immediately using the existing individual endpoints.
-# BATCH queues items in memory and sends them together using /v1/plugin/batch.
-# BATCH reduces request volume during spikes, but queued items can be lost if the server is killed before flush.
-send-mode: "SINGLE"
-
-# Batch sending settings. Only used when send-mode is BATCH.
+# Batch sending settings. Joins, leaves, and custom events are queued in memory
+# and sent together using /v1/plugin/batch.
 batch:
   # Number of queued items that triggers an immediate flush.
   # Recommended: 100-250. Maximum API batch size is 1000.
@@ -72,7 +67,6 @@ events:
 | `debug` | boolean | `false` | Turns on verbose logging. Useful for troubleshooting; noisy otherwise. |
 | `bedrock-prefix` | string | `"."` | Prefix used by Floodgate/Geyser. Players whose names start with it are tagged as Bedrock. Empty string disables detection. |
 | `instance-id` | string | `"default"` | Distinguishes multiple instances of the same Analyse Server (e.g. `survival-1`, `survival-2`). |
-| `send-mode` | enum | `SINGLE` | `SINGLE` sends joins, leaves, and custom events immediately. `BATCH` queues them in memory and sends them through `/v1/plugin/batch`. |
 | `batch.size` | integer | `200` | Number of queued items that triggers an immediate batch flush. Recommended: `100-250`. Maximum sent per API request is `1000`. |
 | `batch.flush-interval-seconds` | integer | `3` | How often queued batch items are flushed. Recommended: `2-5` seconds. |
 | `batch.max-queue-size` | integer | `10000` | Maximum queued items kept in memory before new batch items are rejected. |
@@ -88,7 +82,7 @@ events:
 > Only enable the high-volume events (`block-place`, `block-break`, `kill-entity`) if you have a specific use case in mind. They can generate hundreds of events per player per minute.
 
 > [!NOTE]
-> `BATCH` reduces request volume during spikes, but the queue is in memory only. Queued analytics can be lost if the server process is killed before the next flush or shutdown flush completes.
+> Batch sending reduces request volume during spikes, but the queue is in memory only. Queued analytics can be lost if the server process is killed before the next flush or shutdown flush completes.
 
 ## BungeeCord
 
@@ -100,7 +94,6 @@ events:
   "development": false,
   "bedrockPrefix": ".",
   "instanceId": "default",
-  "sendMode": "SINGLE",
   "batch": {
     "size": 200,
     "flushIntervalSeconds": 3,
@@ -128,7 +121,6 @@ events:
 | `instanceId` | string | Distinguishes multiple proxy instances. |
 | `bedrockPrefix` | string | Floodgate/Geyser prefix (same as on Spigot). |
 | `defaultServer` | string | Backend name used when the plugin cannot determine the current backend (e.g. for API calls from commands). |
-| `sendMode` | enum | `SINGLE` preserves current per-item requests. `BATCH` queues joins, leaves, and custom events for `/v1/plugin/batch`. |
 | `batch.size` | integer | Defaults to `200`. Recommended: `100-250`. |
 | `batch.flushIntervalSeconds` | integer | Defaults to `3`. Recommended: `2-5`. |
 | `batch.maxQueueSize` | integer | Defaults to `10000`. |
@@ -148,7 +140,6 @@ events:
   "development": false,
   "bedrockPrefix": ".",
   "instanceId": "default",
-  "sendMode": "SINGLE",
   "batch": {
     "size": 200,
     "flushIntervalSeconds": 3,
@@ -174,7 +165,6 @@ events:
 | `debug` | boolean | Verbose logging. |
 | `bedrockPrefix` | string | Floodgate/Geyser prefix. |
 | `instanceId` | string | Distinguishes multiple proxy instances. |
-| `sendMode` | enum | `SINGLE` preserves current per-item requests. `BATCH` queues joins, leaves, and custom events for `/v1/plugin/batch`. |
 | `batch.size` | integer | Defaults to `200`. Recommended: `100-250`. |
 | `batch.flushIntervalSeconds` | integer | Defaults to `3`. Recommended: `2-5`. |
 | `batch.maxQueueSize` | integer | Defaults to `10000`. |
@@ -194,7 +184,6 @@ events:
   "development": false,
   "apiKey": "",
   "instanceId": "default",
-  "sendMode": "SINGLE",
   "batch": {
     "size": 200,
     "flushIntervalSeconds": 3,
@@ -211,7 +200,6 @@ events:
 | `apiKey` | string | Your Analyse API key. Required. |
 | `debug` | boolean | Verbose logging. |
 | `instanceId` | string | Distinguishes multiple instances of the same Server. |
-| `sendMode` | enum | `SINGLE` preserves current per-item requests. `BATCH` queues joins, leaves, and custom events for `/v1/plugin/batch`. |
 | `batch.size` | integer | Defaults to `200`. Recommended: `100-250`. |
 | `batch.flushIntervalSeconds` | integer | Defaults to `3`. Recommended: `2-5`. |
 | `batch.maxQueueSize` | integer | Defaults to `10000`. |

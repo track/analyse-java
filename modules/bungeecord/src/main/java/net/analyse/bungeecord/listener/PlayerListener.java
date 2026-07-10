@@ -55,7 +55,6 @@ public class PlayerListener implements Listener {
         AnalyseConfig config = new AnalyseConfig(
             apiKey,
             development,
-            plugin.getPluginConfig().getSendMode(),
             plugin.getPluginConfig().getBatchConfig()
         );
         serverClients.put(serverName, new AnalyseClient(config));
@@ -179,9 +178,7 @@ public class PlayerListener implements Listener {
     }
 
     AnalyseClient client = clientOpt.get();
-    if (client.isBatchMode()) {
-      session.setCurrentServer(serverName);
-    }
+    session.setCurrentServer(serverName);
 
     // Check if player is a Bedrock player
     boolean isBedrock = plugin.getPluginConfig().isBedrock(uuid, username);
@@ -212,21 +209,15 @@ public class PlayerListener implements Listener {
    * Send a leave event to the API
    */
   private void sendLeaveEvent(UUID uuid, String username, PlayerSession session, String serverName) {
-    if (!session.hasActiveSession() && !isBatchLeaveFallbackAvailable(serverName)) {
-      return;
-    }
-
     Optional<AnalyseClient> clientOpt = getClientForServer(serverName);
     if (!clientOpt.isPresent()) {
       return;
     }
 
     AnalyseClient client = clientOpt.get();
-    LeaveRequest request = client.isBatchMode()
-        ? (session.hasActiveSession()
-            ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
-            : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId()))
-        : new LeaveRequest(session.getSessionId());
+    LeaveRequest request = session.hasActiveSession()
+        ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
+        : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId());
 
     client.leave(request, new AnalyseCallback<LeaveResponse>() {
       @Override
@@ -243,11 +234,6 @@ public class PlayerListener implements Listener {
     });
 
     session.clearSession();
-  }
-
-  private boolean isBatchLeaveFallbackAvailable(String serverName) {
-    Optional<AnalyseClient> clientOpt = getClientForServer(serverName);
-    return clientOpt.isPresent() && clientOpt.get().isBatchMode();
   }
 
   /**

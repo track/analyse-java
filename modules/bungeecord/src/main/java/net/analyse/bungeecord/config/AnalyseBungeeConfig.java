@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.analyse.sdk.config.BatchConfig;
 import net.analyse.sdk.config.BedrockMode;
-import net.analyse.sdk.config.SendMode;
 import net.analyse.sdk.util.BedrockUtil;
 import java.io.IOException;
 import java.io.Reader;
@@ -46,7 +45,6 @@ public class AnalyseBungeeConfig {
   private String bedrockMode = "NAME";
   private String bedrockPrefix = ".";
   private String instanceId = "default";
-  private String sendMode = "SINGLE";
   private BatchSettings batch = new BatchSettings();
   private String defaultServer = null;
   private Map<String, ServerConfig> servers = new HashMap<>();
@@ -130,7 +128,6 @@ public class AnalyseBungeeConfig {
     config.bedrockMode = "NAME";
     config.bedrockPrefix = ".";
     config.instanceId = "default";
-    config.sendMode = "SINGLE";
     config.batch = new BatchSettings();
     config.servers.put("lobby", new ServerConfig("anl_your_lobby_key_here"));
     config.servers.put("survival", new ServerConfig("anl_your_survival_key_here"));
@@ -219,10 +216,6 @@ public class AnalyseBungeeConfig {
 
   private boolean fillMissingDefaults() {
     boolean modified = fillMissingEventDefaults();
-    if (sendMode == null || sendMode.trim().isEmpty()) {
-      sendMode = "SINGLE";
-      modified = true;
-    }
     if (batch == null) {
       batch = new BatchSettings();
       modified = true;
@@ -242,15 +235,6 @@ public class AnalyseBungeeConfig {
     }
 
     return events.getOrDefault(key, false);
-  }
-
-  public SendMode getSendMode() {
-    return SendMode.fromConfig(sendMode);
-  }
-
-  public boolean hasInvalidSendMode() {
-    return sendMode != null && !sendMode.trim().isEmpty()
-        && !getSendMode().name().equalsIgnoreCase(sendMode.trim());
   }
 
   public BatchConfig getBatchConfig() {

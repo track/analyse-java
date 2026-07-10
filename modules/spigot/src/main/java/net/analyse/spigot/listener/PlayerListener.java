@@ -165,9 +165,6 @@ public class PlayerListener implements Listener {
     }
 
     PlayerSession session = sessionOpt.get();
-    if (!session.hasActiveSession() && (client == null || !client.isBatchMode())) {
-      return;
-    }
 
     // Only send to API if client is available
     if (client == null) {
@@ -175,11 +172,9 @@ public class PlayerListener implements Listener {
     }
 
     // Send leave event to the API
-    LeaveRequest request = client.isBatchMode()
-        ? (session.hasActiveSession()
-            ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
-            : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId()))
-        : new LeaveRequest(session.getSessionId());
+    LeaveRequest request = session.hasActiveSession()
+        ? new LeaveRequest(session.getSessionId(), uuid, plugin.getPluginConfig().getInstanceId())
+        : new LeaveRequest(uuid, plugin.getPluginConfig().getInstanceId());
 
     client.leave(request, new AnalyseCallback<LeaveResponse>() {
       @Override
